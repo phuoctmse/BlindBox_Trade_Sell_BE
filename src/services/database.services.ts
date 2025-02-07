@@ -1,6 +1,7 @@
 import { Collection, Db, MongoClient } from 'mongodb'
 import { config } from 'dotenv'
-import Account from '~/models/schemas/Account.schema'
+import Accounts from '~/models/schemas/Account.schema'
+import RefreshToken from '~/models/schemas/RefreshToken.schema'
 config()
 
 const uri = `mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@phuoccluster.wsq9h.mongodb.net/?retryWrites=true&w=majority&appName=PhuocCluster`
@@ -23,8 +24,12 @@ class DatabaseServices {
     }
   }
 
-  get accounts(): Collection<Account> {
-    return this.db.collection(process.env.DB_USERS_ACCOUNT as string)
+  get accounts(): Collection<Accounts> {
+    return this.db.collection(process.env.DB_ACCOUNTS_COLLECTION as string)
+  }
+
+  get refreshTokens(): Collection<RefreshToken> {
+    return this.db.collection(process.env.DB_REFRESH_TOKENS_COLLECTION as string)
   }
 }
 

@@ -1,13 +1,15 @@
 import { ObjectId } from 'mongodb'
 import { AccountRole, AccountVerifyStatus } from '~/constants/enums'
 
-interface AccountType {
+interface AccountsType {
   _id?: ObjectId
   userName: string
   password: string
   email: string
   phoneNumber?: string
   address?: string
+  email_verify_token?: string
+  forgot_password_token?: string
   verify?: AccountVerifyStatus
   role: AccountRole
   // bio: string
@@ -18,13 +20,15 @@ interface AccountType {
   updateAt?: Date
 }
 
-export default class Account {
+export default class Accounts {
   _id?: ObjectId
   userName: string
   password: string
   email: string
   phoneNumber: string
   address: string
+  email_verify_token: string
+  forgot_password_token: string
   verify: AccountVerifyStatus
   role: AccountRole
   // bio: string
@@ -34,7 +38,7 @@ export default class Account {
   createdAt: Date
   updateAt: Date
 
-  constructor(account: AccountType) {
+  constructor(account: AccountsType) {
     const date = new Date()
     this._id = account._id
     this.userName = account.userName
@@ -50,5 +54,7 @@ export default class Account {
     // this.cover_photo = account.cover_photo
     this.createdAt = account.createdAt || date
     this.updateAt = account.updateAt || date
+    this.email_verify_token = account.email_verify_token || ''
+    this.forgot_password_token = account.forgot_password_token || ''
   }
 }
