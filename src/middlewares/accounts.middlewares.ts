@@ -1,6 +1,8 @@
 import { checkSchema, ParamSchema } from 'express-validator'
 import USER_MESSAGES from '~/constants/messages'
 import accountService from '~/services/accounts.services'
+import databaseServices from '~/services/database.services'
+import { hashPassword } from '~/utils/crypto'
 import { validate } from '~/utils/validation'
 
 const userNameSchema: ParamSchema = {
@@ -116,6 +118,31 @@ export const registerValidation = validate(
       password: passwordSchema,
       confirmPassword: confirmPasswordSchema,
       phoneNumber: phoneNumberSchema
+    },
+    ['body']
+  )
+)
+
+export const loginValidation = validate(
+  checkSchema(
+    {
+      email: {
+        ...emailSchema,
+        custom: {
+          options: async (value, { req }) => {
+            const account = await databaseServices.accounts.findOne({
+              email: value,
+              password: hashPassword(req.body.password)
+            })
+            if(account === null) {
+              throw new Error(USER_MESSAGES.EMAIL_OR_PASSWORD_IS_INCORRECT)
+            }
+            req.account = account
+            return account
+          }
+        }
+      },
+      password: passwordSchema
     },
     ['body']
   )
