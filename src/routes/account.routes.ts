@@ -1,17 +1,12 @@
 import { Router } from 'express'
-import { registerController } from '~/controllers/account.controllers'
-import { registerValidation } from '~/middlewares/accounts.middlewares'
+import { loginController, registerController } from '~/controllers/account.controllers'
+import { loginValidation, registerValidation } from '~/middlewares/accounts.middlewares'
 import { wrapRequestHandler } from '~/utils/handlers'
 
 const accountsRouter = Router()
 
-// /**
-//  * Path: /Login
-//  * Method: POST
-//  * Description: Login a user
-//  * Body: { email: string, password: string }
-//  */
-// accountsRouter.post('/login', loginValidation, wrapRequestHandler(loginController))
+
+accountsRouter.post('/login', loginValidation, wrapRequestHandler(loginController))
 
 // /**
 //  * Path: /register
