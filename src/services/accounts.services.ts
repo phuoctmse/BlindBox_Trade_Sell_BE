@@ -69,7 +69,7 @@ class AccountService {
     )
     const [accessToken, refreshToken] = await this.signAccessAnhRefreshTokens(accountIdToString)
     await databaseServices.refreshTokens.insertOne(
-      new RefreshToken({ user_id: new ObjectId(accountIdToString), token: refreshToken })
+      new RefreshToken({ account_id: new ObjectId(accountIdToString), token: refreshToken })
     )
     return {
       accessToken,
@@ -85,6 +85,17 @@ class AccountService {
   async checkEmailExist(email: string) {
     const user = await databaseServices.accounts.findOne({ email })
     return user
+  }
+
+  async login(accountId: string) {
+    const [accessToken, refreshToken] = await this.signAccessAnhRefreshTokens(accountId)
+    await databaseServices.refreshTokens.insertOne(
+      new RefreshToken({ account_id: new ObjectId(accountId), token: refreshToken })
+    )
+    return {
+      accessToken,
+      refreshToken
+    }
   }
 }
 
