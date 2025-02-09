@@ -4,7 +4,7 @@ import Accounts from '~/models/schemas/Account.schema'
 import RefreshToken from '~/models/schemas/RefreshToken.schema'
 config()
 
-const uri = `mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@phuoccluster.wsq9h.mongodb.net/?retryWrites=true&w=majority&appName=PhuocCluster`
+const uri = process.env.MONGODB_URL as string
 
 class DatabaseServices {
   private client: MongoClient
