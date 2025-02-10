@@ -1,5 +1,5 @@
 import { ObjectId } from 'mongodb'
-import { AccountRole, TokenType } from '~/constants/enums'
+import { AccountRole, AccountVerifyStatus, TokenType } from '~/constants/enums'
 import { signToken } from '~/utils/jwt'
 import databaseServices from './database.services'
 import { hashPassword } from '~/utils/crypto'
@@ -118,6 +118,39 @@ class AccountService {
     return {
       accessToken: new_access_token,
       refreshToken: new_refresh_token
+    }
+  }
+
+  async verifyEmail(accountId: string) {
+    await databaseServices.accounts.updateOne({ _id: new ObjectId(accountId) }, [
+      {
+        $set: {
+          email_verify_token: '',
+          verify: AccountVerifyStatus.Verified,
+          updated_at: '$$NOW'
+        }
+      }
+    ])
+    return {
+      message: USER_MESSAGES.EMAIL_VERIFIED_SUCCESS
+    }
+  }
+
+  async resendVerifyEmail(accountId: string) {
+    const email_verify_token = await this.signEmailVerifyToken(accountId)
+    await databaseServices.accounts.updateOne(
+      { _id: new ObjectId(accountId) },
+      {
+        $set: {
+          email_verify_token
+        },
+        $currentDate: {
+          updated_at: true
+        }
+      }
+    )
+    return {
+      message: USER_MESSAGES.EMAIL_VERIFY_RESENT_SUCCESS
     }
   }
 }
