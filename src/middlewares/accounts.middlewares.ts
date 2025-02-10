@@ -232,3 +232,31 @@ export const refreshTokenValidation = validate(
     ['body']
   )
 )
+
+export const emailVerifyTokenValidation = validate(
+  checkSchema(
+    {
+      email_verified_token: {
+        trim: true,
+        custom: {
+          options: async (value: string, { req }) => {
+            if (!value) {
+              throw new ErrorWithStatus({
+                message: USER_MESSAGES.EMAIL_VERIFY_TOKEN_IS_REQUIRED,
+                status: HTTP_STATUS.UNAUTHORIZED
+              })
+            }
+            const decoded_email_verified_token = await verifyAccessToken({
+              token: value,
+              secretKey: process.env.JWT_SECRET_VERIFIED_EMAIL_TOKEN as string
+            })
+            ;(req as Request).decoded_email_verified_token = decoded_email_verified_token
+
+            return true
+          }
+        }
+      }
+    },
+    ['body']
+  )
+)
