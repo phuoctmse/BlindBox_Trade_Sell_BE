@@ -1,5 +1,5 @@
 import { ObjectId } from 'mongodb'
-import { AccountRole, TokenType } from '~/constants/enums'
+import { AccountRole, AccountVerifyStatus, TokenType } from '~/constants/enums'
 import { signToken } from '~/utils/jwt'
 import databaseServices from './database.services'
 import { hashPassword } from '~/utils/crypto'
@@ -8,6 +8,7 @@ import RefreshToken from '~/models/schemas/RefreshToken.schema'
 import { RegisterReqBody } from '~/models/requests/Account.requests'
 import { config } from 'dotenv'
 import { StringValue } from 'ms'
+import USER_MESSAGES from '~/constants/messages'
 config()
 
 class AccountService {
@@ -95,6 +96,61 @@ class AccountService {
     return {
       accessToken,
       refreshToken
+    }
+  }
+
+  async logout(refreshToken: string) {
+    await databaseServices.refreshTokens.deleteOne({ token: refreshToken })
+    return {
+      message: USER_MESSAGES.LOGOUT_SUCCESS
+    }
+  }
+
+  async refreshToken(accountId: string, refresh_token: string) {
+    const [new_access_token, new_refresh_token] = await Promise.all([
+      this.signAccessToken(accountId),
+      this.signRefreshToken(accountId),
+      databaseServices.refreshTokens.deleteOne({ token: refresh_token })
+    ])
+    await databaseServices.refreshTokens.insertOne(
+      new RefreshToken({ account_id: new ObjectId(accountId), token: new_refresh_token })
+    )
+    return {
+      accessToken: new_access_token,
+      refreshToken: new_refresh_token
+    }
+  }
+
+  async verifyEmail(accountId: string) {
+    await databaseServices.accounts.updateOne({ _id: new ObjectId(accountId) }, [
+      {
+        $set: {
+          email_verify_token: '',
+          verify: AccountVerifyStatus.Verified,
+          updated_at: '$$NOW'
+        }
+      }
+    ])
+    return {
+      message: USER_MESSAGES.EMAIL_VERIFIED_SUCCESS
+    }
+  }
+
+  async resendVerifyEmail(accountId: string) {
+    const email_verify_token = await this.signEmailVerifyToken(accountId)
+    await databaseServices.accounts.updateOne(
+      { _id: new ObjectId(accountId) },
+      {
+        $set: {
+          email_verify_token
+        },
+        $currentDate: {
+          updated_at: true
+        }
+      }
+    )
+    return {
+      message: USER_MESSAGES.EMAIL_VERIFY_RESENT_SUCCESS
     }
   }
 }
