@@ -102,3 +102,24 @@ export const resendEmailVerifyController = async (req: Request, res: Response) =
     result
   })
 }
+
+export const forgotPasswordController = async (req: Request, res: Response) => {
+  const { accountId } = req.decode_authorization as TokenPayload
+  const user = await databaseServices.accounts.findOne({ _id: ObjectId.createFromHexString(accountId) })
+  // Check if user is not found
+  if (!user) {
+    res.status(HTTP_STATUS.NOT_FOUND).json({
+      message: USER_MESSAGES.USER_NOT_FOUND
+    })
+  }
+  // Check if user's email is already verified
+  if (user?.email_verify_token === '') {
+    res.json({
+      message: USER_MESSAGES.EMAIL_ALREADY_VERIFIED
+    })
+  }
+  const result = await accountService.resendVerifyEmail(accountId)
+  res.json({
+    result
+  })
+}

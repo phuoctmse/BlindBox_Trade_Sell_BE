@@ -1,6 +1,7 @@
 import { Router } from 'express'
 import {
   emailVerifyController,
+  forgotPasswordController,
   loginController,
   logoutController,
   refreshTokenController,
@@ -10,6 +11,7 @@ import {
 import {
   accessTokenValidation,
   emailVerifyTokenValidation,
+  forgotPasswordTokenValidation,
   loginValidation,
   refreshTokenValidation,
   registerValidation
@@ -29,6 +31,8 @@ accountsRouter.post('/refresh-token', refreshTokenValidation, wrapRequestHandler
 accountsRouter.post('/verify-email', emailVerifyTokenValidation, wrapRequestHandler(emailVerifyController))
 
 accountsRouter.post('/resend-verify-email', accessTokenValidation, wrapRequestHandler(resendEmailVerifyController))
+
+accountsRouter.post('/forgot-password', forgotPasswordTokenValidation, wrapRequestHandler(forgotPasswordController))
 
 // /**
 //  * Path: /forgot-password

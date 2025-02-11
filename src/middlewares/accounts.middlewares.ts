@@ -260,3 +260,35 @@ export const emailVerifyTokenValidation = validate(
     ['body']
   )
 )
+
+export const forgotPasswordTokenValidation = validate(
+  checkSchema(
+    {
+      forgot_password_token: {  // Ensure correct field name
+        in: ['body'],
+        trim: true,
+        notEmpty: {
+          errorMessage: USER_MESSAGES.FORGOT_PASSWORD_TOKEN_IS_REQUIRED
+        },
+        custom: {
+          options: async (value: string, { req }) => {
+            try {
+              const decodedToken = await verifyAccessToken({
+                token: value,
+                secretKey: process.env.JWT_SECRET_FORGOT_PASSWORD_TOKEN as string
+              });
+
+              (req as Request).decoded_forgot_password_token = decodedToken;
+              return true;
+            } catch (error) {
+              throw new ErrorWithStatus({
+                message: USER_MESSAGES.INVALID_FORGOT_PASSWORD_TOKEN,
+                status: HTTP_STATUS.UNAUTHORIZED
+              });
+            }
+          }
+        }
+      }
+    }
+  )
+);
