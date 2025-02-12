@@ -5,6 +5,7 @@ import { defaultErrorHandler } from './middlewares/errors.middlewares'
 import swaggerUi from 'swagger-ui-express'
 import YAML from 'yamljs'
 import path from 'path'
+import cors from 'cors'
 
 const app = express()
 const port = 5000
@@ -18,8 +19,11 @@ databaseServices.connect()
 // Middleware
 app.use(express.json())
 
+//Setup CORS
+app.use(cors())
+
 // Setup Swagger
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument))
+app.use('/api', swaggerUi.serve, swaggerUi.setup(swaggerDocument))
 
 // Routes
 app.use('/accounts', accountsRouter)
