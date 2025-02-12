@@ -113,10 +113,10 @@ paths:
           description: Email verify resent success
         400:
           description: Invalid input
-  
+
 components:
   schemas:
-    Accounts: 
+    Accounts:
       type: object
       properties:
         id:
@@ -124,20 +124,20 @@ components:
         userName:
           type: string
         password:
-          type: string  
+          type: string
         email:
           type: string
         phoneNumber:
           type: string
         address:
-          type: string  
+          type: string
         email_verify_token:
           type: string
         forgotPasswordToken:
           type: string
         verify:
           type: string
-          enum: 
+          enum:
             - Unverified
             - Verified
             - BannedBanned
