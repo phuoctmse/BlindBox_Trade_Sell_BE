@@ -153,6 +153,20 @@ class AccountService {
       message: USER_MESSAGES.EMAIL_VERIFY_RESENT_SUCCESS
     }
   }
+
+  async getMe(accountId: string) {
+    const account = await databaseServices.accounts.findOne(
+      { _id: new ObjectId(accountId) },
+      {
+        projection: {
+          email_verify_token: 0,
+          password: 0,
+          forgot_password_token: 0
+        }
+      }
+    )
+    return account
+  }
 }
 
 const accountService = new AccountService()
