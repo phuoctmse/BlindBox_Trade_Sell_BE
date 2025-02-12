@@ -127,7 +127,7 @@ class AccountService {
         $set: {
           email_verify_token: '',
           verify: AccountVerifyStatus.Verified,
-          updated_at: '$$NOW'
+          updatedAt: '$$NOW'
         }
       }
     ])
@@ -145,7 +145,7 @@ class AccountService {
           email_verify_token
         },
         $currentDate: {
-          updated_at: true
+          updatedAt: true
         }
       }
     )
