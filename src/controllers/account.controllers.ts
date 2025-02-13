@@ -104,22 +104,33 @@ export const resendEmailVerifyController = async (req: Request, res: Response) =
 }
 
 export const forgotPasswordController = async (req: Request, res: Response) => {
-  const { accountId } = req.decode_authorization as TokenPayload
-  const user = await databaseServices.accounts.findOne({ _id: ObjectId.createFromHexString(accountId) })
-  // Check if user is not found
-  if (!user) {
-    res.status(HTTP_STATUS.NOT_FOUND).json({
-      message: USER_MESSAGES.USER_NOT_FOUND
-    })
-  }
-  // Check if user's email is already verified
-  if (user?.email_verify_token === '') {
-    res.json({
-      message: USER_MESSAGES.EMAIL_ALREADY_VERIFIED
-    })
-  }
-  const result = await accountService.resendVerifyEmail(accountId)
-  res.json({
-    result
-  })
-}
+//   const { email } = req.body;
+//   const user = await databaseServices.accounts.findOne({ email });
+
+//   if (!user) {
+//     return res.status(HTTP_STATUS.NOT_FOUND).json({
+//       message: USER_MESSAGES.EMAIL_NOT_FOUND,
+//     });
+//   }
+
+//   if (!user.email_verify_token) {
+//     return res.json({
+//       message: USER_MESSAGES.EMAIL_ALREADY_VERIFIED,
+//     });
+//   }
+
+//   const forgotPasswordToken = jwt.sign(
+//     { accountId: user._id.toString() },
+//     process.env.JWT_SECRET_FORGOT_PASSWORD as string,
+//     { expiresIn: '1h' }
+//   );
+
+//   await databaseServices.accounts.updateOne(
+//     { _id: user._id },
+//     { $set: { forgot_password_token: forgotPasswordToken } }
+//   );
+
+//   await sendResetPasswordEmail(user.email, forgotPasswordToken);
+
+//   res.json({ message: USER_MESSAGES.FORGOT_PASSWORD_EMAIL_SENT });
+};

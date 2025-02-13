@@ -17,7 +17,7 @@ interface AccountsType {
   // avatar: string
   // cover_photo: string
   createdAt?: Date
-  updateAt?: Date
+  updatedAt?: Date
 }
 
 export default class Accounts {
@@ -36,7 +36,7 @@ export default class Accounts {
   // avatar: string
   // cover_photo: string
   createdAt: Date
-  updateAt: Date
+  updatedAt: Date
 
   constructor(account: AccountsType) {
     const date = new Date()
@@ -53,7 +53,7 @@ export default class Accounts {
     // this.avatar = account.avatar
     // this.cover_photo = account.cover_photo
     this.createdAt = account.createdAt || date
-    this.updateAt = account.updateAt || date
+    this.updatedAt = account.updatedAt || date
     this.email_verify_token = account.email_verify_token || ''
     this.forgot_password_token = account.forgot_password_token || ''
   }

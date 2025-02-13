@@ -41,6 +41,8 @@ const USER_MESSAGES = {
   INVALID_FORGOT_PASSWORD_TOKEN: 'Invalid forgot password token',
   VERIFY_FORGOT_PASSWORD_SUCCESS: 'Verify forgot password success',
   RESET_PASSWORD_SUCCESS: 'Reset password success',
+  FORGOT_PASSWORD_TOKEN_REQUIRED: 'Forgot password token is required',
+  EMAIL_NOT_FOUND: 'Email not found',
   GET_ME_SUCCESS: 'Get my profile success'
 } as const
 
