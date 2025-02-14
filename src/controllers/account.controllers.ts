@@ -102,3 +102,12 @@ export const resendEmailVerifyController = async (req: Request, res: Response) =
     result
   })
 }
+
+export const getMeController = async (req: Request, res: Response, next: NextFunction) => {
+  const { accountId } = req.decode_authorization as TokenPayload
+  const account = await accountService.getMe(accountId)
+  res.json({
+    message: USER_MESSAGES.GET_ME_SUCCESS,
+    result: account
+  })
+}
