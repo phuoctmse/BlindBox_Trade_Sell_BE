@@ -265,20 +265,17 @@ export const forgotPasswordTokenValidation = validate(
   checkSchema(
     {
       forgot_password_token: {
+        in: ['body'],
         trim: true,
         custom: {
           options: async (value: string, { req }) => {
-            if (!value) {
-              throw new Error(USER_MESSAGES.FORGOT_PASSWORD_TOKEN_REQUIRED);
-            }
+            if (!value) return true; 
 
-            // Verify the token
             const decoded_Forgot_Password_Token = await verifyAccessToken({
               token: value,
               secretKey: process.env.JWT_SECRET_FORGOT_PASSWORD as string,
             });
 
-            // Attach the decoded token to the request
             (req as Request).decoded_forgot_password_token = decoded_Forgot_Password_Token;
 
             return true;
@@ -289,3 +286,33 @@ export const forgotPasswordTokenValidation = validate(
     ['body']
   )
 );
+
+export const verifyForgotPasswordTokenValidation = validate(
+  checkSchema(
+    {
+      forgot_password_token: {
+        notEmpty: {
+          errorMessage: USER_MESSAGES.FORGOT_PASSWORD_TOKEN_REQUIRED
+        },
+        trim: true,
+        custom: {
+          options: async (value: string, { req }) => {
+            if (!value) {
+              throw new Error(USER_MESSAGES.FORGOT_PASSWORD_TOKEN_REQUIRED);
+            }
+            // Verify token
+            const decoded_Forgot_Password_Token = await verifyAccessToken({
+              token: value,
+              secretKey: process.env.JWT_FORGOT_PASSWORD_TOKEN as string,
+            });
+            (req as Request).decoded_forgot_password_token = decoded_Forgot_Password_Token;
+
+            return true;
+          },
+        },
+      },
+    },
+    ['body']
+  )
+);
+

@@ -9,11 +9,13 @@ import {
   LogoutReqBody,
   RefreshTokenReqBody,
   RegisterReqBody,
-  TokenPayload
+  TokenPayload,
+  ForgotPasswordReqBody
 } from '~/models/requests/Account.requests'
 import Accounts from '~/models/schemas/Account.schema'
 import accountService from '~/services/accounts.services'
 import databaseServices from '~/services/database.services'
+import jwt from 'jsonwebtoken'
 
 export const registerController = async (
   req: Request<ParamsDictionary, any, RegisterReqBody>,
@@ -103,34 +105,82 @@ export const resendEmailVerifyController = async (req: Request, res: Response) =
   })
 }
 
-export const forgotPasswordController = async (req: Request, res: Response) => {
-//   const { email } = req.body;
-//   const user = await databaseServices.accounts.findOne({ email });
+export const forgotPasswordController = async (req: Request<ParamsDictionary, any, ForgotPasswordReqBody>, res: Response): Promise<void> => {
+  const { email } = req.body;
+  const user = await databaseServices.accounts.findOne({ email });
 
-//   if (!user) {
-//     return res.status(HTTP_STATUS.NOT_FOUND).json({
-//       message: USER_MESSAGES.EMAIL_NOT_FOUND,
-//     });
-//   }
+  if (!user) {
+    res.status(HTTP_STATUS.NOT_FOUND).json({
+      message: USER_MESSAGES.EMAIL_NOT_FOUND,
+    });
+    return;
+  }
 
-//   if (!user.email_verify_token) {
-//     return res.json({
-//       message: USER_MESSAGES.EMAIL_ALREADY_VERIFIED,
-//     });
-//   }
 
-//   const forgotPasswordToken = jwt.sign(
-//     { accountId: user._id.toString() },
-//     process.env.JWT_SECRET_FORGOT_PASSWORD as string,
-//     { expiresIn: '1h' }
-//   );
+  const expiresIn = process.env.FORGOT_PASSWORD_TOKEN_EXPIRES_IN;
+  // Generate JWT
+  const forgotPasswordToken = jwt.sign(
+    { accountId: user._id.toString() },
+    process.env.JWT_FORGOT_PASSWORD_TOKEN as string,
+    { expiresIn: expiresIn as jwt.SignOptions['expiresIn'] }
+  );
 
-//   await databaseServices.accounts.updateOne(
-//     { _id: user._id },
-//     { $set: { forgot_password_token: forgotPasswordToken } }
-//   );
 
-//   await sendResetPasswordEmail(user.email, forgotPasswordToken);
-
-//   res.json({ message: USER_MESSAGES.FORGOT_PASSWORD_EMAIL_SENT });
+  // Save token
+  await databaseServices.accounts.updateOne(
+    { _id: user._id },
+    { $set: { forgot_password_token: forgotPasswordToken } }
+  );
+  res.json({ message: USER_MESSAGES.FORGOT_PASSWORD_EMAIL_SENT });
 };
+
+
+export const verifyForgotPasswordController = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { forgot_password_token } = req.body;
+
+    const decodedToken = jwt.verify(
+      forgot_password_token,
+      process.env.JWT_FORGOT_PASSWORD_TOKEN as string
+    ) as TokenPayload;
+
+    const accountId = decodedToken.accountId;
+
+    const user = await databaseServices.accounts.findOne({ _id: new ObjectId(accountId) });
+
+    if (!user) {
+      res.status(HTTP_STATUS.NOT_FOUND).json({
+        message: USER_MESSAGES.USER_NOT_FOUND,
+      });
+      return;
+    }
+
+    // Check if token is already used
+    if (!user.forgot_password_token || user.forgot_password_token !== forgot_password_token) {
+      res.status(HTTP_STATUS.UNAUTHORIZED).json({
+        message: USER_MESSAGES.INVALID_FORGOT_PASSWORD_TOKEN,
+      });
+      return;
+    }
+
+    //Clear token
+    await databaseServices.accounts.updateOne(
+      { _id: user._id },
+      { $set: { forgot_password_token: '' } }
+    );
+
+    res.json({ message: USER_MESSAGES.VALID_FORGOT_PASSWORD_TOKEN });
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      res.status(HTTP_STATUS.UNAUTHORIZED).json({
+        message: USER_MESSAGES.INVALID_FORGOT_PASSWORD_TOKEN,
+        error: error.message,
+      });
+    } else {
+      res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
+        message: 'An unknown error occurred',
+      });
+    }
+  }
+}
+

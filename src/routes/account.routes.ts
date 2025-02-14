@@ -6,7 +6,8 @@ import {
   logoutController,
   refreshTokenController,
   registerController,
-  resendEmailVerifyController
+  resendEmailVerifyController,
+  verifyForgotPasswordController
 } from '~/controllers/account.controllers'
 import {
   accessTokenValidation,
@@ -14,7 +15,8 @@ import {
   forgotPasswordTokenValidation,
   loginValidation,
   refreshTokenValidation,
-  registerValidation
+  registerValidation,
+  verifyForgotPasswordTokenValidation
 } from '~/middlewares/accounts.middlewares'
 import { wrapRequestHandler } from '~/utils/handlers'
 
@@ -34,25 +36,8 @@ accountsRouter.post('/resend-verify-email', accessTokenValidation, wrapRequestHa
 
 accountsRouter.post('/forgot-password', forgotPasswordTokenValidation, wrapRequestHandler(forgotPasswordController))
 
-// /**
-//  * Path: /forgot-password
-//  * Method: POST
-//  * Description: Forgot password
-//  * Body: { email: string }
-//  */
-// accountsRouter.post('/forgot-password', forgotPasswordTokenValidation, wrapRequestHandler(forgotPasswordController))
+accountsRouter.post('/verify-forgot-password', verifyForgotPasswordTokenValidation, wrapRequestHandler(verifyForgotPasswordController))
 
-// /**
-//  * Path: /verify-forgot-password
-//  * Method: POST
-//  * Description: Verify link forgot password
-//  * Body: { forgot_password_token: string }
-//  */
-// accountsRouter.post(
-//   '/verify-forgot-password',
-//   verifyForgotPasswordTokenValidation,
-//   wrapRequestHandler(verifyForgotPasswordController)
-// )
 
 // /**
 //  * Path: /reset-password
