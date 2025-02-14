@@ -6,9 +6,11 @@ import swaggerUi from 'swagger-ui-express'
 import YAML from 'yamljs'
 import path from 'path'
 import cors from 'cors'
+import { config } from 'dotenv'
+config()
 
 const app = express()
-const port = 5000
+const port = process.env.PORT || 8080
 
 // Load Swagger document
 const swaggerDocument = YAML.load(path.join(__dirname, '../blindbox-swagger.yaml'))

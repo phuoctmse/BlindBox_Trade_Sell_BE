@@ -105,6 +105,15 @@ export const resendEmailVerifyController = async (req: Request, res: Response) =
   })
 }
 
+export const getMeController = async (req: Request, res: Response, next: NextFunction) => {
+  const { accountId } = req.decode_authorization as TokenPayload
+  const account = await accountService.getMe(accountId)
+  res.json({
+    message: USER_MESSAGES.GET_ME_SUCCESS,
+    result: account
+  })
+}
+
 export const forgotPasswordController = async (req: Request<ParamsDictionary, any, ForgotPasswordReqBody>, res: Response): Promise<void> => {
   const { email } = req.body;
   const user = await databaseServices.accounts.findOne({ email });
