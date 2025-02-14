@@ -265,7 +265,6 @@ export const forgotPasswordTokenValidation = validate(
   checkSchema(
     {
       forgot_password_token: {
-        in: ['body'],
         trim: true,
         custom: {
           options: async (value: string, { req }) => {
