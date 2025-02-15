@@ -2,18 +2,24 @@ import { Router } from 'express'
 import {
   emailVerifyController,
   getMeController,
+  forgotPasswordController,
   loginController,
   logoutController,
   refreshTokenController,
   registerController,
-  resendEmailVerifyController
+  resendEmailVerifyController,
+  verifyForgotPasswordController,
+  resetPasswordController
 } from '~/controllers/account.controllers'
 import {
   accessTokenValidation,
   emailVerifyTokenValidation,
+  forgotPasswordTokenValidation,
   loginValidation,
   refreshTokenValidation,
-  registerValidation
+  registerValidation,
+  verifyForgotPasswordTokenValidation,
+  resetPasswordValidation
 } from '~/middlewares/accounts.middlewares'
 import { wrapRequestHandler } from '~/utils/handlers'
 
@@ -31,33 +37,11 @@ accountsRouter.post('/verify-email', emailVerifyTokenValidation, wrapRequestHand
 
 accountsRouter.post('/resend-verify-email', accessTokenValidation, wrapRequestHandler(resendEmailVerifyController))
 
-// /**
-//  * Path: /forgot-password
-//  * Method: POST
-//  * Description: Forgot password
-//  * Body: { email: string }
-//  */
-// accountsRouter.post('/forgot-password', forgotPasswordTokenValidation, wrapRequestHandler(forgotPasswordController))
+accountsRouter.post('/forgot-password', forgotPasswordTokenValidation, wrapRequestHandler(forgotPasswordController))
 
-// /**
-//  * Path: /verify-forgot-password
-//  * Method: POST
-//  * Description: Verify link forgot password
-//  * Body: { forgot_password_token: string }
-//  */
-// accountsRouter.post(
-//   '/verify-forgot-password',
-//   verifyForgotPasswordTokenValidation,
-//   wrapRequestHandler(verifyForgotPasswordController)
-// )
+accountsRouter.post('/verify-forgot-password', verifyForgotPasswordTokenValidation, wrapRequestHandler(verifyForgotPasswordController))
 
-// /**
-//  * Path: /reset-password
-//  * Method: POST
-//  * Description: Reset password
-//  * Body: { forgot_password_token: string, password: string, confirm_password: string }
-//  */
-// accountsRouter.post('/reset-password', resetPasswordValidation, wrapRequestHandler(resetPasswordController))
+accountsRouter.post('/reset-password', resetPasswordValidation, wrapRequestHandler(resetPasswordController))
 
 accountsRouter.get('/me', accessTokenValidation, wrapRequestHandler(getMeController))
 

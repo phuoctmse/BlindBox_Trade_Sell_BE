@@ -9,11 +9,13 @@ import {
   LogoutReqBody,
   RefreshTokenReqBody,
   RegisterReqBody,
-  TokenPayload
+  TokenPayload,
+  ForgotPasswordReqBody
 } from '~/models/requests/Account.requests'
 import Accounts from '~/models/schemas/Account.schema'
 import accountService from '~/services/accounts.services'
 import databaseServices from '~/services/database.services'
+import { hashPassword } from '~/utils/crypto'
 
 export const registerController = async (
   req: Request<ParamsDictionary, any, RegisterReqBody>,
@@ -111,3 +113,40 @@ export const getMeController = async (req: Request, res: Response, next: NextFun
     result: account
   })
 }
+
+export const forgotPasswordController = async (req: Request<ParamsDictionary, any, ForgotPasswordReqBody>, res: Response): Promise<void> => {
+  const { email } = req.body;
+  const result = await accountService.forgotPassword(email);
+  res.json(result);
+};
+
+export const verifyForgotPasswordController = async (req: Request, res: Response): Promise<void> => {
+  const { forgot_password_token } = req.body;
+  const decodedToken = req.decoded_forgot_password_token as TokenPayload;
+  const accountId = decodedToken.accountId;
+  const user = await databaseServices.accounts.findOne({ _id: new ObjectId(accountId) });
+
+  if (!user || user.forgot_password_token !== forgot_password_token) {
+    res.status(HTTP_STATUS.UNAUTHORIZED).json({
+      message: USER_MESSAGES.INVALID_FORGOT_PASSWORD_TOKEN,
+    });
+    return;
+  }
+  res.json({ message: USER_MESSAGES.VALID_FORGOT_PASSWORD_TOKEN });
+}
+
+export const resetPasswordController = async (req: Request, res: Response): Promise<void> => {
+  const { password, confirm_password, forgot_password_token } = req.body;
+  const decodedToken = req.decoded_forgot_password_token as TokenPayload;
+  const accountId = decodedToken.accountId;
+
+  if (password !== confirm_password) {
+    res.status(HTTP_STATUS.BAD_REQUEST).json({
+      message: USER_MESSAGES.CONFIRM_PASSWORD_MUST_BE_THE_SAME_AS_PASSWORD,
+    });
+    return;
+  }
+  const result = await accountService.resetPassword(accountId, password, forgot_password_token);
+  res.json(result);
+}
+

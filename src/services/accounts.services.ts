@@ -1,11 +1,11 @@
 import { ObjectId } from 'mongodb'
 import { AccountRole, AccountVerifyStatus, TokenType } from '~/constants/enums'
-import { signToken } from '~/utils/jwt'
+import { signToken, verifyAccessToken } from '~/utils/jwt'
 import databaseServices from './database.services'
 import { hashPassword } from '~/utils/crypto'
 import Account from '~/models/schemas/Account.schema'
 import RefreshToken from '~/models/schemas/RefreshToken.schema'
-import { RegisterReqBody } from '~/models/requests/Account.requests'
+import { RegisterReqBody, TokenPayload } from '~/models/requests/Account.requests'
 import { config } from 'dotenv'
 import { StringValue } from 'ms'
 import USER_MESSAGES from '~/constants/messages'
@@ -49,6 +49,19 @@ class AccountService {
         expiresIn: process.env.EMAIL_VERIFY_TOKEN_EXPIRES_IN as StringValue
       }
     })
+  }
+
+  private signForgotPasswordToken(accountId: string) {
+    return signToken({
+      payload: {
+        accountId,
+        token_type: TokenType.ForgotPasswordToken
+      },
+      privateKey: process.env.JWT_FORGOT_PASSWORD_TOKEN as string,
+      options: {
+        expiresIn: process.env.FORGOT_PASSWORD_TOKEN_EXPIRES_IN as StringValue
+      }
+    });
   }
 
   private async signAccessAnhRefreshTokens(accountId: string) {
@@ -152,6 +165,58 @@ class AccountService {
     return {
       message: USER_MESSAGES.EMAIL_VERIFY_RESENT_SUCCESS
     }
+  }
+
+  async forgotPassword(email: string) {
+    const user = await databaseServices.accounts.findOne({ email });
+    if (!user) {
+      throw new Error(USER_MESSAGES.EMAIL_NOT_FOUND);
+    }
+
+    const forgotPasswordToken = await this.signForgotPasswordToken(user._id.toString());
+    await databaseServices.accounts.updateOne(
+      { _id: user._id },
+      { $set: { forgot_password_token: forgotPasswordToken } }
+    );
+    return { message: USER_MESSAGES.FORGOT_PASSWORD_EMAIL_SENT };
+  }
+
+  async verifyForgotPassword(forgot_password_token: string) {
+    const decodedToken = await verifyAccessToken({
+      token: forgot_password_token,
+      secretKey: process.env.JWT_FORGOT_PASSWORD_TOKEN as string
+    }) as TokenPayload;
+
+    const accountId = decodedToken.accountId;
+    const user = await databaseServices.accounts.findOne({ _id: new ObjectId(accountId) });
+    if (!user) {
+      throw new Error(USER_MESSAGES.USER_NOT_FOUND);
+    }
+    if (!user.forgot_password_token || user.forgot_password_token !== forgot_password_token) {
+      throw new Error(USER_MESSAGES.INVALID_FORGOT_PASSWORD_TOKEN);
+    }
+    await databaseServices.accounts.updateOne(
+      { _id: user._id },
+      { $set: { forgot_password_token: '' } }
+    );
+
+    return { message: USER_MESSAGES.VALID_FORGOT_PASSWORD_TOKEN };
+  }
+
+  async resetPassword(accountId: string, password: string, forgot_password_token: string) {
+    const user = await databaseServices.accounts.findOne({ _id: new ObjectId(accountId) });
+
+    if (!user || user.forgot_password_token !== forgot_password_token) {
+      throw new Error(USER_MESSAGES.INVALID_FORGOT_PASSWORD_TOKEN);
+    }
+
+    const hashedPassword = hashPassword(password);
+    await databaseServices.accounts.updateOne(
+      { _id: new ObjectId(accountId) },
+      { $set: { password: hashedPassword, forgot_password_token: '' } }
+    );
+
+    return { message: USER_MESSAGES.PASSWORD_RESET_SUCCESS };
   }
 
   async getMe(accountId: string) {
