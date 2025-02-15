@@ -315,3 +315,43 @@ export const verifyForgotPasswordTokenValidation = validate(
   )
 );
 
+export const resetPasswordValidation = validate(
+  checkSchema(
+    {
+      forgot_password_token: {
+        notEmpty: {
+          errorMessage: USER_MESSAGES.FORGOT_PASSWORD_TOKEN_REQUIRED
+        },
+        trim: true,
+        custom: {
+          options: async (value: string, { req }) => {
+            if (!value) {
+              throw new Error(USER_MESSAGES.FORGOT_PASSWORD_TOKEN_REQUIRED);
+            }
+            const decoded_Forgot_Password_Token = await verifyAccessToken({
+              token: value,
+              secretKey: process.env.JWT_FORGOT_PASSWORD_TOKEN as string,
+            });
+            (req as Request).decoded_forgot_password_token = decoded_Forgot_Password_Token;
+            return true;
+          },
+        },
+      },
+      password: passwordSchema,
+      confirm_password: {
+        notEmpty: {
+          errorMessage: USER_MESSAGES.CONFIRM_PASSWORD_IS_REQUIRED
+        },
+        custom: {
+          options: (value: any, { req }) => {
+            if (value !== req.body.password) {
+              throw new Error(USER_MESSAGES.CONFIRM_PASSWORD_MUST_BE_THE_SAME_AS_PASSWORD)
+            }
+            return value
+          }
+        }
+      }
+    },
+    ['body']
+  )
+);

@@ -15,7 +15,7 @@ import {
 import Accounts from '~/models/schemas/Account.schema'
 import accountService from '~/services/accounts.services'
 import databaseServices from '~/services/database.services'
-import jwt from 'jsonwebtoken'
+import { hashPassword } from '~/utils/crypto'
 
 export const registerController = async (
   req: Request<ParamsDictionary, any, RegisterReqBody>,
@@ -116,80 +116,37 @@ export const getMeController = async (req: Request, res: Response, next: NextFun
 
 export const forgotPasswordController = async (req: Request<ParamsDictionary, any, ForgotPasswordReqBody>, res: Response): Promise<void> => {
   const { email } = req.body;
-  const user = await databaseServices.accounts.findOne({ email });
+  const result = await accountService.forgotPassword(email);
+  res.json(result);
+};
 
-  if (!user) {
-    res.status(HTTP_STATUS.NOT_FOUND).json({
-      message: USER_MESSAGES.EMAIL_NOT_FOUND,
+export const verifyForgotPasswordController = async (req: Request, res: Response): Promise<void> => {
+  const { forgot_password_token } = req.body;
+  const decodedToken = req.decoded_forgot_password_token as TokenPayload;
+  const accountId = decodedToken.accountId;
+  const user = await databaseServices.accounts.findOne({ _id: new ObjectId(accountId) });
+
+  if (!user || user.forgot_password_token !== forgot_password_token) {
+    res.status(HTTP_STATUS.UNAUTHORIZED).json({
+      message: USER_MESSAGES.INVALID_FORGOT_PASSWORD_TOKEN,
     });
     return;
   }
+  res.json({ message: USER_MESSAGES.VALID_FORGOT_PASSWORD_TOKEN });
+}
 
+export const resetPasswordController = async (req: Request, res: Response): Promise<void> => {
+  const { password, confirm_password, forgot_password_token } = req.body;
+  const decodedToken = req.decoded_forgot_password_token as TokenPayload;
+  const accountId = decodedToken.accountId;
 
-  const expiresIn = process.env.FORGOT_PASSWORD_TOKEN_EXPIRES_IN;
-  // Generate JWT
-  const forgotPasswordToken = jwt.sign(
-    { accountId: user._id.toString() },
-    process.env.JWT_FORGOT_PASSWORD_TOKEN as string,
-    { expiresIn: expiresIn as jwt.SignOptions['expiresIn'] }
-  );
-
-
-  // Save token
-  await databaseServices.accounts.updateOne(
-    { _id: user._id },
-    { $set: { forgot_password_token: forgotPasswordToken } }
-  );
-  res.json({ message: USER_MESSAGES.FORGOT_PASSWORD_EMAIL_SENT });
-};
-
-
-export const verifyForgotPasswordController = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const { forgot_password_token } = req.body;
-
-    const decodedToken = jwt.verify(
-      forgot_password_token,
-      process.env.JWT_FORGOT_PASSWORD_TOKEN as string
-    ) as TokenPayload;
-
-    const accountId = decodedToken.accountId;
-
-    const user = await databaseServices.accounts.findOne({ _id: new ObjectId(accountId) });
-
-    if (!user) {
-      res.status(HTTP_STATUS.NOT_FOUND).json({
-        message: USER_MESSAGES.USER_NOT_FOUND,
-      });
-      return;
-    }
-
-    // Check if token is already used
-    if (!user.forgot_password_token || user.forgot_password_token !== forgot_password_token) {
-      res.status(HTTP_STATUS.UNAUTHORIZED).json({
-        message: USER_MESSAGES.INVALID_FORGOT_PASSWORD_TOKEN,
-      });
-      return;
-    }
-
-    //Clear token
-    await databaseServices.accounts.updateOne(
-      { _id: user._id },
-      { $set: { forgot_password_token: '' } }
-    );
-
-    res.json({ message: USER_MESSAGES.VALID_FORGOT_PASSWORD_TOKEN });
-  } catch (error: unknown) {
-    if (error instanceof Error) {
-      res.status(HTTP_STATUS.UNAUTHORIZED).json({
-        message: USER_MESSAGES.INVALID_FORGOT_PASSWORD_TOKEN,
-        error: error.message,
-      });
-    } else {
-      res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
-        message: 'An unknown error occurred',
-      });
-    }
+  if (password !== confirm_password) {
+    res.status(HTTP_STATUS.BAD_REQUEST).json({
+      message: USER_MESSAGES.CONFIRM_PASSWORD_MUST_BE_THE_SAME_AS_PASSWORD,
+    });
+    return;
   }
+  const result = await accountService.resetPassword(accountId, password, forgot_password_token);
+  res.json(result);
 }
 

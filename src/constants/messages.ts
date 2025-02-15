@@ -45,6 +45,7 @@ const USER_MESSAGES = {
   EMAIL_NOT_FOUND: 'Email not found',
   FORGOT_PASSWORD_EMAIL_SENT: 'Forgot password email sent',
   VALID_FORGOT_PASSWORD_TOKEN: 'Valid forgot password token',
+  PASSWORD_RESET_SUCCESS: 'Password reset successully',
   GET_ME_SUCCESS: 'Get my profile success'
 } as const
 
