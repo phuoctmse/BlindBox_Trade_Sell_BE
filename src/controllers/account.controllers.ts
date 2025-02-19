@@ -1,5 +1,7 @@
+import { config } from 'dotenv'
 import { Request, Response } from 'express'
 import { NextFunction, ParamsDictionary } from 'express-serve-static-core'
+import { access } from 'fs'
 import { ObjectId } from 'mongodb'
 import HTTP_STATUS from '~/constants/httpStatus'
 import USER_MESSAGES from '~/constants/messages'
@@ -15,7 +17,7 @@ import {
 import Accounts from '~/models/schemas/Account.schema'
 import accountService from '~/services/accounts.services'
 import databaseServices from '~/services/database.services'
-import { hashPassword } from '~/utils/crypto'
+config()
 
 export const registerController = async (
   req: Request<ParamsDictionary, any, RegisterReqBody>,
@@ -37,11 +39,18 @@ export const loginController = async (
 ) => {
   const account = req.account as Accounts
   const accountId = account._id as ObjectId
-  const result = await accountService.login(accountId.toString())
+  const result = await accountService.login({ accountId: accountId.toString(), verify: account.verify })
   res.json({
     message: USER_MESSAGES.LOGIN_SUCCESS,
     result
   })
+}
+
+export const oauthController = async (req: Request, res: Response) => {
+  const { code } = req.query
+  const result = await accountService.oauth(code as string)
+  const urlRedirect = `${process.env.CLIENT_REDIRECT_URI}?access_token=${result.access_token}&refresh_token=${result.refresh_token}&new_user=${result.newUser}`
+  return res.redirect(urlRedirect)
 }
 
 export const logoutController = async (req: Request<ParamsDictionary, any, LogoutReqBody>, res: Response) => {
@@ -55,8 +64,8 @@ export const refreshTokenController = async (
   res: Response
 ) => {
   const { refresh_token } = req.body
-  const { userId } = req.decode_authorization as TokenPayload
-  const result = await accountService.refreshToken(userId, refresh_token)
+  const { accountId, verify, exp } = req.decoded_refresh_token as TokenPayload
+  const result = await accountService.refreshToken({ accountId, refresh_token, verify, exp })
   res.json({
     message: USER_MESSAGES.REFRESH_TOKEN_SUCCESS,
     result
@@ -151,4 +160,8 @@ export const resetPasswordController = async (req: Request, res: Response): Prom
   }
   const result = await accountService.resetPassword(accountId, password, forgot_password_token)
   res.json(result)
+}
+
+export const updateMeController = async (req: Request, res: Response): Promise<void> => {
+  res.json({})
 }

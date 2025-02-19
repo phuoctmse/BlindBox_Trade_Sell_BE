@@ -7,6 +7,7 @@ import YAML from 'yamljs'
 import path from 'path'
 import cors from 'cors'
 import { config } from 'dotenv'
+import productsRouter from './routes/product.routes'
 config()
 
 const app = express()
@@ -29,6 +30,7 @@ app.use('/api', swaggerUi.serve, swaggerUi.setup(swaggerDocument))
 
 // Routes
 app.use('/accounts', accountsRouter)
+app.use('/products', productsRouter)
 
 // Error handling
 app.use(defaultErrorHandler as any)
