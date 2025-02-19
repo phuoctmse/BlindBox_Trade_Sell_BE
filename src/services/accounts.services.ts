@@ -1,6 +1,6 @@
 import { ObjectId } from 'mongodb'
 import { AccountRole, AccountVerifyStatus, TokenType } from '~/constants/enums'
-import { signToken, verifyAccessToken } from '~/utils/jwt'
+import { signToken, verifyToken } from '~/utils/jwt'
 import databaseServices from './database.services'
 import { hashPassword } from '~/utils/crypto'
 import Account from '~/models/schemas/Account.schema'
@@ -9,14 +9,19 @@ import { RegisterReqBody, TokenPayload } from '~/models/requests/Account.request
 import { config } from 'dotenv'
 import { StringValue } from 'ms'
 import USER_MESSAGES from '~/constants/messages'
+import axios from 'axios'
+import { access } from 'fs'
+import { ErrorWithStatus } from '~/models/Errors'
+import HTTP_STATUS from '~/constants/httpStatus'
 config()
 
 class AccountService {
-  private signAccessToken(accountId: string) {
+  private signAccessToken({ accountId, verify }: { accountId: string; verify: AccountVerifyStatus }) {
     return signToken({
       payload: {
         accountId,
-        token_type: TokenType.AccessToken
+        token_type: TokenType.AccessToken,
+        verify
       },
       privateKey: process.env.JWT_SECRET_ACCESS_TOKEN as string,
       options: {
@@ -25,11 +30,31 @@ class AccountService {
     })
   }
 
-  private signRefreshToken(accountId: string) {
+  private signRefreshToken({
+    accountId,
+    verify,
+    exp
+  }: {
+    accountId: string
+    verify: AccountVerifyStatus
+    exp?: number
+  }) {
+    if (exp) {
+      return signToken({
+        payload: {
+          accountId,
+          token_type: TokenType.RefreshToken,
+          verify,
+          exp
+        },
+        privateKey: process.env.JWT_SECRET_REFRESH_TOKEN as string
+      })
+    }
     return signToken({
       payload: {
         accountId,
-        token_type: TokenType.RefreshToken
+        token_type: TokenType.RefreshToken,
+        verify
       },
       privateKey: process.env.JWT_SECRET_REFRESH_TOKEN as string,
       options: {
@@ -61,11 +86,21 @@ class AccountService {
       options: {
         expiresIn: process.env.FORGOT_PASSWORD_TOKEN_EXPIRES_IN as StringValue
       }
-    });
+    })
   }
 
-  private async signAccessAnhRefreshTokens(accountId: string) {
-    return await Promise.all([this.signAccessToken(accountId), this.signRefreshToken(accountId)])
+  private async signAccessAnhRefreshTokens({ accountId, verify }: { accountId: string; verify: AccountVerifyStatus }) {
+    return await Promise.all([
+      this.signAccessToken({ accountId, verify }),
+      this.signRefreshToken({ accountId, verify })
+    ])
+  }
+
+  private decodeRefreshToken(refreshToken: string) {
+    return verifyToken({
+      token: refreshToken,
+      secretKey: process.env.JWT_SECRET_REFRESH_TOKEN as string
+    })
   }
 
   async register(payload: RegisterReqBody) {
@@ -81,9 +116,13 @@ class AccountService {
         role: AccountRole.User
       })
     )
-    const [accessToken, refreshToken] = await this.signAccessAnhRefreshTokens(accountIdToString)
+    const [accessToken, refreshToken] = await this.signAccessAnhRefreshTokens({
+      accountId: accountIdToString,
+      verify: AccountVerifyStatus.Unverified
+    })
+    const { iat, exp } = await this.decodeRefreshToken(refreshToken)
     await databaseServices.refreshTokens.insertOne(
-      new RefreshToken({ account_id: new ObjectId(accountIdToString), token: refreshToken })
+      new RefreshToken({ account_id: new ObjectId(accountIdToString), token: refreshToken, iat, exp })
     )
     return {
       accessToken,
@@ -101,14 +140,96 @@ class AccountService {
     return user
   }
 
-  async login(accountId: string) {
-    const [accessToken, refreshToken] = await this.signAccessAnhRefreshTokens(accountId)
+  async login({ accountId, verify }: { accountId: string; verify: AccountVerifyStatus }) {
+    const [accessToken, refreshToken] = await this.signAccessAnhRefreshTokens({ accountId, verify })
+    const { iat, exp } = await this.decodeRefreshToken(refreshToken)
     await databaseServices.refreshTokens.insertOne(
-      new RefreshToken({ account_id: new ObjectId(accountId), token: refreshToken })
+      new RefreshToken({ account_id: new ObjectId(accountId), token: refreshToken, iat, exp })
     )
     return {
       accessToken,
       refreshToken
+    }
+  }
+
+  private async getOauthGoogleToken(code: string) {
+    const body = {
+      code,
+      client_id: process.env.GOOGLE_CLIENT_ID,
+      client_secret: process.env.GOOGLE_CLIENT_SECRET,
+      redirect_uri: process.env.GOOGLE_REDIRECT_URI,
+      grant_type: 'authorization_code'
+    }
+    const { data } = await axios.post('https://oauth2.googleapis.com/token', body, {
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      }
+    })
+    return data as {
+      access_token: string
+      id_token: string
+    }
+  }
+
+  private async getGoogleUserInfo(access_token: string, id_token: string) {
+    const { data } = await axios.get('https://www.googleapis.com/oauth2/v1/userinfo', {
+      params: {
+        access_token,
+        alt: 'json'
+      },
+      headers: {
+        Authorization: `Bearer ${id_token}`
+      }
+    })
+    return data as {
+      id: string
+      email: string
+      verified_email: boolean
+      name: string
+      given_name: string
+      family_name: string
+      picture: string
+      locale: string
+    }
+  }
+  async oauth(code: string) {
+    const { id_token, access_token } = await this.getOauthGoogleToken(code)
+    const userInfo = await this.getGoogleUserInfo(access_token, id_token)
+    if (!userInfo.verified_email) {
+      throw new ErrorWithStatus({ message: USER_MESSAGES.EMAIL_NOT_VERIFIED, status: HTTP_STATUS.BAD_REQUEST })
+    }
+    const user = await databaseServices.accounts.findOne({ email: userInfo.email })
+    if (user) {
+      const [access_token, refresh_token] = await this.signAccessAnhRefreshTokens({
+        accountId: user._id.toString(),
+        verify: user.verify
+      })
+      const { iat, exp } = await this.decodeRefreshToken(refresh_token)
+      await databaseServices.refreshTokens.insertOne(
+        new RefreshToken({
+          account_id: user._id,
+          token: refresh_token,
+          iat: iat,
+          exp: exp
+        })
+      )
+      return {
+        access_token,
+        refresh_token,
+        newUser: false
+      }
+    } else {
+      const password = Math.random().toString(36).slice(2, 7)
+      const data = await this.register({
+        email: userInfo.email,
+        userName: userInfo.family_name + ' ' + userInfo.given_name,
+        password: hashPassword(password),
+        phoneNumber: ''
+      })
+      return {
+        ...data,
+        newUser: true
+      }
     }
   }
 
@@ -119,14 +240,25 @@ class AccountService {
     }
   }
 
-  async refreshToken(accountId: string, refresh_token: string) {
+  async refreshToken({
+    accountId,
+    refresh_token,
+    verify,
+    exp
+  }: {
+    accountId: string
+    refresh_token: string
+    verify: AccountVerifyStatus
+    exp: number
+  }) {
     const [new_access_token, new_refresh_token] = await Promise.all([
-      this.signAccessToken(accountId),
-      this.signRefreshToken(accountId),
+      this.signAccessToken({ accountId, verify }),
+      this.signRefreshToken({ accountId, verify, exp }),
       databaseServices.refreshTokens.deleteOne({ token: refresh_token })
     ])
+    const { iat } = await this.decodeRefreshToken(new_refresh_token)
     await databaseServices.refreshTokens.insertOne(
-      new RefreshToken({ account_id: new ObjectId(accountId), token: new_refresh_token })
+      new RefreshToken({ account_id: new ObjectId(accountId), token: new_refresh_token, iat, exp })
     )
     return {
       accessToken: new_access_token,
@@ -168,55 +300,52 @@ class AccountService {
   }
 
   async forgotPassword(email: string) {
-    const user = await databaseServices.accounts.findOne({ email });
+    const user = await databaseServices.accounts.findOne({ email })
     if (!user) {
-      throw new Error(USER_MESSAGES.EMAIL_NOT_FOUND);
+      throw new Error(USER_MESSAGES.EMAIL_NOT_FOUND)
     }
 
-    const forgotPasswordToken = await this.signForgotPasswordToken(user._id.toString());
+    const forgotPasswordToken = await this.signForgotPasswordToken(user._id.toString())
     await databaseServices.accounts.updateOne(
       { _id: user._id },
       { $set: { forgot_password_token: forgotPasswordToken } }
-    );
-    return { message: USER_MESSAGES.FORGOT_PASSWORD_EMAIL_SENT };
+    )
+    return { message: USER_MESSAGES.FORGOT_PASSWORD_EMAIL_SENT }
   }
 
   async verifyForgotPassword(forgot_password_token: string) {
-    const decodedToken = await verifyAccessToken({
+    const decodedToken = (await verifyToken({
       token: forgot_password_token,
       secretKey: process.env.JWT_FORGOT_PASSWORD_TOKEN as string
-    }) as TokenPayload;
+    })) as TokenPayload
 
-    const accountId = decodedToken.accountId;
-    const user = await databaseServices.accounts.findOne({ _id: new ObjectId(accountId) });
+    const accountId = decodedToken.accountId
+    const user = await databaseServices.accounts.findOne({ _id: new ObjectId(accountId) })
     if (!user) {
-      throw new Error(USER_MESSAGES.USER_NOT_FOUND);
+      throw new Error(USER_MESSAGES.USER_NOT_FOUND)
     }
     if (!user.forgot_password_token || user.forgot_password_token !== forgot_password_token) {
-      throw new Error(USER_MESSAGES.INVALID_FORGOT_PASSWORD_TOKEN);
+      throw new Error(USER_MESSAGES.INVALID_FORGOT_PASSWORD_TOKEN)
     }
-    await databaseServices.accounts.updateOne(
-      { _id: user._id },
-      { $set: { forgot_password_token: '' } }
-    );
+    await databaseServices.accounts.updateOne({ _id: user._id }, { $set: { forgot_password_token: '' } })
 
-    return { message: USER_MESSAGES.VALID_FORGOT_PASSWORD_TOKEN };
+    return { message: USER_MESSAGES.VALID_FORGOT_PASSWORD_TOKEN }
   }
 
   async resetPassword(accountId: string, password: string, forgot_password_token: string) {
-    const user = await databaseServices.accounts.findOne({ _id: new ObjectId(accountId) });
+    const user = await databaseServices.accounts.findOne({ _id: new ObjectId(accountId) })
 
     if (!user || user.forgot_password_token !== forgot_password_token) {
-      throw new Error(USER_MESSAGES.INVALID_FORGOT_PASSWORD_TOKEN);
+      throw new Error(USER_MESSAGES.INVALID_FORGOT_PASSWORD_TOKEN)
     }
 
-    const hashedPassword = hashPassword(password);
+    const hashedPassword = hashPassword(password)
     await databaseServices.accounts.updateOne(
       { _id: new ObjectId(accountId) },
       { $set: { password: hashedPassword, forgot_password_token: '' } }
-    );
+    )
 
-    return { message: USER_MESSAGES.PASSWORD_RESET_SUCCESS };
+    return { message: USER_MESSAGES.PASSWORD_RESET_SUCCESS }
   }
 
   async getMe(accountId: string) {

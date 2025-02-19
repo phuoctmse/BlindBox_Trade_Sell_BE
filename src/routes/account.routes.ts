@@ -9,7 +9,9 @@ import {
   registerController,
   resendEmailVerifyController,
   verifyForgotPasswordController,
-  resetPasswordController
+  resetPasswordController,
+  oauthController,
+  updateMeController
 } from '~/controllers/account.controllers'
 import {
   accessTokenValidation,
@@ -19,13 +21,16 @@ import {
   refreshTokenValidation,
   registerValidation,
   verifyForgotPasswordTokenValidation,
-  resetPasswordValidation
+  resetPasswordValidation,
+  verifiedUserValidation
 } from '~/middlewares/accounts.middlewares'
 import { wrapRequestHandler } from '~/utils/handlers'
 
 const accountsRouter = Router()
 
 accountsRouter.post('/login', loginValidation, wrapRequestHandler(loginController))
+
+accountsRouter.get('/oauth/google', wrapRequestHandler(oauthController))
 
 accountsRouter.post('/register', registerValidation, wrapRequestHandler(registerController))
 
@@ -39,10 +44,16 @@ accountsRouter.post('/resend-verify-email', accessTokenValidation, wrapRequestHa
 
 accountsRouter.post('/forgot-password', forgotPasswordTokenValidation, wrapRequestHandler(forgotPasswordController))
 
-accountsRouter.post('/verify-forgot-password', verifyForgotPasswordTokenValidation, wrapRequestHandler(verifyForgotPasswordController))
+accountsRouter.post(
+  '/verify-forgot-password',
+  verifyForgotPasswordTokenValidation,
+  wrapRequestHandler(verifyForgotPasswordController)
+)
 
 accountsRouter.post('/reset-password', resetPasswordValidation, wrapRequestHandler(resetPasswordController))
 
 accountsRouter.get('/me', accessTokenValidation, wrapRequestHandler(getMeController))
+
+accountsRouter.patch('/me', accessTokenValidation, verifiedUserValidation, wrapRequestHandler(updateMeController))
 
 export default accountsRouter

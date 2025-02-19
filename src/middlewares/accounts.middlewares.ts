@@ -1,14 +1,16 @@
-import { Request } from 'express'
+import { NextFunction, Request, Response } from 'express'
 import { checkSchema, ParamSchema } from 'express-validator'
 import { JsonWebTokenError } from 'jsonwebtoken'
 import { capitalize } from 'lodash'
+import { AccountVerifyStatus } from '~/constants/enums'
 import HTTP_STATUS from '~/constants/httpStatus'
 import USER_MESSAGES from '~/constants/messages'
 import { ErrorWithStatus } from '~/models/Errors'
+import { TokenPayload } from '~/models/requests/Account.requests'
 import accountService from '~/services/accounts.services'
 import databaseServices from '~/services/database.services'
 import { hashPassword } from '~/utils/crypto'
-import { verifyAccessToken } from '~/utils/jwt'
+import { verifyToken } from '~/utils/jwt'
 import { validate } from '~/utils/validation'
 
 const userNameSchema: ParamSchema = {
@@ -169,7 +171,7 @@ export const accessTokenValidation = validate(
               })
             }
             try {
-              const decoded_authorization = await verifyAccessToken({
+              const decoded_authorization = await verifyToken({
                 token: access_token,
                 secretKey: process.env.JWT_SECRET_ACCESS_TOKEN as string
               })
@@ -205,7 +207,7 @@ export const refreshTokenValidation = validate(
             }
             try {
               const [decoded_refresh_token, refresh_token] = await Promise.all([
-                verifyAccessToken({ token: value, secretKey: process.env.JWT_SECRET_REFRESH_TOKEN as string }),
+                verifyToken({ token: value, secretKey: process.env.JWT_SECRET_REFRESH_TOKEN as string }),
                 databaseServices.refreshTokens.findOne({ token: value })
               ])
               if (!refresh_token) {
@@ -214,7 +216,7 @@ export const refreshTokenValidation = validate(
                   status: HTTP_STATUS.UNAUTHORIZED
                 })
               }
-              ;(req as Request).decode_authorization = decoded_refresh_token
+              ;(req as Request).decoded_refresh_token = decoded_refresh_token
             } catch (error) {
               if (error instanceof JsonWebTokenError) {
                 throw new ErrorWithStatus({
@@ -246,7 +248,7 @@ export const emailVerifyTokenValidation = validate(
                 status: HTTP_STATUS.UNAUTHORIZED
               })
             }
-            const decoded_email_verified_token = await verifyAccessToken({
+            const decoded_email_verified_token = await verifyToken({
               token: value,
               secretKey: process.env.JWT_SECRET_VERIFIED_EMAIL_TOKEN as string
             })
@@ -280,7 +282,7 @@ export const forgotPasswordTokenValidation = validate(
     },
     ['body']
   )
-);
+)
 
 export const verifyForgotPasswordTokenValidation = validate(
   checkSchema(
@@ -293,23 +295,23 @@ export const verifyForgotPasswordTokenValidation = validate(
         custom: {
           options: async (value: string, { req }) => {
             if (!value) {
-              throw new Error(USER_MESSAGES.FORGOT_PASSWORD_TOKEN_REQUIRED);
+              throw new Error(USER_MESSAGES.FORGOT_PASSWORD_TOKEN_REQUIRED)
             }
             // Verify token
-            const decoded_Forgot_Password_Token = await verifyAccessToken({
+            const decoded_Forgot_Password_Token = await verifyToken({
               token: value,
-              secretKey: process.env.JWT_FORGOT_PASSWORD_TOKEN as string,
-            });
-            (req as Request).decoded_forgot_password_token = decoded_Forgot_Password_Token;
+              secretKey: process.env.JWT_FORGOT_PASSWORD_TOKEN as string
+            })
+            ;(req as Request).decoded_forgot_password_token = decoded_Forgot_Password_Token
 
-            return true;
-          },
-        },
-      },
+            return true
+          }
+        }
+      }
     },
     ['body']
   )
-);
+)
 
 export const resetPasswordValidation = validate(
   checkSchema(
@@ -322,16 +324,16 @@ export const resetPasswordValidation = validate(
         custom: {
           options: async (value: string, { req }) => {
             if (!value) {
-              throw new Error(USER_MESSAGES.FORGOT_PASSWORD_TOKEN_REQUIRED);
+              throw new Error(USER_MESSAGES.FORGOT_PASSWORD_TOKEN_REQUIRED)
             }
-            const decoded_Forgot_Password_Token = await verifyAccessToken({
+            const decoded_Forgot_Password_Token = await verifyToken({
               token: value,
-              secretKey: process.env.JWT_FORGOT_PASSWORD_TOKEN as string,
-            });
-            (req as Request).decoded_forgot_password_token = decoded_Forgot_Password_Token;
-            return true;
-          },
-        },
+              secretKey: process.env.JWT_FORGOT_PASSWORD_TOKEN as string
+            })
+            ;(req as Request).decoded_forgot_password_token = decoded_Forgot_Password_Token
+            return true
+          }
+        }
       },
       password: passwordSchema,
       confirm_password: {
@@ -350,4 +352,17 @@ export const resetPasswordValidation = validate(
     },
     ['body']
   )
-);
+)
+
+export const verifiedUserValidation = (req: Request, res: Response, next: NextFunction) => {
+  const { verify } = req.decode_authorization as TokenPayload
+  if (verify !== AccountVerifyStatus.Verified) {
+    return next(
+      new ErrorWithStatus({
+        message: USER_MESSAGES.EMAIL_NOT_VERIFIED,
+        status: HTTP_STATUS.UNAUTHORIZED
+      })
+    )
+  }
+  next()
+}

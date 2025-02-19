@@ -22,7 +22,7 @@ export const signToken = ({
   })
 }
 
-export const verifyAccessToken = ({ token, secretKey }: { token: string; secretKey: string }) => {
+export const verifyToken = ({ token, secretKey }: { token: string; secretKey: string }) => {
   return new Promise<TokenPayload>((resolve, reject) => {
     jwt.verify(token, secretKey, (error, decoded) => {
       if (error) reject(error)

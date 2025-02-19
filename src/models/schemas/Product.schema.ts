@@ -13,7 +13,7 @@ interface ProductType {
   updatedAt: Date
 }
 
-export default class Product {
+export default class Products {
   _id?: ObjectId
   name: string
   feedbackId: ObjectId

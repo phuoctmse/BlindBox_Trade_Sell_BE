@@ -1,9 +1,12 @@
 import { JwtPayload } from 'jsonwebtoken'
-import { TokenType } from '~/constants/enums'
+import { AccountVerifyStatus, TokenType } from '~/constants/enums'
 
 export interface TokenPayload extends JwtPayload {
   accountId: string
   token_type: TokenType
+  verify: AccountVerifyStatus
+  exp: number
+  iat: number
 }
 
 export interface RegisterReqBody {
