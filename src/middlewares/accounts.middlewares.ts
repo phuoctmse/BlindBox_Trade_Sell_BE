@@ -264,23 +264,19 @@ export const emailVerifyTokenValidation = validate(
 export const forgotPasswordTokenValidation = validate(
   checkSchema(
     {
-      forgot_password_token: {
-        trim: true,
+      email: {
+        ...emailSchema,
         custom: {
-          options: async (value: string, { req }) => {
-            if (!value) return true; 
-
-            const decoded_Forgot_Password_Token = await verifyAccessToken({
-              token: value,
-              secretKey: process.env.JWT_SECRET_FORGOT_PASSWORD as string,
-            });
-
-            (req as Request).decoded_forgot_password_token = decoded_Forgot_Password_Token;
-
-            return true;
-          },
-        },
-      },
+          options: async (value, { req }) => {
+            const account = await databaseServices.accounts.findOne({ email: value })
+            if (!account) {
+              throw new Error(USER_MESSAGES.EMAIL_NOT_FOUND)
+            }
+            req.account = account
+            return true
+          }
+        }
+      }
     },
     ['body']
   )
