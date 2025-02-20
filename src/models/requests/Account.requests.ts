@@ -34,5 +34,12 @@ export interface EmailVerifyReqBody {
 }
 
 export interface ForgotPasswordReqBody {
-  email: string;
+  email: string
+}
+
+export interface UpdateReqMeBody {
+  fullName?: string
+  email?: string
+  phoneNumber?: string
+  address?: string
 }

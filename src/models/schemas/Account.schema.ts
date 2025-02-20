@@ -4,6 +4,8 @@ import { AccountRole, AccountVerifyStatus } from '~/constants/enums'
 interface AccountsType {
   _id?: ObjectId
   userName: string
+  fullName?: string
+  lastName?: string
   password: string
   email: string
   phoneNumber?: string
@@ -23,6 +25,7 @@ interface AccountsType {
 export default class Accounts {
   _id?: ObjectId
   userName: string
+  fullName: string
   password: string
   email: string
   phoneNumber: string
@@ -42,6 +45,7 @@ export default class Accounts {
     const date = new Date()
     this._id = account._id
     this.userName = account.userName
+    this.fullName = account.fullName || ''
     this.password = account.password
     this.email = account.email
     this.phoneNumber = account.phoneNumber || ''

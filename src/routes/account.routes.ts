@@ -22,8 +22,11 @@ import {
   registerValidation,
   verifyForgotPasswordTokenValidation,
   resetPasswordValidation,
-  verifiedUserValidation
+  verifiedUserValidation,
+  updateMeValidation
 } from '~/middlewares/accounts.middlewares'
+import { filterMiddleware } from '~/middlewares/common.middlewares'
+import { UpdateReqMeBody } from '~/models/requests/Account.requests'
 import { wrapRequestHandler } from '~/utils/handlers'
 
 const accountsRouter = Router()
@@ -54,6 +57,19 @@ accountsRouter.post('/reset-password', resetPasswordValidation, wrapRequestHandl
 
 accountsRouter.get('/me', accessTokenValidation, wrapRequestHandler(getMeController))
 
-accountsRouter.patch('/me', accessTokenValidation, verifiedUserValidation, wrapRequestHandler(updateMeController))
+accountsRouter.patch(
+  '/me',
+  accessTokenValidation,
+  updateMeValidation,
+  filterMiddleware<UpdateReqMeBody>(['email', 'address', 'fullName', 'phoneNumber']),
+  wrapRequestHandler(updateMeController)
+)
 
+// accountsRouter.put(
+//   '/change-password',
+//   accessTokenValidation,
+//   verifiedUserValidation,
+//   changePasswordValidation,
+//   wrapRequestHandler(changePasswordController)
+// )
 export default accountsRouter
