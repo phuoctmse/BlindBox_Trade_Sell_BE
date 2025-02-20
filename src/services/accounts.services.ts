@@ -5,7 +5,7 @@ import databaseServices from './database.services'
 import { hashPassword } from '~/utils/crypto'
 import Account from '~/models/schemas/Account.schema'
 import RefreshToken from '~/models/schemas/RefreshToken.schema'
-import { RegisterReqBody, TokenPayload } from '~/models/requests/Account.requests'
+import { RegisterReqBody, TokenPayload, UpdateReqMeBody } from '~/models/requests/Account.requests'
 import { config } from 'dotenv'
 import { StringValue } from 'ms'
 import USER_MESSAGES from '~/constants/messages'
@@ -116,17 +116,9 @@ class AccountService {
         role: AccountRole.User
       })
     )
-    const [accessToken, refreshToken] = await this.signAccessAnhRefreshTokens({
-      accountId: accountIdToString,
-      verify: AccountVerifyStatus.Unverified
-    })
-    const { iat, exp } = await this.decodeRefreshToken(refreshToken)
-    await databaseServices.refreshTokens.insertOne(
-      new RefreshToken({ account_id: new ObjectId(accountIdToString), token: refreshToken, iat, exp })
-    )
+
     return {
-      accessToken,
-      refreshToken
+      message: USER_MESSAGES.REGISTER_SUCCESS
     }
   }
 
@@ -359,6 +351,18 @@ class AccountService {
         }
       }
     )
+    return account
+  }
+
+  async updateMe(accountId: string, payload: UpdateReqMeBody) {
+    const account = await databaseServices.accounts.findOneAndUpdate({ _id: new ObjectId(accountId) }, [
+      {
+        $set: {
+          ...payload,
+          updatedAt: '$$NOW'
+        }
+      }
+    ])
     return account
   }
 }

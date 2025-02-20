@@ -2,7 +2,7 @@ const USER_MESSAGES = {
   VALIDATION_ERROR: 'Validation error',
   USERNAME_IS_REQUIRED: 'Username is required',
   USERNAME_MUST_BE_A_STRING: 'Username must be a string',
-  USERNAME_LENGTH_MUST_BE_FROM_1_TO_50: 'Username length must be from 1 to 50',
+  USERNAME_LENGTH_MUST_BE_FROM_1_TO_20: 'Username length must be from 1 to 20',
   USERNAME_ALREADY_EXISTS: 'Username already exists',
   EMAIL_ALREADY_EXISTS: 'Email already exists',
   EMAIL_IS_REQUIRED: 'Email is required',
@@ -47,7 +47,14 @@ const USER_MESSAGES = {
   FORGOT_PASSWORD_EMAIL_SENT: 'Forgot password email sent',
   VALID_FORGOT_PASSWORD_TOKEN: 'Valid forgot password token',
   PASSWORD_RESET_SUCCESS: 'Password reset successully',
-  GET_ME_SUCCESS: 'Get my profile success'
+  GET_ME_SUCCESS: 'Get my profile success',
+  FULL_NAME_MUST_BE_A_STRING: 'Full name must be a string',
+  FULL_NAME_LENGTH_MUST_BE_FROM_1_TO_50: 'Full name length must be from 1 to 50',
+  ADDRESS_MUST_BE_A_STRING: 'Address must be a string',
+  ADDRESS_LENGTH_MUST_BE_FROM_10_TO_255: 'Address length must be from 10 to 255',
+  IMAGE_MUST_BE_A_STRING: 'Image must be a string',
+  IMAGE_LENGTH_MUST_BE_FROM_1_TO_400: 'Image length must be from 1 to 400',
+  UPDATE_ME_SUCCESS:  'Update me success',
 } as const
 
 export default USER_MESSAGES

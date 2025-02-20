@@ -20,14 +20,14 @@ const userNameSchema: ParamSchema = {
   isString: {
     errorMessage: USER_MESSAGES.USERNAME_MUST_BE_A_STRING
   },
+  trim: true,
   isLength: {
-    errorMessage: USER_MESSAGES.USERNAME_LENGTH_MUST_BE_FROM_1_TO_50,
+    errorMessage: USER_MESSAGES.USERNAME_LENGTH_MUST_BE_FROM_1_TO_20,
     options: {
       min: 1,
       max: 50
     }
   },
-  trim: true,
   custom: {
     options: async (value) => {
       const isExistUserName = await accountService.checkUserNameExist(value)
@@ -115,6 +115,17 @@ const phoneNumberSchema: ParamSchema = {
   isMobilePhone: {
     errorMessage: USER_MESSAGES.PHONE_NUMBER_IS_INVALID,
     options: ['any']
+  }
+}
+
+const imageSchema: ParamSchema = {
+  optional: true,
+  isString: {
+    errorMessage: USER_MESSAGES.IMAGE_MUST_BE_A_STRING
+  },
+  trim: true,
+  isLength: {
+    errorMessage: USER_MESSAGES.IMAGE_LENGTH_MUST_BE_FROM_1_TO_400
   }
 }
 
@@ -366,3 +377,38 @@ export const verifiedUserValidation = (req: Request, res: Response, next: NextFu
   }
   next()
 }
+
+export const updateMeValidation = validate(
+  checkSchema({
+    fullName: {
+      optional: true,
+      isString: {
+        errorMessage: USER_MESSAGES.FULL_NAME_MUST_BE_A_STRING
+      },
+      trim: true,
+      isLength: {
+        errorMessage: USER_MESSAGES.FULL_NAME_LENGTH_MUST_BE_FROM_1_TO_50,
+        options: {
+          min: 1,
+          max: 50
+        }
+      }
+    },
+    email: { ...emailSchema, optional: true },
+    phonNumber: { ...phoneNumberSchema, optional: true },
+    address: {
+      optional: true,
+      isString: {
+        errorMessage: USER_MESSAGES.ADDRESS_MUST_BE_A_STRING
+      },
+      trim: true,
+      isLength: {
+        errorMessage: USER_MESSAGES.ADDRESS_LENGTH_MUST_BE_FROM_10_TO_255,
+        options: {
+          min: 10,
+          max: 255
+        }
+      }
+    }
+  })
+)

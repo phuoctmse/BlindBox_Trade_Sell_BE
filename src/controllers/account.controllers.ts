@@ -12,7 +12,8 @@ import {
   RefreshTokenReqBody,
   RegisterReqBody,
   TokenPayload,
-  ForgotPasswordReqBody
+  ForgotPasswordReqBody,
+  UpdateReqMeBody
 } from '~/models/requests/Account.requests'
 import Accounts from '~/models/schemas/Account.schema'
 import accountService from '~/services/accounts.services'
@@ -26,10 +27,7 @@ export const registerController = async (
 ) => {
   const { userName, email, password, phoneNumber } = req.body
   const result = await accountService.register({ userName, email, password, phoneNumber })
-  res.status(HTTP_STATUS.CREATED).json({
-    message: USER_MESSAGES.REGISTER_SUCCESS,
-    result
-  })
+  res.status(HTTP_STATUS.CREATED).json(result)
 }
 
 export const loginController = async (
@@ -162,6 +160,16 @@ export const resetPasswordController = async (req: Request, res: Response): Prom
   res.json(result)
 }
 
-export const updateMeController = async (req: Request, res: Response): Promise<void> => {
-  res.json({})
+export const updateMeController = async (
+  req: Request<ParamsDictionary, any, UpdateReqMeBody>,
+  res: Response
+): Promise<void> => {
+  const { accountId } = req.decode_authorization as TokenPayload
+  const { body } = req
+  console.log(body)
+  const result = await accountService.updateMe(accountId, body)
+  res.json({
+    message: USER_MESSAGES.UPDATE_ME_SUCCESS,
+    result
+  })
 }
