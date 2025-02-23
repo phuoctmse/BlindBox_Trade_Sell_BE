@@ -38,6 +38,10 @@ export const loginController = async (
   const account = req.account as Accounts
   const accountId = account._id as ObjectId
   const result = await accountService.login({ accountId: accountId.toString(), verify: account.verify })
+  res.cookie('refresh_token', result.refreshToken, {
+    httpOnly: true,
+    sameSite: 'strict'
+  })
   res.json({
     message: USER_MESSAGES.LOGIN_SUCCESS,
     result
