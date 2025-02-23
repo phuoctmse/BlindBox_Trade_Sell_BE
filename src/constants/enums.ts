@@ -15,3 +15,8 @@ export enum TokenType {
   ForgotPasswordToken,
   EmailVerificationToken
 }
+
+export enum Category {
+  Blindbox,
+  Accessory
+}
