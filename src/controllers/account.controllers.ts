@@ -52,7 +52,11 @@ export const oauthController = async (req: Request, res: Response) => {
   const { code } = req.query
   const result = await accountService.oauth(code as string)
   const urlRedirect = `${process.env.CLIENT_REDIRECT_URI}?access_token=${result.access_token}&refresh_token=${result.refresh_token}&new_user=${result.newUser}`
-  return res.redirect(urlRedirect)
+  res.cookie('refresh_token', result.refresh_token, {
+    httpOnly: true,
+    sameSite: 'strict'
+  })
+  res.redirect(urlRedirect)
 }
 
 export const logoutController = async (req: Request<ParamsDictionary, any, LogoutReqBody>, res: Response) => {
