@@ -27,7 +27,7 @@ export const registerController = async (
   next: NextFunction
 ) => {
   const { userName, email, password, phoneNumber } = req.body
-  const result = await accountService.register({ userName, email, password, phoneNumber })
+  const result = await accountService.register({ userName, email, password, phoneNumber }, false)
   res.status(HTTP_STATUS.CREATED).json(result)
 }
 
@@ -39,6 +39,10 @@ export const loginController = async (
   const account = req.account as Accounts
   const accountId = account._id as ObjectId
   const result = await accountService.login({ accountId: accountId.toString(), verify: account.verify })
+  res.cookie('refresh_token', result.refreshToken, {
+    httpOnly: true,
+    sameSite: 'strict'
+  })
   res.json({
     message: USER_MESSAGES.LOGIN_SUCCESS,
     result
@@ -49,7 +53,11 @@ export const oauthController = async (req: Request, res: Response) => {
   const { code } = req.query
   const result = await accountService.oauth(code as string)
   const urlRedirect = `${process.env.CLIENT_REDIRECT_URI}?access_token=${result.access_token}&refresh_token=${result.refresh_token}&new_user=${result.newUser}`
-  return res.redirect(urlRedirect)
+  res.cookie('refresh_token', result.refresh_token, {
+    httpOnly: true,
+    sameSite: 'strict'
+  })
+  res.redirect(urlRedirect)
 }
 
 export const logoutController = async (req: Request<ParamsDictionary, any, LogoutReqBody>, res: Response) => {
