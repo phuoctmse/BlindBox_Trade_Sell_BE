@@ -26,7 +26,7 @@ export const registerController = async (
   next: NextFunction
 ) => {
   const { userName, email, password, phoneNumber } = req.body
-  const result = await accountService.register({ userName, email, password, phoneNumber })
+  const result = await accountService.register({ userName, email, password, phoneNumber }, false)
   res.status(HTTP_STATUS.CREATED).json(result)
 }
 

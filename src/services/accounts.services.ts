@@ -89,7 +89,7 @@ class AccountService {
     })
   }
 
-  private async signAccessAnhRefreshTokens({ accountId, verify }: { accountId: string; verify: AccountVerifyStatus }) {
+  private async signAccessAndRefreshTokens({ accountId, verify }: { accountId: string; verify: AccountVerifyStatus }) {
     return await Promise.all([
       this.signAccessToken({ accountId, verify }),
       this.signRefreshToken({ accountId, verify })
@@ -103,7 +103,7 @@ class AccountService {
     })
   }
 
-  async register(payload: RegisterReqBody) {
+  async register(payload: RegisterReqBody, isGoogle: boolean) {
     const newAccountId = new ObjectId()
     const accountIdToString = newAccountId.toString()
     const email_verify_token = await this.signEmailVerifyToken(accountIdToString)
@@ -116,9 +116,29 @@ class AccountService {
         role: AccountRole.User
       })
     )
-
-    return {
-      message: USER_MESSAGES.REGISTER_SUCCESS
+    if (isGoogle) {
+      const [access_token, refresh_token] = await this.signAccessAndRefreshTokens({
+        accountId: newAccountId.toString(),
+        verify: AccountVerifyStatus.Verified
+      })
+      const { iat, exp } = await this.decodeRefreshToken(refresh_token)
+      await databaseServices.refreshTokens.insertOne(
+        new RefreshToken({
+          account_id: ObjectId.createFromHexString(newAccountId.toString()),
+          token: refresh_token,
+          iat,
+          exp
+        })
+      )
+      return {
+        message: USER_MESSAGES.REGISTER_SUCCESS,
+        access_token,
+        refresh_token
+      }
+    } else {
+      return {
+        message: USER_MESSAGES.REGISTER_SUCCESS
+      }
     }
   }
 
@@ -133,7 +153,7 @@ class AccountService {
   }
 
   async login({ accountId, verify }: { accountId: string; verify: AccountVerifyStatus }) {
-    const [accessToken, refreshToken] = await this.signAccessAnhRefreshTokens({ accountId, verify })
+    const [accessToken, refreshToken] = await this.signAccessAndRefreshTokens({ accountId, verify })
     const { iat, exp } = await this.decodeRefreshToken(refreshToken)
     await databaseServices.refreshTokens.insertOne(
       new RefreshToken({ account_id: new ObjectId(accountId), token: refreshToken, iat, exp })
@@ -159,6 +179,7 @@ class AccountService {
     })
     return data as {
       access_token: string
+      refresh_token: string
       id_token: string
     }
   }
@@ -192,7 +213,7 @@ class AccountService {
     }
     const user = await databaseServices.accounts.findOne({ email: userInfo.email })
     if (user) {
-      const [access_token, refresh_token] = await this.signAccessAnhRefreshTokens({
+      const [access_token, refresh_token] = await this.signAccessAndRefreshTokens({
         accountId: user._id.toString(),
         verify: user.verify
       })
@@ -212,12 +233,15 @@ class AccountService {
       }
     } else {
       const password = Math.random().toString(36).slice(2, 7)
-      const data = await this.register({
-        email: userInfo.email,
-        userName: userInfo.family_name + ' ' + userInfo.given_name,
-        password: hashPassword(password),
-        phoneNumber: ''
-      })
+      const data = await this.register(
+        {
+          email: userInfo.email,
+          userName: userInfo.family_name + ' ' + userInfo.given_name,
+          password: hashPassword(password),
+          phoneNumber: ''
+        },
+        true
+      )
       return {
         ...data,
         newUser: true
