@@ -365,6 +365,62 @@ export const resetPasswordValidation = validate(
   )
 )
 
+export const changePasswordValidation = validate(
+  checkSchema({
+    old_password: {
+      notEmpty: {
+        errorMessage: USER_MESSAGES.OLD_PASSWORD_IS_REQUIRED
+      },
+      isString: {
+        errorMessage: USER_MESSAGES.OLD_PASSWORD_MUST_BE_A_STRING
+      },
+      isLength: {
+        errorMessage: USER_MESSAGES.OLD_PASSWORD_LENGTH_MUST_BE_FROM_6_TO_50,
+        options: {
+          min: 6,
+          max: 50
+        }
+      }
+    },
+    new_password: {
+      notEmpty: {
+        errorMessage: USER_MESSAGES.NEW_PASSWORD_IS_REQUIRED
+      },
+      isString: {
+        errorMessage: USER_MESSAGES.NEW_PASSWORD_MUST_BE_A_STRING
+      },
+      isLength: {
+        errorMessage: USER_MESSAGES.NEW_PASSWORD_LENGTH_MUST_BE_FROM_6_TO_50,
+        options: {
+          min: 6,
+          max: 50
+        }
+      },
+      custom: {
+        options: (value, { req }) => {
+          if (value === req.body.old_password) {
+            throw new Error(USER_MESSAGES.NEW_PASSWORD_SAME_AS_OLD_PASSWORD)
+          }
+          return true
+        }
+      }
+    },
+    confirm_new_password: {
+      notEmpty: {
+        errorMessage: USER_MESSAGES.CONFIRM_NEW_PASSWORD_IS_REQUIRED
+      },
+      custom: {
+        options: (value, { req }) => {
+          if (value !== req.body.new_password) {
+            throw new Error(USER_MESSAGES.CONFIRM_PASSWORD_MUST_BE_THE_SAME_AS_PASSWORD)
+          }
+          return value
+        }
+      }
+    }
+  })
+)
+
 export const verifiedUserValidation = (req: Request, res: Response, next: NextFunction) => {
   const { verify } = req.decode_authorization as TokenPayload
   if (verify !== AccountVerifyStatus.Verified) {

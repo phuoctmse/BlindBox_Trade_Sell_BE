@@ -364,6 +364,28 @@ class AccountService {
     return { message: USER_MESSAGES.PASSWORD_RESET_SUCCESS }
   }
 
+  async verifyPassword(accountId: string, currentPassword: string) {
+    const user = await databaseServices.accounts.findOne({ _id: new ObjectId(accountId) })
+    if (!user) {
+      throw new Error(USER_MESSAGES.USER_NOT_FOUND)
+    }
+    const hashedCurrentPassword = hashPassword(currentPassword)
+    const isPasswordValid = user.password === hashedCurrentPassword
+    return isPasswordValid
+  }
+
+  async changePassword(accountId: string, newPassword: string) {
+    const hashedPassword = hashPassword(newPassword)
+    const result = await databaseServices.accounts.updateOne(
+      { _id: new ObjectId(accountId) },
+      { $set: { password: hashedPassword } }
+    )
+    if (result.modifiedCount === 0) {
+      throw new Error('Failed to update password')
+    }
+    return { message: USER_MESSAGES.PASSWORD_CHANGE_SUCCESS }
+  }
+
   async getMe(accountId: string) {
     const account = await databaseServices.accounts.findOne(
       { _id: new ObjectId(accountId) },
