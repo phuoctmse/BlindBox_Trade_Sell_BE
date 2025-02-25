@@ -12,6 +12,10 @@ config()
 
 const app = express()
 const port = process.env.PORT || 8080
+const corsOptions = {
+  origin: process.env.CLIENT_URL,
+  optionsSuccessStatus: 200
+}
 
 // Load Swagger document
 const swaggerDocument = YAML.load(path.join(__dirname, '../blindbox-swagger.yaml'))
@@ -23,7 +27,7 @@ databaseServices.connect()
 app.use(express.json())
 
 //Setup CORS
-app.use(cors())
+app.use(cors(corsOptions))
 
 // Setup Swagger
 app.use('/api', swaggerUi.serve, swaggerUi.setup(swaggerDocument))
