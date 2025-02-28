@@ -56,6 +56,17 @@ const USER_MESSAGES = {
   IMAGE_LENGTH_MUST_BE_FROM_1_TO_400: 'Image length must be from 1 to 400',
   UPDATE_ME_SUCCESS:  'Update me success',
   LOGIN_OAUTH_FAILED: 'Login oauth failed',
+  OLD_PASSWORD_IS_REQUIRED : 'Old password is required',
+  OLD_PASSWORD_MUST_BE_A_STRING : 'Old password must be a string',
+  OLD_PASSWORD_LENGTH_MUST_BE_FROM_6_TO_50 : 'Old password length must be from 6 to 50',
+  INVALID_CURRENT_PASSWORD : 'Invalid current password',
+  NEW_PASSWORD_IS_REQUIRED : 'New password is required',
+  NEW_PASSWORD_MUST_BE_A_STRING : 'New password must be a string',
+  NEW_PASSWORD_LENGTH_MUST_BE_FROM_6_TO_50 : 'New password length must be from 6 to 50',
+  CONFIRM_NEW_PASSWORD_IS_REQUIRED : 'Confirm new password is required',
+  OLD_PASSWORD_IS_INCORRECT : 'Old password is incorrect',
+  PASSWORD_CHANGE_SUCCESS : 'Password change success',
+  NEW_PASSWORD_SAME_AS_OLD_PASSWORD: "New password cannot be the same as the old password.",
 } as const
 
 export default USER_MESSAGES

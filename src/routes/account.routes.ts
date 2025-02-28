@@ -11,7 +11,8 @@ import {
   verifyForgotPasswordController,
   resetPasswordController,
   oauthController,
-  updateMeController
+  updateMeController,
+  changePasswordController
 } from '~/controllers/account.controllers'
 import {
   accessTokenValidation,
@@ -23,7 +24,8 @@ import {
   verifyForgotPasswordTokenValidation,
   resetPasswordValidation,
   verifiedUserValidation,
-  updateMeValidation
+  updateMeValidation,
+  changePasswordValidation
 } from '~/middlewares/accounts.middlewares'
 import { filterMiddleware } from '~/middlewares/common.middlewares'
 import { UpdateReqMeBody } from '~/models/requests/Account.requests'
@@ -65,11 +67,11 @@ accountsRouter.patch(
   wrapRequestHandler(updateMeController)
 )
 
-// accountsRouter.put(
-//   '/change-password',
-//   accessTokenValidation,
-//   verifiedUserValidation,
-//   changePasswordValidation,
-//   wrapRequestHandler(changePasswordController)
-// )
+accountsRouter.put(
+  '/change-password',
+  accessTokenValidation,
+  verifiedUserValidation,
+  changePasswordValidation,
+  wrapRequestHandler(changePasswordController)
+)
 export default accountsRouter

@@ -18,6 +18,7 @@ import {
 import Accounts from '~/models/schemas/Account.schema'
 import accountService from '~/services/accounts.services'
 import databaseServices from '~/services/database.services'
+import { hashPassword } from '~/utils/crypto'
 config()
 
 export const registerController = async (
@@ -184,5 +185,28 @@ export const updateMeController = async (
   res.json({
     message: USER_MESSAGES.UPDATE_ME_SUCCESS,
     result
+  })
+}
+
+export const changePasswordController = async ( req: Request, res: Response ): Promise<void> => {
+  const { old_password, new_password } = req.body
+  const { accountId } = req.decode_authorization as TokenPayload
+  const user = await databaseServices.accounts.findOne({ _id: new ObjectId(accountId) })
+  if (!user) {
+    res.status(HTTP_STATUS.NOT_FOUND).json({
+      message: USER_MESSAGES.USER_NOT_FOUND
+    })
+    return
+  }
+  const isMatch = user.password === hashPassword(old_password)
+  if (!isMatch) {
+    res.status(HTTP_STATUS.UNAUTHORIZED).json({
+      message: USER_MESSAGES.OLD_PASSWORD_IS_INCORRECT
+    })
+    return
+  }
+  await accountService.changePassword(accountId, new_password)
+  res.json({
+    message: USER_MESSAGES.PASSWORD_CHANGE_SUCCESS
   })
 }
