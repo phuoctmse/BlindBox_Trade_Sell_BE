@@ -210,7 +210,8 @@ export const refreshTokenValidation = validate(
         trim: true,
         custom: {
           options: async (value: string, { req }) => {
-            if (!value) {
+            const refreshToken = req.cookies?.refresh_token
+            if (!refreshToken) {
               throw new ErrorWithStatus({
                 message: USER_MESSAGES.REFRESH_TOKEN_IS_REQUIRED,
                 status: HTTP_STATUS.UNAUTHORIZED
@@ -242,7 +243,7 @@ export const refreshTokenValidation = validate(
         }
       }
     },
-    ['body']
+    ['cookies']
   )
 )
 

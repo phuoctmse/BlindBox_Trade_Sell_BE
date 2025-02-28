@@ -1,7 +1,6 @@
 import { config } from 'dotenv'
 import { Request, Response } from 'express'
 import { NextFunction, ParamsDictionary } from 'express-serve-static-core'
-import { access } from 'fs'
 import { ObjectId } from 'mongodb'
 import HTTP_STATUS from '~/constants/httpStatus'
 import USER_MESSAGES from '~/constants/messages'
@@ -75,7 +74,7 @@ export const refreshTokenController = async (
   req: Request<ParamsDictionary, any, RefreshTokenReqBody>,
   res: Response
 ) => {
-  const { refresh_token } = req.body
+  const { refresh_token } = req.cookies
   const { accountId, verify, exp } = req.decoded_refresh_token as TokenPayload
   const result = await accountService.refreshToken({ accountId, refresh_token, verify, exp })
   res.json({
