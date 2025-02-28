@@ -5,7 +5,6 @@ interface AccountsType {
   _id?: ObjectId
   userName: string
   fullName?: string
-  lastName?: string
   password: string
   email: string
   phoneNumber?: string
@@ -14,10 +13,8 @@ interface AccountsType {
   forgot_password_token?: string
   verify?: AccountVerifyStatus
   role: AccountRole
-  // bio: string
-  // location: string
-  // avatar: string
-  // cover_photo: string
+  remainingCredits?: number
+  isRegisterSelling?: boolean
   createdAt?: Date
   updatedAt?: Date
 }
@@ -34,10 +31,8 @@ export default class Accounts {
   forgot_password_token: string
   verify: AccountVerifyStatus
   role: AccountRole
-  // bio: string
-  // location: string
-  // avatar: string
-  // cover_photo: string
+  remainingCredits: number
+  isRegisterSelling: boolean
   createdAt: Date
   updatedAt: Date
 
@@ -52,10 +47,8 @@ export default class Accounts {
     this.address = account.address || ''
     this.verify = account.verify || AccountVerifyStatus.Unverified
     this.role = account.role
-    // this.bio = account.bio
-    // this.location = account.location
-    // this.avatar = account.avatar
-    // this.cover_photo = account.cover_photo
+    this.remainingCredits = account.remainingCredits || 0
+    this.isRegisterSelling = account.isRegisterSelling || false
     this.createdAt = account.createdAt || date
     this.updatedAt = account.updatedAt || date
     this.email_verify_token = account.email_verify_token || ''
