@@ -51,6 +51,11 @@ export const loginController = async (
 
 export const oauthController = async (req: Request, res: Response) => {
   const { code } = req.query
+  if(code === undefined) {
+    res.status(HTTP_STATUS.BAD_REQUEST).json({
+      message: USER_MESSAGES.LOGIN_OAUTH_FAILED
+    })
+  }
   const result = await accountService.oauth(code as string)
   const urlRedirect = `${process.env.CLIENT_REDIRECT_URI}?access_token=${result.access_token}&refresh_token=${result.refresh_token}&new_user=${result.newUser}`
   res.cookie('refresh_token', result.refresh_token, {
