@@ -8,6 +8,7 @@ import path from 'path'
 import cors from 'cors'
 import { config } from 'dotenv'
 import productsRouter from './routes/product.routes'
+import cookieParser from 'cookie-parser'
 config()
 
 const app = express()
@@ -29,6 +30,9 @@ app.use(express.json())
 
 //Setup CORS
 app.use(cors(corsOptions))
+
+// Setup Cookie Parser
+app.use(cookieParser())
 
 // Setup Swagger
 app.use('/api', swaggerUi.serve, swaggerUi.setup(swaggerDocument))
