@@ -18,5 +18,19 @@ export enum TokenType {
 
 export enum Category {
   Blindbox,
-  Accessory
+  Accessory,
+  OpenedItems
+}
+
+export enum ProductStatus {
+  Inactive,
+  Active,
+  Outstock
+}
+
+export enum RarityLevel {
+  Common,
+  Rare,
+  Epic,
+  Legendary
 }

@@ -54,19 +54,29 @@ const USER_MESSAGES = {
   ADDRESS_LENGTH_MUST_BE_FROM_10_TO_255: 'Address length must be from 10 to 255',
   IMAGE_MUST_BE_A_STRING: 'Image must be a string',
   IMAGE_LENGTH_MUST_BE_FROM_1_TO_400: 'Image length must be from 1 to 400',
-  UPDATE_ME_SUCCESS:  'Update me success',
+  UPDATE_ME_SUCCESS: 'Update me success',
   LOGIN_OAUTH_FAILED: 'Login oauth failed',
-  OLD_PASSWORD_IS_REQUIRED : 'Old password is required',
-  OLD_PASSWORD_MUST_BE_A_STRING : 'Old password must be a string',
-  OLD_PASSWORD_LENGTH_MUST_BE_FROM_6_TO_50 : 'Old password length must be from 6 to 50',
-  INVALID_CURRENT_PASSWORD : 'Invalid current password',
-  NEW_PASSWORD_IS_REQUIRED : 'New password is required',
-  NEW_PASSWORD_MUST_BE_A_STRING : 'New password must be a string',
-  NEW_PASSWORD_LENGTH_MUST_BE_FROM_6_TO_50 : 'New password length must be from 6 to 50',
-  CONFIRM_NEW_PASSWORD_IS_REQUIRED : 'Confirm new password is required',
-  OLD_PASSWORD_IS_INCORRECT : 'Old password is incorrect',
-  PASSWORD_CHANGE_SUCCESS : 'Password change success',
-  NEW_PASSWORD_SAME_AS_OLD_PASSWORD: "New password cannot be the same as the old password.",
+  OLD_PASSWORD_IS_REQUIRED: 'Old password is required',
+  OLD_PASSWORD_MUST_BE_A_STRING: 'Old password must be a string',
+  OLD_PASSWORD_LENGTH_MUST_BE_FROM_6_TO_50: 'Old password length must be from 6 to 50',
+  INVALID_CURRENT_PASSWORD: 'Invalid current password',
+  NEW_PASSWORD_IS_REQUIRED: 'New password is required',
+  NEW_PASSWORD_MUST_BE_A_STRING: 'New password must be a string',
+  NEW_PASSWORD_LENGTH_MUST_BE_FROM_6_TO_50: 'New password length must be from 6 to 50',
+  CONFIRM_NEW_PASSWORD_IS_REQUIRED: 'Confirm new password is required',
+  OLD_PASSWORD_IS_INCORRECT: 'Old password is incorrect',
+  PASSWORD_CHANGE_SUCCESS: 'Password change success',
+  NEW_PASSWORD_SAME_AS_OLD_PASSWORD: 'New password cannot be the same as the old password.'
 } as const
 
-export default USER_MESSAGES
+const PRODUCT_MESSAGES = {
+  NAME_MUST_BE_FROM_10_TO_255: 'Name must be between 10 and 255 characters',
+  PRODUCT_CREATED_SUCCESS: 'Product created successfully',
+  DESCRIPTION_MUST_BE_FROM_10_TO_255: 'Description must be between 10 and 255 characters',
+  QUANTITY_MUST_BE_A_POSITIVE_INTEGER: 'Quantity must be a positive integer',
+  PRICE_MUST_BE_A_POSITIVE_NUMBER: 'Price must be a positive number',
+  BRAND_MUST_BE_FROM_1_TO_100: 'Brand must be between 1 and 100 characters',
+  SIZE_MUST_BE_POSITIVE_NUMBER: 'Size must be a positive number'
+} as const
+
+export { USER_MESSAGES, PRODUCT_MESSAGES }

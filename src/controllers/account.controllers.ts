@@ -3,7 +3,7 @@ import { Request, Response } from 'express'
 import { NextFunction, ParamsDictionary } from 'express-serve-static-core'
 import { ObjectId } from 'mongodb'
 import HTTP_STATUS from '~/constants/httpStatus'
-import USER_MESSAGES from '~/constants/messages'
+import { USER_MESSAGES } from '~/constants/messages'
 import {
   EmailVerifyReqBody,
   LoginReqBody,
@@ -50,7 +50,7 @@ export const loginController = async (
 
 export const oauthController = async (req: Request, res: Response) => {
   const { code } = req.query
-  if(code === undefined) {
+  if (code === undefined) {
     res.status(HTTP_STATUS.BAD_REQUEST).json({
       message: USER_MESSAGES.LOGIN_OAUTH_FAILED
     })
@@ -190,7 +190,7 @@ export const updateMeController = async (
   })
 }
 
-export const changePasswordController = async ( req: Request, res: Response ): Promise<void> => {
+export const changePasswordController = async (req: Request, res: Response): Promise<void> => {
   const { old_password, new_password } = req.body
   const { accountId } = req.decode_authorization as TokenPayload
   const user = await databaseServices.accounts.findOne({ _id: new ObjectId(accountId) })
