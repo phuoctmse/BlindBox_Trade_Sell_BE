@@ -3,7 +3,7 @@ import { Request, Response } from 'express'
 import { NextFunction, ParamsDictionary } from 'express-serve-static-core'
 import { ObjectId } from 'mongodb'
 import HTTP_STATUS from '~/constants/httpStatus'
-import USER_MESSAGES from '~/constants/messages'
+import { USER_MESSAGES } from '~/constants/messages'
 import {
   EmailVerifyReqBody,
   LoginReqBody,
@@ -50,7 +50,7 @@ export const loginController = async (
 
 export const oauthController = async (req: Request, res: Response) => {
   const { code } = req.query
-  if(code === undefined) {
+  if (code === undefined) {
     res.status(HTTP_STATUS.BAD_REQUEST).json({
       message: USER_MESSAGES.LOGIN_OAUTH_FAILED
     })
@@ -65,7 +65,7 @@ export const oauthController = async (req: Request, res: Response) => {
 }
 
 export const logoutController = async (req: Request<ParamsDictionary, any, LogoutReqBody>, res: Response) => {
-  const { refresh_token } = req.body
+  const { refresh_token } = req.cookies
   const result = await accountService.logout(refresh_token)
   res.json(result)
 }
@@ -77,6 +77,10 @@ export const refreshTokenController = async (
   const { refresh_token } = req.cookies
   const { accountId, verify, exp } = req.decoded_refresh_token as TokenPayload
   const result = await accountService.refreshToken({ accountId, refresh_token, verify, exp })
+  res.cookie('refresh_token', result.refreshToken, {
+    httpOnly: true,
+    sameSite: 'strict'
+  })
   res.json({
     message: USER_MESSAGES.REFRESH_TOKEN_SUCCESS,
     result
@@ -179,7 +183,6 @@ export const updateMeController = async (
 ): Promise<void> => {
   const { accountId } = req.decode_authorization as TokenPayload
   const { body } = req
-  console.log(body)
   const result = await accountService.updateMe(accountId, body)
   res.json({
     message: USER_MESSAGES.UPDATE_ME_SUCCESS,
@@ -187,7 +190,7 @@ export const updateMeController = async (
   })
 }
 
-export const changePasswordController = async ( req: Request, res: Response ): Promise<void> => {
+export const changePasswordController = async (req: Request, res: Response): Promise<void> => {
   const { old_password, new_password } = req.body
   const { accountId } = req.decode_authorization as TokenPayload
   const user = await databaseServices.accounts.findOne({ _id: new ObjectId(accountId) })

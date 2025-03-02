@@ -8,9 +8,8 @@ import RefreshToken from '~/models/schemas/RefreshToken.schema'
 import { RegisterReqBody, TokenPayload, UpdateReqMeBody } from '~/models/requests/Account.requests'
 import { config } from 'dotenv'
 import { StringValue } from 'ms'
-import USER_MESSAGES from '~/constants/messages'
+import { USER_MESSAGES } from '~/constants/messages'
 import axios from 'axios'
-import { access } from 'fs'
 import { ErrorWithStatus } from '~/models/Errors'
 import HTTP_STATUS from '~/constants/httpStatus'
 config()
@@ -242,6 +241,7 @@ class AccountService {
         },
         true
       )
+      console.log('data', data)
       return {
         ...data,
         newUser: true
