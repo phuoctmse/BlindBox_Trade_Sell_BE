@@ -159,7 +159,8 @@ class AccountService {
     )
     return {
       accessToken,
-      refreshToken
+      refreshToken,
+      message: USER_MESSAGES.LOGIN_SUCCESS
     }
   }
 
@@ -228,7 +229,8 @@ class AccountService {
       return {
         access_token,
         refresh_token,
-        newUser: false
+        newUser: false,
+        message: USER_MESSAGES.LOGIN_SUCCESS
       }
     } else {
       const password = Math.random().toString(36).slice(2, 7)
@@ -244,7 +246,8 @@ class AccountService {
       console.log('data', data)
       return {
         ...data,
-        newUser: true
+        newUser: true,
+        message: USER_MESSAGES.REGISTER_SUCCESS
       }
     }
   }
@@ -278,7 +281,8 @@ class AccountService {
     )
     return {
       accessToken: new_access_token,
-      refreshToken: new_refresh_token
+      refreshToken: new_refresh_token,
+      message: USER_MESSAGES.REFRESH_TOKEN_SUCCESS
     }
   }
 
@@ -326,7 +330,9 @@ class AccountService {
       { _id: user._id },
       { $set: { forgot_password_token: forgotPasswordToken } }
     )
-    return { message: USER_MESSAGES.FORGOT_PASSWORD_EMAIL_SENT }
+    return {
+      message: USER_MESSAGES.FORGOT_PASSWORD_EMAIL_SENT
+    }
   }
 
   async verifyForgotPassword(forgot_password_token: string) {
@@ -361,7 +367,9 @@ class AccountService {
       { $set: { password: hashedPassword, forgot_password_token: '' } }
     )
 
-    return { message: USER_MESSAGES.PASSWORD_RESET_SUCCESS }
+    return {
+      message: USER_MESSAGES.PASSWORD_RESET_SUCCESS
+    }
   }
 
   async verifyPassword(accountId: string, currentPassword: string) {
@@ -383,7 +391,9 @@ class AccountService {
     if (result.modifiedCount === 0) {
       throw new Error('Failed to update password')
     }
-    return { message: USER_MESSAGES.PASSWORD_CHANGE_SUCCESS }
+    return {
+      message: USER_MESSAGES.PASSWORD_CHANGE_SUCCESS
+    }
   }
 
   async getMe(accountId: string) {
@@ -409,7 +419,9 @@ class AccountService {
         }
       }
     ])
-    return account
+    return {
+      message: USER_MESSAGES.UPDATE_SUCCESS
+    }
   }
 }
 

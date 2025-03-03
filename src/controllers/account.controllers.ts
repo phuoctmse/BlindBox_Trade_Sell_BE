@@ -42,7 +42,7 @@ export const loginController = async (
     httpOnly: true,
     sameSite: 'strict'
   })
-  res.json({
+  res.status(HTTP_STATUS.OK).json({
     message: USER_MESSAGES.LOGIN_SUCCESS,
     result
   })
@@ -67,7 +67,7 @@ export const oauthController = async (req: Request, res: Response) => {
 export const logoutController = async (req: Request<ParamsDictionary, any, LogoutReqBody>, res: Response) => {
   const { refresh_token } = req.cookies
   const result = await accountService.logout(refresh_token)
-  res.json(result)
+  res.status(HTTP_STATUS.OK).json(result)
 }
 
 export const refreshTokenController = async (
@@ -81,7 +81,7 @@ export const refreshTokenController = async (
     httpOnly: true,
     sameSite: 'strict'
   })
-  res.json({
+  res.status(HTTP_STATUS.OK).json({
     message: USER_MESSAGES.REFRESH_TOKEN_SUCCESS,
     result
   })
@@ -98,12 +98,12 @@ export const emailVerifyController = async (req: Request<ParamsDictionary, any, 
   }
   // Check if account's email is already verified
   if (user?.email_verify_token === '') {
-    res.json({
+    res.status(HTTP_STATUS.OK).json({
       message: USER_MESSAGES.EMAIL_ALREADY_VERIFIED
     })
   }
   const result = await accountService.verifyEmail(accountId)
-  res.json({
+  res.status(HTTP_STATUS.OK).json({
     result
   })
 }
@@ -119,12 +119,12 @@ export const resendEmailVerifyController = async (req: Request, res: Response) =
   }
   // Check if user's email is already verified
   if (user?.email_verify_token === '') {
-    res.json({
+    res.status(HTTP_STATUS.OK).json({
       message: USER_MESSAGES.EMAIL_ALREADY_VERIFIED
     })
   }
   const result = await accountService.resendVerifyEmail(accountId)
-  res.json({
+  res.status(HTTP_STATUS.OK).json({
     result
   })
 }
@@ -144,7 +144,9 @@ export const forgotPasswordController = async (
 ): Promise<void> => {
   const { email } = req.body
   const result = await accountService.forgotPassword(email)
-  res.json(result)
+  res.status(HTTP_STATUS.OK).json({
+    result
+  })
 }
 
 export const verifyForgotPasswordController = async (req: Request, res: Response): Promise<void> => {
@@ -159,7 +161,7 @@ export const verifyForgotPasswordController = async (req: Request, res: Response
     })
     return
   }
-  res.json({ message: USER_MESSAGES.VALID_FORGOT_PASSWORD_TOKEN })
+  res.status(HTTP_STATUS.OK).json({ message: USER_MESSAGES.VALID_FORGOT_PASSWORD_TOKEN })
 }
 
 export const resetPasswordController = async (req: Request, res: Response): Promise<void> => {
@@ -174,7 +176,9 @@ export const resetPasswordController = async (req: Request, res: Response): Prom
     return
   }
   const result = await accountService.resetPassword(accountId, password, forgot_password_token)
-  res.json(result)
+  res.status(HTTP_STATUS.OK).json({
+    result
+  })
 }
 
 export const updateMeController = async (
@@ -184,7 +188,7 @@ export const updateMeController = async (
   const { accountId } = req.decode_authorization as TokenPayload
   const { body } = req
   const result = await accountService.updateMe(accountId, body)
-  res.json({
+  res.status(HTTP_STATUS.OK).json({
     message: USER_MESSAGES.UPDATE_ME_SUCCESS,
     result
   })
@@ -207,8 +211,8 @@ export const changePasswordController = async (req: Request, res: Response): Pro
     })
     return
   }
-  await accountService.changePassword(accountId, new_password)
-  res.json({
-    message: USER_MESSAGES.PASSWORD_CHANGE_SUCCESS
+  const result = await accountService.changePassword(accountId, new_password)
+  res.status(HTTP_STATUS.OK).json({
+    result
   })
 }
