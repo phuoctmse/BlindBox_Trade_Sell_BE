@@ -326,7 +326,7 @@ class AccountService {
       { _id: user._id },
       { $set: { forgot_password_token: forgotPasswordToken } }
     )
-    return { message: USER_MESSAGES.FORGOT_PASSWORD_EMAIL_SENT }
+    return USER_MESSAGES.FORGOT_PASSWORD_EMAIL_SENT
   }
 
   async verifyForgotPassword(forgot_password_token: string) {
@@ -361,7 +361,7 @@ class AccountService {
       { $set: { password: hashedPassword, forgot_password_token: '' } }
     )
 
-    return { message: USER_MESSAGES.PASSWORD_RESET_SUCCESS }
+    return USER_MESSAGES.PASSWORD_RESET_SUCCESS
   }
 
   async verifyPassword(accountId: string, currentPassword: string) {
@@ -383,7 +383,7 @@ class AccountService {
     if (result.modifiedCount === 0) {
       throw new Error('Failed to update password')
     }
-    return { message: USER_MESSAGES.PASSWORD_CHANGE_SUCCESS }
+    return USER_MESSAGES.PASSWORD_CHANGE_SUCCESS
   }
 
   async getMe(accountId: string) {
