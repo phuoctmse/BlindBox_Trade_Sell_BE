@@ -66,7 +66,8 @@ const USER_MESSAGES = {
   CONFIRM_NEW_PASSWORD_IS_REQUIRED: 'Confirm new password is required',
   OLD_PASSWORD_IS_INCORRECT: 'Old password is incorrect',
   PASSWORD_CHANGE_SUCCESS: 'Password change success',
-  NEW_PASSWORD_SAME_AS_OLD_PASSWORD: 'New password cannot be the same as the old password.'
+  NEW_PASSWORD_SAME_AS_OLD_PASSWORD: 'New password cannot be the same as the old password.',
+  UPDATE_SUCCESS: 'Update success',
 } as const
 
 const PRODUCT_MESSAGES = {
