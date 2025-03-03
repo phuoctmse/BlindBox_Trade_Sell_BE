@@ -37,7 +37,8 @@ export const loginController = async (
 ) => {
   const account = req.account as Accounts
   const accountId = account._id as ObjectId
-  const result = await accountService.login({ accountId: accountId.toString(), verify: account.verify })
+  const isSeller = account.isRegisterSelling
+  const result = await accountService.login({ accountId: accountId.toString(), verify: account.verify, isSeller })
   res.cookie('refresh_token', result.refreshToken, {
     httpOnly: true,
     sameSite: 'strict'
@@ -75,8 +76,8 @@ export const refreshTokenController = async (
   res: Response
 ) => {
   const { refresh_token } = req.cookies
-  const { accountId, verify, exp } = req.decoded_refresh_token as TokenPayload
-  const result = await accountService.refreshToken({ accountId, refresh_token, verify, exp })
+  const { accountId, verify, exp, isSeller } = req.decoded_refresh_token as TokenPayload
+  const result = await accountService.refreshToken({ accountId, refresh_token, verify, exp, isSeller })
   res.cookie('refresh_token', result.refreshToken, {
     httpOnly: true,
     sameSite: 'strict'

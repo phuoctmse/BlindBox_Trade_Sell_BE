@@ -469,3 +469,15 @@ export const updateMeValidation = validate(
     }
   })
 )
+
+export const validateRegisterSelling = (req: Request, res: Response, next: NextFunction) => {
+  const { isSeller } = req.decode_authorization as TokenPayload
+  if (!isSeller) {
+    return next(
+      new ErrorWithStatus({
+        message: USER_MESSAGES.USER_NOT_SELLER,
+        status: HTTP_STATUS.UNAUTHORIZED
+      })
+    )
+  }
+}

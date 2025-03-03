@@ -5,6 +5,7 @@ export interface TokenPayload extends JwtPayload {
   accountId: string
   token_type: TokenType
   verify: AccountVerifyStatus
+  isSeller: boolean
   exp: number
   iat: number
 }

@@ -15,12 +15,21 @@ import HTTP_STATUS from '~/constants/httpStatus'
 config()
 
 class AccountService {
-  private signAccessToken({ accountId, verify }: { accountId: string; verify: AccountVerifyStatus }) {
+  private signAccessToken({
+    accountId,
+    verify,
+    isSeller
+  }: {
+    accountId: string
+    verify: AccountVerifyStatus
+    isSeller: boolean
+  }) {
     return signToken({
       payload: {
         accountId,
         token_type: TokenType.AccessToken,
-        verify
+        verify,
+        isSeller
       },
       privateKey: process.env.JWT_SECRET_ACCESS_TOKEN as string,
       options: {
@@ -32,10 +41,12 @@ class AccountService {
   private signRefreshToken({
     accountId,
     verify,
+    isSeller,
     exp
   }: {
     accountId: string
     verify: AccountVerifyStatus
+    isSeller: boolean
     exp?: number
   }) {
     if (exp) {
@@ -44,6 +55,7 @@ class AccountService {
           accountId,
           token_type: TokenType.RefreshToken,
           verify,
+          isSeller,
           exp
         },
         privateKey: process.env.JWT_SECRET_REFRESH_TOKEN as string
@@ -53,7 +65,8 @@ class AccountService {
       payload: {
         accountId,
         token_type: TokenType.RefreshToken,
-        verify
+        verify,
+        isSeller
       },
       privateKey: process.env.JWT_SECRET_REFRESH_TOKEN as string,
       options: {
@@ -88,10 +101,18 @@ class AccountService {
     })
   }
 
-  private async signAccessAndRefreshTokens({ accountId, verify }: { accountId: string; verify: AccountVerifyStatus }) {
+  private async signAccessAndRefreshTokens({
+    accountId,
+    verify,
+    isSeller
+  }: {
+    accountId: string
+    verify: AccountVerifyStatus
+    isSeller: boolean
+  }) {
     return await Promise.all([
-      this.signAccessToken({ accountId, verify }),
-      this.signRefreshToken({ accountId, verify })
+      this.signAccessToken({ accountId, verify, isSeller }),
+      this.signRefreshToken({ accountId, verify, isSeller })
     ])
   }
 
@@ -116,9 +137,11 @@ class AccountService {
       })
     )
     if (isGoogle) {
+      const isSeller = false
       const [access_token, refresh_token] = await this.signAccessAndRefreshTokens({
         accountId: newAccountId.toString(),
-        verify: AccountVerifyStatus.Verified
+        verify: AccountVerifyStatus.Verified,
+        isSeller
       })
       const { iat, exp } = await this.decodeRefreshToken(refresh_token)
       await databaseServices.refreshTokens.insertOne(
@@ -151,8 +174,8 @@ class AccountService {
     return user
   }
 
-  async login({ accountId, verify }: { accountId: string; verify: AccountVerifyStatus }) {
-    const [accessToken, refreshToken] = await this.signAccessAndRefreshTokens({ accountId, verify })
+  async login({ accountId, verify, isSeller }: { accountId: string; verify: AccountVerifyStatus; isSeller: boolean }) {
+    const [accessToken, refreshToken] = await this.signAccessAndRefreshTokens({ accountId, verify, isSeller })
     const { iat, exp } = await this.decodeRefreshToken(refreshToken)
     await databaseServices.refreshTokens.insertOne(
       new RefreshToken({ account_id: new ObjectId(accountId), token: refreshToken, iat, exp })
@@ -215,7 +238,8 @@ class AccountService {
     if (user) {
       const [access_token, refresh_token] = await this.signAccessAndRefreshTokens({
         accountId: user._id.toString(),
-        verify: user.verify
+        verify: user.verify,
+        isSeller: user.isRegisterSelling
       })
       const { iat, exp } = await this.decodeRefreshToken(refresh_token)
       await databaseServices.refreshTokens.insertOne(
@@ -263,16 +287,18 @@ class AccountService {
     accountId,
     refresh_token,
     verify,
-    exp
+    exp,
+    isSeller
   }: {
     accountId: string
     refresh_token: string
     verify: AccountVerifyStatus
     exp: number
+    isSeller: boolean
   }) {
     const [new_access_token, new_refresh_token] = await Promise.all([
-      this.signAccessToken({ accountId, verify }),
-      this.signRefreshToken({ accountId, verify, exp }),
+      this.signAccessToken({ accountId, verify, isSeller }),
+      this.signRefreshToken({ accountId, verify, isSeller, exp }),
       databaseServices.refreshTokens.deleteOne({ token: refresh_token })
     ])
     const { iat } = await this.decodeRefreshToken(new_refresh_token)
