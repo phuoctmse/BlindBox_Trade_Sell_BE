@@ -26,6 +26,7 @@ interface Component {
 interface ProductType {
   _id?: ObjectId
   name: string
+  slug: string
   description: string
   quantity: number
   price: Double
@@ -45,6 +46,7 @@ interface ProductType {
 export default class Products {
   _id?: ObjectId
   name: string
+  slug: string
   description: string
   quantity: number
   price: Double
@@ -64,6 +66,7 @@ export default class Products {
     const date = new Date()
     this._id = product._id
     this.name = product.name
+    this.slug = product.slug
     this.description = product.description
     this.quantity = product.quantity
     this.price = product.price

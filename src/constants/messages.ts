@@ -68,6 +68,7 @@ const USER_MESSAGES = {
   PASSWORD_CHANGE_SUCCESS: 'Password change success',
   NEW_PASSWORD_SAME_AS_OLD_PASSWORD: 'New password cannot be the same as the old password.',
   UPDATE_SUCCESS: 'Update success',
+  USER_NOT_SELLER: 'User is not a seller'
 } as const
 
 const PRODUCT_MESSAGES = {
@@ -77,7 +78,9 @@ const PRODUCT_MESSAGES = {
   QUANTITY_MUST_BE_A_POSITIVE_INTEGER: 'Quantity must be a positive integer',
   PRICE_MUST_BE_A_POSITIVE_NUMBER: 'Price must be a positive number',
   BRAND_MUST_BE_FROM_1_TO_100: 'Brand must be between 1 and 100 characters',
-  SIZE_MUST_BE_POSITIVE_NUMBER: 'Size must be a positive number'
+  SIZE_MUST_BE_POSITIVE_NUMBER: 'Size must be a positive number',
+  PRODUCTS_FETCHED_SUCCESS: 'Products fetched successfully',
+  PRODUCT_ID_REQUIRED: 'Product ID is required'
 } as const
 
 export { USER_MESSAGES, PRODUCT_MESSAGES }
