@@ -449,6 +449,19 @@ class AccountService {
       message: USER_MESSAGES.UPDATE_SUCCESS
     }
   }
+
+  async registerSeller(accountId: string) {
+    const result = await databaseServices.accounts.updateOne(
+      { _id: new ObjectId(accountId) },
+      { $set: { isRegisterSelling: true } }
+    )
+    if (result.modifiedCount === 0) {
+      throw new Error(USER_MESSAGES.USER_NOT_SELLER)
+    }
+    return {
+      message: USER_MESSAGES.REGISTERED_SELLING_SUCCESS
+    }
+  }
 }
 
 const accountService = new AccountService()
