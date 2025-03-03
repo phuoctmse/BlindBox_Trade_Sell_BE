@@ -12,7 +12,8 @@ import {
   resetPasswordController,
   oauthController,
   updateMeController,
-  changePasswordController
+  changePasswordController,
+  registerSellerController
 } from '~/controllers/account.controllers'
 import {
   accessTokenValidation,
@@ -74,4 +75,7 @@ accountsRouter.put(
   changePasswordValidation,
   wrapRequestHandler(changePasswordController)
 )
+
+accountsRouter.patch('/register-seller', accessTokenValidation, wrapRequestHandler(registerSellerController))
+
 export default accountsRouter
