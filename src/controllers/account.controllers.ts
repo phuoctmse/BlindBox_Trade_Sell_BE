@@ -68,6 +68,7 @@ export const oauthController = async (req: Request, res: Response) => {
 export const logoutController = async (req: Request<ParamsDictionary, any, LogoutReqBody>, res: Response) => {
   const { refresh_token } = req.cookies
   const result = await accountService.logout(refresh_token)
+  res.clearCookie('refresh_token')
   res.status(HTTP_STATUS.OK).json(result)
 }
 

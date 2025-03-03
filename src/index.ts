@@ -15,7 +15,7 @@ const app = express()
 const port = process.env.PORT || 8080
 const corsOptions = {
   origin: process.env.CLIENT_URL,
-  Credentials: true,
+  credentials: true,
   optionsSuccessStatus: 200
 }
 
