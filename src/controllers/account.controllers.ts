@@ -38,10 +38,13 @@ export const loginController = async (
   const account = req.account as Accounts
   const accountId = account._id as ObjectId
   const isSeller = account.isRegisterSelling
+  const cookiesExpire = process.env.COOKIES_EXPIRES_IN as string
   const result = await accountService.login({ accountId: accountId.toString(), verify: account.verify, isSeller })
   res.cookie('refresh_token', result.refreshToken, {
     httpOnly: true,
-    sameSite: 'strict'
+    sameSite: 'strict',
+    path: '/refresh-token',
+    maxAge: parseInt(cookiesExpire)
   })
   res.status(HTTP_STATUS.OK).json({
     message: USER_MESSAGES.LOGIN_SUCCESS,
@@ -58,9 +61,12 @@ export const oauthController = async (req: Request, res: Response) => {
   }
   const result = await accountService.oauth(code as string)
   const urlRedirect = `${process.env.CLIENT_REDIRECT_URI}?access_token=${result.access_token}&refresh_token=${result.refresh_token}&new_user=${result.newUser}`
+  const cookiesExpire = process.env.COOKIES_EXPIRES_IN as string
   res.cookie('refresh_token', result.refresh_token, {
     httpOnly: true,
-    sameSite: 'strict'
+    sameSite: 'strict',
+    path: '/refresh-token',
+    maxAge: parseInt(cookiesExpire)
   })
   res.redirect(urlRedirect)
 }
@@ -78,10 +84,13 @@ export const refreshTokenController = async (
 ) => {
   const { refresh_token } = req.cookies
   const { accountId, verify, exp, isSeller } = req.decoded_refresh_token as TokenPayload
+  const cookiesExpire = process.env.COOKIES_EXPIRES_IN as string
   const result = await accountService.refreshToken({ accountId, refresh_token, verify, exp, isSeller })
   res.cookie('refresh_token', result.refreshToken, {
     httpOnly: true,
-    sameSite: 'strict'
+    sameSite: 'strict',
+    path: '/refresh-token',
+    maxAge: parseInt(cookiesExpire)
   })
   res.status(HTTP_STATUS.OK).json({
     message: USER_MESSAGES.REFRESH_TOKEN_SUCCESS,

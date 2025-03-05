@@ -32,7 +32,7 @@ productsRouter.post(
 // productsRouter.delete('/:id', accessTokenValidation, wrapRequestHandler(deleteProductController))
 
 //Buyer
-productsRouter.get('/blind-boxes', accessTokenValidation, wrapRequestHandler(getALlBlindBoxesController))
+productsRouter.get('/blind-boxes', wrapRequestHandler(getALlBlindBoxesController))
 productsRouter.get('/blind-boxes/:slug', accessTokenValidation, wrapRequestHandler(getBlindBoxesDetailsController))
 
 export default productsRouter
