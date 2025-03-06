@@ -38,3 +38,35 @@ export const getALlBlindBoxesController = async (req: Request, res: Response) =>
   const result = await productService.getAllBlindBoxes()
   res.status(HTTP_STATUS.OK).json(result)
 }
+
+export const updateProductController = async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const payload = { ...req.body };
+
+  if (!id || !payload) {
+    return res.status(HTTP_STATUS.BAD_REQUEST).json({ message: "Invalid request data" });
+  }
+
+  const result = await productService.updateProduct(id, payload);
+  if (result.success) {
+    res.status(HTTP_STATUS.OK).json(result);
+  } else {
+    res.status(HTTP_STATUS.NOT_FOUND).json(result);
+  }
+};
+
+export const deleteProductController = async (req: Request, res: Response) => {
+  const { id } = req.params;
+
+  console.log('Received request to delete product with ID:', id);
+
+  const result = await productService.deleteProduct(id);
+
+  if (result.success) {
+    console.log('Product deleted successfully:', id);
+    res.status(200).json(result);
+  } else {
+    console.error('Failed to delete product:', id, result.message);
+    res.status(404).json(result);
+  }
+};

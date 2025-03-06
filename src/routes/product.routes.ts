@@ -1,9 +1,11 @@
 import { Router } from 'express'
 import {
   createBlindBoxesController,
+  deleteProductController,
   getALlBlindBoxesController,
   getBlindBoxesDetailsController,
-  getMyBlindBoxesController
+  getMyBlindBoxesController,
+  updateProductController
 } from '~/controllers/product.controllers'
 import { accessTokenValidation, validateRegisterSelling } from '~/middlewares/accounts.middlewares'
 import { filterMiddleware } from '~/middlewares/common.middlewares'
@@ -28,8 +30,8 @@ productsRouter.post(
   filterMiddleware<CreateBlindBoxesReqBody>(['brand', 'description', 'name', 'price', 'quantity', 'size']),
   wrapRequestHandler(createBlindBoxesController)
 )
-// productsRouter.put('/:id', accessTokenValidation, wrapRequestHandler(updateProductController))
-// productsRouter.delete('/:id', accessTokenValidation, wrapRequestHandler(deleteProductController))
+productsRouter.put('/:id', accessTokenValidation, wrapRequestHandler(updateProductController))
+productsRouter.delete('/:id', accessTokenValidation, wrapRequestHandler(deleteProductController))
 
 //Buyer
 productsRouter.get('/blind-boxes', accessTokenValidation, wrapRequestHandler(getALlBlindBoxesController))
