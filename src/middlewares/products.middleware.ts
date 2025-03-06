@@ -17,7 +17,7 @@ const descriptionSchema: ParamSchema = {
   isString: true,
   trim: true,
   isLength: {
-    options: { min: 10, max: 255 },
+    options: { min: 10, max: 1000 },
     errorMessage: PRODUCT_MESSAGES.DESCRIPTION_MUST_BE_FROM_10_TO_255
   }
 }
