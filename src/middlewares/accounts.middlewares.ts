@@ -480,4 +480,5 @@ export const validateRegisterSelling = (req: Request, res: Response, next: NextF
       })
     )
   }
+  next()
 }

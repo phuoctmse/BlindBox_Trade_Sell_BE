@@ -43,7 +43,6 @@ export const loginController = async (
   res.cookie('refresh_token', result.refreshToken, {
     httpOnly: true,
     sameSite: 'strict',
-    path: '/refresh-token',
     maxAge: parseInt(cookiesExpire)
   })
   res.status(HTTP_STATUS.OK).json({
@@ -65,7 +64,6 @@ export const oauthController = async (req: Request, res: Response) => {
   res.cookie('refresh_token', result.refresh_token, {
     httpOnly: true,
     sameSite: 'strict',
-    path: '/refresh-token',
     maxAge: parseInt(cookiesExpire)
   })
   res.redirect(urlRedirect)
@@ -89,7 +87,6 @@ export const refreshTokenController = async (
   res.cookie('refresh_token', result.refreshToken, {
     httpOnly: true,
     sameSite: 'strict',
-    path: '/refresh-token',
     maxAge: parseInt(cookiesExpire)
   })
   res.status(HTTP_STATUS.OK).json({
