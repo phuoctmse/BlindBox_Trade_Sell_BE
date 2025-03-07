@@ -30,7 +30,12 @@ productsRouter.post(
   filterMiddleware<CreateBlindBoxesReqBody>(['brand', 'description', 'name', 'price', 'quantity', 'size']),
   wrapRequestHandler(createBlindBoxesController)
 )
-productsRouter.put('/seller/blind-boxes/:id', accessTokenValidation,filterMiddleware<CreateBlindBoxesReqBody>(['brand', 'description', 'name', 'price', 'quantity', 'size']), wrapRequestHandler(updateProductController))
+productsRouter.put(
+  '/seller/blind-boxes/:id',
+  accessTokenValidation,
+  filterMiddleware<CreateBlindBoxesReqBody>(['brand', 'description', 'name', 'price', 'quantity', 'size']),
+  wrapRequestHandler(updateProductController)
+)
 productsRouter.delete('/seller/blind-boxes/:id', accessTokenValidation, wrapRequestHandler(deleteProductController))
 
 //Buyer
