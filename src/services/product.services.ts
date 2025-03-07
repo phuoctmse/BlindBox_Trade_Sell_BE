@@ -87,14 +87,9 @@ class ProductService {
     if (!ObjectId.isValid(id)) {
       return { success: false, message: "Invalid product ID" };
     }
-
     if (!payload || typeof payload !== 'object') {
       return { success: false, message: "Invalid payload" };
     }
-
-    console.log('Updating product with ID:', id);
-    console.log('Payload:', payload);
-
     const updatePayload: any = {
       ...payload,
       updatedAt: new Date()
@@ -104,10 +99,9 @@ class ProductService {
       updatePayload['blindBoxes.size'] = payload.size;
       delete updatePayload.size;
     }
-
     try {
       const result = await databaseServices.products.updateOne(
-        { _id: new ObjectId(id) },  // Ensure ID is a valid ObjectId
+        { _id: new ObjectId(id) },
         { $set: updatePayload }
       );
 
@@ -126,19 +120,12 @@ class ProductService {
     if (!ObjectId.isValid(id)) {
       return { success: false, message: "Invalid product ID" };
     }
-
     try {
       const objectId = new ObjectId(id);
-      console.log('Deleting product with ID:', objectId);
-
       const result = await databaseServices.products.deleteOne({ _id: objectId });
-
       if (result.deletedCount === 0) {
-        console.log('Product not found:', objectId);
         return { success: false, message: "Product not found" };
       }
-
-      console.log('Product deleted successfully:', objectId);
       return { success: true, message: "Product deleted successfully" };
     } catch (error) {
       console.error('Error deleting product:', error);
