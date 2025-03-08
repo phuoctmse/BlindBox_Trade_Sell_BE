@@ -43,7 +43,9 @@ export const updateProductController = async (req: Request, res: Response): Prom
   const { id } = req.params;
   const payload = { ...req.body };
   if (!id || !payload) {
-    res.status(HTTP_STATUS.BAD_REQUEST).json({ message: "Invalid request data" });
+    res.status(HTTP_STATUS.BAD_REQUEST).json({
+      message: PRODUCT_MESSAGES.PRODUCT_ID_REQUIRED
+  });
     return;
   }
   const result = await productService.updateProduct(id, payload);
