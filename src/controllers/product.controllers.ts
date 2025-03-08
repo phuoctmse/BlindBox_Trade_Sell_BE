@@ -52,13 +52,18 @@ export const updateProductController = async (req: Request, res: Response): Prom
   res.status(HTTP_STATUS.OK).json(result);
 };
 
-export const deleteProductController = async (req: Request, res: Response) => {
+export const deleteProductController = async (req: Request, res: Response): Promise<void> => {
   const { id } = req.params;
+  if (!id) {
+    res.status(HTTP_STATUS.BAD_REQUEST).json({
+      message: PRODUCT_MESSAGES.PRODUCT_ID_REQUIRED
+    });
+    return;
+  }
   const result = await productService.deleteProduct(id);
   if (result.success) {
-    res.status(200).json(result);
+    res.status(HTTP_STATUS.OK).json(result);
   } else {
-    console.error('Failed to delete product:', id, result.message);
-    res.status(404).json(result);
+    res.status(HTTP_STATUS.NOT_FOUND).json(result);
   }
 };
