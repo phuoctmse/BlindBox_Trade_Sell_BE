@@ -39,14 +39,15 @@ export const getALlBlindBoxesController = async (req: Request, res: Response) =>
   res.status(HTTP_STATUS.OK).json(result)
 }
 
-export const updateProductController = async (req: Request, res: Response) => {
+export const updateProductController = async (req: Request, res: Response): Promise<void> => {
   const { id } = req.params;
   const payload = { ...req.body };
   if (!id || !payload) {
-    return res.status(HTTP_STATUS.BAD_REQUEST).json({ message: "Invalid request data" });
+    res.status(HTTP_STATUS.BAD_REQUEST).json({ message: "Invalid request data" });
+    return;
   }
   const result = await productService.updateProduct(id, payload);
-  res.status(HTTP_STATUS.OK).json(result)
+  res.status(HTTP_STATUS.OK).json(result);
 };
 
 export const deleteProductController = async (req: Request, res: Response) => {
