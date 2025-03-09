@@ -225,7 +225,7 @@ export const changePasswordController = async (req: Request, res: Response): Pro
   })
 }
 
-export const registerSellerController = async (req: Request, res: Response): Promise<void> => { 
+export const registerSellerController = async (req: Request, res: Response): Promise<void> => {
   const { accountId } = req.decode_authorization as TokenPayload
   const result = await accountService.registerSeller(accountId)
   res.status(HTTP_STATUS.OK).json({
