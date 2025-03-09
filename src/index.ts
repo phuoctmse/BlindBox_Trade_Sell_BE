@@ -11,6 +11,7 @@ import productsRouter from './routes/product.routes'
 import cookieParser from 'cookie-parser'
 import mediasRouter from './routes/media.routes'
 import { initFolder } from './utils/file'
+import { UPLOAD_DIR } from './constants/dir'
 config()
 
 const app = express()
@@ -38,6 +39,8 @@ app.use(cors(corsOptions))
 
 // Setup Cookie Parser
 app.use(cookieParser())
+
+app.use('/media/images/',express.static(UPLOAD_DIR))
 
 // Setup Swagger
 app.use('/api', swaggerUi.serve, swaggerUi.setup(swaggerDocument))
