@@ -85,6 +85,8 @@ const PRODUCT_MESSAGES = {
   PRODUCT_UPDATED_SUCCESS: 'Product updated successfully',
   PRODUCT_DELETED_SUCCESS: 'Product deleted successfully',
   PRODUCT_NOT_FOUND: 'Product not found',
+  INVALID_PRODUCT_ID: 'Invalid product ID',
+  INVALID_PAYLOAD: 'Invalid payload',
 } as const
 
 export { USER_MESSAGES, PRODUCT_MESSAGES }

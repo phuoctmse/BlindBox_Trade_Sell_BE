@@ -83,56 +83,39 @@ class ProductService {
     }
   }
 
-  async updateProduct(id: string, payload: any) {
+  async updateProduct(id: string, payload: CreateBlindBoxesReqBody) {
     if (!ObjectId.isValid(id)) {
-      return { success: false, message: "Invalid product ID" };
+      return { success: false, message: PRODUCT_MESSAGES.INVALID_PRODUCT_ID };
     }
     if (!payload || typeof payload !== 'object') {
-      return { success: false, message: "Invalid payload" };
+      return { success: false, message: PRODUCT_MESSAGES.INVALID_PAYLOAD };
     }
-    const updatePayload: any = {
+    const updatePayload: CreateBlindBoxesReqBody = {
       ...payload,
-      updatedAt: new Date()
     };
-
-    if (payload.size) {
-      updatePayload['blindBoxes.size'] = payload.size;
-      delete updatePayload.size;
+    const result = await databaseServices.products.updateOne(
+      { _id: new ObjectId(id) },
+      { $set: updatePayload }
+    );
+    if (result.matchedCount === 0) {
+      return { success: false, message: PRODUCT_MESSAGES.PRODUCT_NOT_FOUND };
     }
-    try {
-      const result = await databaseServices.products.updateOne(
-        { _id: new ObjectId(id) },
-        { $set: updatePayload }
-      );
-
-      if (result.matchedCount === 0) {
-        return { success: false, message: "Product not found" };
-      }
-
-      return { success: true, message: "Product updated successfully" };
-    } catch (error) {
-      console.error('Error updating product:', error);
-      return { success: false, message: "Error updating product" };
-    }
+    return {
+      message: PRODUCT_MESSAGES.PRODUCT_UPDATED_SUCCESS
+    };
   }
 
   async deleteProduct(id: string) {
     if (!ObjectId.isValid(id)) {
-      return { success: false, message: "Invalid product ID" };
+      return { success: false, message: PRODUCT_MESSAGES.INVALID_PRODUCT_ID };
     }
-    try {
-      const objectId = new ObjectId(id);
-      const result = await databaseServices.products.deleteOne({ _id: objectId });
-      if (result.deletedCount === 0) {
-        return { success: false, message: "Product not found" };
-      }
-      return { success: true, message: "Product deleted successfully" };
-    } catch (error) {
-      console.error('Error deleting product:', error);
-      return { success: false, message: "Error deleting product" };
+    const objectId = new ObjectId(id);
+    const result = await databaseServices.products.deleteOne({ _id: objectId });
+    if (result.deletedCount === 0) {
+      return { success: false, message: PRODUCT_MESSAGES.PRODUCT_NOT_FOUND };
     }
-}
-
+    return { success: true, message: PRODUCT_MESSAGES.PRODUCT_DELETED_SUCCESS };
+  }
 }
 const productService = new ProductService()
 export default productService

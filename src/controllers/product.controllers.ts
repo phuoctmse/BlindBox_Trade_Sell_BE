@@ -39,31 +39,22 @@ export const getALlBlindBoxesController = async (req: Request, res: Response) =>
   res.status(HTTP_STATUS.OK).json(result)
 }
 
-export const updateProductController = async (req: Request, res: Response): Promise<void> => {
+export const updateProductController = async (
+  req: Request<ParamsDictionary, any, CreateBlindBoxesReqBody>,
+  res: Response
+): Promise<void> => {
   const { id } = req.params;
   const payload = { ...req.body };
-  if (!id || !payload) {
-    res.status(HTTP_STATUS.BAD_REQUEST).json({
-      message: PRODUCT_MESSAGES.PRODUCT_ID_REQUIRED
-  });
-    return;
-  }
   const result = await productService.updateProduct(id, payload);
   res.status(HTTP_STATUS.OK).json(result);
 };
 
 export const deleteProductController = async (req: Request, res: Response): Promise<void> => {
   const { id } = req.params;
-  if (!id) {
-    res.status(HTTP_STATUS.BAD_REQUEST).json({
-      message: PRODUCT_MESSAGES.PRODUCT_ID_REQUIRED
-    });
+  const result = await productService.deleteProduct(id);
+  if (!result.success) {
+    res.status(HTTP_STATUS.BAD_REQUEST).json({ message: result.message });
     return;
   }
-  const result = await productService.deleteProduct(id);
-  if (result.success) {
-    res.status(HTTP_STATUS.OK).json(result);
-  } else {
-    res.status(HTTP_STATUS.NOT_FOUND).json(result);
-  }
+  res.status(HTTP_STATUS.OK).json(result);
 };
