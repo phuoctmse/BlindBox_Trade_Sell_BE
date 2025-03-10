@@ -81,7 +81,12 @@ const PRODUCT_MESSAGES = {
   BRAND_MUST_BE_FROM_1_TO_100: 'Brand must be between 1 and 100 characters',
   SIZE_MUST_BE_POSITIVE_NUMBER: 'Size must be a positive number',
   PRODUCTS_FETCHED_SUCCESS: 'Products fetched successfully',
-  PRODUCT_ID_REQUIRED: 'Product ID is required'
+  PRODUCT_ID_REQUIRED: 'Product ID is required',
+  PRODUCT_UPDATED_SUCCESS: 'Product updated successfully',
+  PRODUCT_DELETED_SUCCESS: 'Product deleted successfully',
+  PRODUCT_NOT_FOUND: 'Product not found',
+  INVALID_PRODUCT_ID: 'Invalid product ID',
+  INVALID_PAYLOAD: 'Invalid payload',
 } as const
 
 export { USER_MESSAGES, PRODUCT_MESSAGES }
