@@ -82,7 +82,40 @@ class ProductService {
       result: formattedResult
     }
   }
-}
 
+  async updateProduct(id: string, payload: CreateBlindBoxesReqBody) {
+    if (!ObjectId.isValid(id)) {
+      return { success: false, message: PRODUCT_MESSAGES.INVALID_PRODUCT_ID };
+    }
+    if (!payload || typeof payload !== 'object') {
+      return { success: false, message: PRODUCT_MESSAGES.INVALID_PAYLOAD };
+    }
+    const updatePayload: CreateBlindBoxesReqBody = {
+      ...payload,
+    };
+    const result = await databaseServices.products.updateOne(
+      { _id: new ObjectId(id) },
+      { $set: updatePayload }
+    );
+    if (result.matchedCount === 0) {
+      return { success: false, message: PRODUCT_MESSAGES.PRODUCT_NOT_FOUND };
+    }
+    return {
+      message: PRODUCT_MESSAGES.PRODUCT_UPDATED_SUCCESS
+    };
+  }
+
+  async deleteProduct(id: string) {
+    if (!ObjectId.isValid(id)) {
+      return { success: false, message: PRODUCT_MESSAGES.INVALID_PRODUCT_ID };
+    }
+    const objectId = new ObjectId(id);
+    const result = await databaseServices.products.deleteOne({ _id: objectId });
+    if (result.deletedCount === 0) {
+      return { success: false, message: PRODUCT_MESSAGES.PRODUCT_NOT_FOUND };
+    }
+    return { success: true, message: PRODUCT_MESSAGES.PRODUCT_DELETED_SUCCESS };
+  }
+}
 const productService = new ProductService()
 export default productService

@@ -38,3 +38,23 @@ export const getALlBlindBoxesController = async (req: Request, res: Response) =>
   const result = await productService.getAllBlindBoxes()
   res.status(HTTP_STATUS.OK).json(result)
 }
+
+export const updateProductController = async (
+  req: Request<ParamsDictionary, any, CreateBlindBoxesReqBody>,
+  res: Response
+): Promise<void> => {
+  const { id } = req.params;
+  const payload = { ...req.body };
+  const result = await productService.updateProduct(id, payload);
+  res.status(HTTP_STATUS.OK).json(result);
+};
+
+export const deleteProductController = async (req: Request, res: Response): Promise<void> => {
+  const { id } = req.params;
+  const result = await productService.deleteProduct(id);
+  if (!result.success) {
+    res.status(HTTP_STATUS.BAD_REQUEST).json({ message: result.message });
+    return;
+  }
+  res.status(HTTP_STATUS.OK).json(result);
+};
