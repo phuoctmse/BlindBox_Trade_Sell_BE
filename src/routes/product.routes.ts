@@ -27,7 +27,7 @@ productsRouter.post(
   accessTokenValidation,
   validateRegisterSelling,
   createBlindBoxesValidation,
-  filterMiddleware<CreateBlindBoxesReqBody>(['brand', 'description', 'name', 'price', 'quantity', 'size']),
+  filterMiddleware<CreateBlindBoxesReqBody>(['image', 'brand', 'description', 'name', 'price', 'quantity', 'size']),
   wrapRequestHandler(createBlindBoxesController)
 )
 productsRouter.put(

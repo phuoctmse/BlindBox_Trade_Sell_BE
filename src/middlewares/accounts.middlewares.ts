@@ -118,17 +118,6 @@ const phoneNumberSchema: ParamSchema = {
   }
 }
 
-const imageSchema: ParamSchema = {
-  optional: true,
-  isString: {
-    errorMessage: USER_MESSAGES.IMAGE_MUST_BE_A_STRING
-  },
-  trim: true,
-  isLength: {
-    errorMessage: USER_MESSAGES.IMAGE_LENGTH_MUST_BE_FROM_1_TO_400
-  }
-}
-
 export const registerValidation = validate(
   checkSchema(
     {

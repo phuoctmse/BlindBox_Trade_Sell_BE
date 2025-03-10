@@ -4,19 +4,28 @@ import sharp from 'sharp'
 import { UPLOAD_DIR } from '~/constants/dir'
 import path from 'path'
 import fs from 'fs'
+import fsPromise from 'fs/promises'
 import { config } from 'dotenv'
+import { uploadFileToS3 } from '~/utils/s3'
+import mime from 'mime'
 config()
 
 class MediasService {
   async uploadSingleImage(req: Request) {
     const file = await handleUploadSingleImage(req)
     const newName = getNameFromFullName(file.newFilename)
-    const newPath = path.resolve(UPLOAD_DIR, `${newName}.jpg`)
+    const newFullFileName = `${newName}.jpg`
+    const newPath = path.resolve(UPLOAD_DIR, newFullFileName)
     sharp.cache(false)
     await sharp(file.filepath).jpeg().toFile(newPath)
-    fs.unlinkSync(file.filepath)
+    const s3result = await uploadFileToS3({
+      fileName: newFullFileName,
+      filePath: newPath,
+      contentType: mime.getType(newFullFileName) as string
+    })
+    await Promise.all([fsPromise.unlink(file.filepath), fsPromise.unlink(newPath)])
 
-    return `http://localhost:${process.env.PORT}/media/images/${newName}.jpg`
+    return s3result.Location as string
   }
 }
 

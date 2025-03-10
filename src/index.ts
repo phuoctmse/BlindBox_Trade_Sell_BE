@@ -40,7 +40,7 @@ app.use(cors(corsOptions))
 // Setup Cookie Parser
 app.use(cookieParser())
 
-app.use('/media/images/',express.static(UPLOAD_DIR))
+app.use('/medias/images/', express.static(UPLOAD_DIR))
 
 // Setup Swagger
 app.use('/api', swaggerUi.serve, swaggerUi.setup(swaggerDocument))
