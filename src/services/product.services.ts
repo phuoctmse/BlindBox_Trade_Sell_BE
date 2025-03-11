@@ -83,6 +83,19 @@ class ProductService {
     }
   }
 
+  async getAllApprovedBlindboxes() {
+    const result = await databaseServices.products
+      .find({
+        category: Category.Blindbox,
+        status: 1
+      })
+      .toArray()
+    return {
+      message: PRODUCT_MESSAGES.PRODUCTS_FETCHED_SUCCESS,
+      result
+    }
+  }
+
   async updateProduct(id: string, payload: CreateBlindBoxesReqBody) {
     if (!ObjectId.isValid(id)) {
       return { success: false, message: PRODUCT_MESSAGES.INVALID_PRODUCT_ID };

@@ -70,6 +70,28 @@ const imageSchema: ParamSchema = {
   }
 }
 
+const colorSchema: ParamSchema = {
+  isString: {
+    errorMessage: PRODUCT_MESSAGES.COLOR_MUST_BE_A_STRING
+  },
+  trim: true,
+  isLength: {
+    options: { min: 1, max: 100 },
+    errorMessage: PRODUCT_MESSAGES.COLOR_LENGTH_MUST_BE_FROM_1_TO_100,
+  }
+}
+
+const typeSchema: ParamSchema = {
+  isString: {
+    errorMessage: PRODUCT_MESSAGES.TYPE_MUST_BE_A_STRING
+  },
+  trim: true,
+  isLength: {
+    options: { min: 1, max: 100 },
+    errorMessage: PRODUCT_MESSAGES.TYPE_LENGTH_MUST_BE_FROM_1_TO_100,
+  }
+}
+
 export const createBlindBoxesValidation = validate(
   checkSchema(
     {
@@ -80,6 +102,17 @@ export const createBlindBoxesValidation = validate(
       price: priceSchema,
       brand: brandSchema,
       size: sizeSchema
+    },
+    ['body']
+  )
+)
+
+export const createBeadsValidation = validate(
+  checkSchema(
+    {
+      color: colorSchema,
+      type: typeSchema,
+      price: priceSchema
     },
     ['body']
   )

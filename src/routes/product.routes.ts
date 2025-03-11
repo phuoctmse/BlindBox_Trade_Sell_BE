@@ -2,6 +2,7 @@ import { Router } from 'express'
 import {
   createBlindBoxesController,
   deleteProductController,
+  getAllApprovedBlindBoxesController,
   getALlBlindBoxesController,
   getBlindBoxesDetailsController,
   getMyBlindBoxesController,
@@ -39,11 +40,11 @@ productsRouter.put(
 productsRouter.delete('/seller/blind-boxes/:id', accessTokenValidation, wrapRequestHandler(deleteProductController))
 
 //Buyer
-productsRouter.get('/blind-boxes', wrapRequestHandler(getALlBlindBoxesController))
+productsRouter.get('/blind-boxes', wrapRequestHandler(getAllApprovedBlindBoxesController))
 productsRouter.get('/blind-boxes/:slug', accessTokenValidation, wrapRequestHandler(getBlindBoxesDetailsController))
 
 //Accessory
-productsRouter.get('/accessories', wrapRequestHandler(getALlBlindBoxesController))
-productsRouter.get('/accessories/:slug', wrapRequestHandler(getALlBlindBoxesController))
+productsRouter.get('/accessories', wrapRequestHandler(getAllApprovedBlindBoxesController))
+productsRouter.get('/accessories/:slug', wrapRequestHandler(getAllApprovedBlindBoxesController))
 
 export default productsRouter

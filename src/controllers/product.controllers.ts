@@ -34,6 +34,12 @@ export const getBlindBoxesDetailsController = async (req: Request, res: Response
   res.status(HTTP_STATUS.OK).json(result)
 }
 
+export const getAllApprovedBlindBoxesController = async (req: Request, res: Response) => {
+  const result = await productService.getAllBlindBoxes()
+  const approvedBlindBoxes = result.result.filter((box: any) => box.status === 1)
+  res.status(HTTP_STATUS.OK).json(approvedBlindBoxes)
+}
+
 export const getALlBlindBoxesController = async (req: Request, res: Response) => {
   const result = await productService.getAllBlindBoxes()
   res.status(HTTP_STATUS.OK).json(result)
