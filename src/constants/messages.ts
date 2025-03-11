@@ -94,6 +94,9 @@ const PRODUCT_MESSAGES = {
   TYPE_LENGTH_MUST_BE_FROM_1_TO_100: 'Type length must be from 1 to 100',
   BEAD_CREATED_SUCCESS: 'Bead created successfully',
   BEAD_FETCHED_SUCCESS: 'Bead fetched successfully',
+  BEAD_UPDATED_SUCCESS: 'Bead updated successfully',
+  BEAD_DELETED_SUCCESS: 'Bead deleted successfully',
+  BEAD_LINKED_WITH_PRODUCT: 'Bead linked with product',
 } as const
 
 export { USER_MESSAGES, PRODUCT_MESSAGES }

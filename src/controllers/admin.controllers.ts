@@ -40,7 +40,19 @@ export const getAllBeadsController = async (req: Request, res: Response) => {
 
 export const getBeadsDetailsController = async (req: Request, res: Response) => {
     const { id } = req.params
-    console.log(id)
     const result = await adminService.getBeadsDetails(id as string)
+    res.status(HTTP_STATUS.OK).json(result)
+}
+
+export const updateBeadsController = async (req: Request<ParamsDictionary, any, CreateBeadsReqBody>, res: Response) => {
+    const { id } = req.params
+    const payload = { ...req.body }
+    const result = await adminService.updateBead(id, payload)
+    res.status(HTTP_STATUS.OK).json(result)
+}
+
+export const deleteBeadsController = async (req: Request, res: Response) => {
+    const { id } = req.params
+    const result = await adminService.deleteBead(id)
     res.status(HTTP_STATUS.OK).json(result)
 }

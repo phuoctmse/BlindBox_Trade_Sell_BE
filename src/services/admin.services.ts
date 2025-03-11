@@ -61,13 +61,50 @@ class AdminService {
     }
 
     async getBeadsDetails(id: string) {
+        if (!ObjectId.isValid(id)) {
+          return { success: false, message: PRODUCT_MESSAGES.INVALID_PRODUCT_ID };
+        }
         const result = await databaseServices.beads.findOne({
-            _id: new ObjectId(id)
-        })
+          _id: new ObjectId(id)
+        });
+        if (!result) {
+          return { success: false, message: PRODUCT_MESSAGES.PRODUCT_NOT_FOUND };
+        }
         return {
-            message: PRODUCT_MESSAGES.BEAD_FETCHED_SUCCESS,
+          success: true,
+          message: PRODUCT_MESSAGES.BEAD_FETCHED_SUCCESS,
+          result
+        };
+      }
+
+    async updateBead(id: string, payload: CreateBeadsReqBody) {
+        const result = await databaseServices.beads.updateOne(
+            { _id: new ObjectId(id) },
+            { $set: { ...payload } }
+        )
+        return {
+            message: PRODUCT_MESSAGES.BEAD_UPDATED_SUCCESS,
             result
         }
+    }
+
+    async deleteBead(id: string) {
+        const linkedProduct = await databaseServices.products.findOne({
+            beadId: new ObjectId(id)
+        });
+        if (linkedProduct) {
+            return {
+                message: PRODUCT_MESSAGES.BEAD_LINKED_WITH_PRODUCT,
+                result: null
+            };
+        }
+        const result = await databaseServices.beads.deleteOne({
+            _id: new ObjectId(id)
+        });
+        return {
+            message: PRODUCT_MESSAGES.BEAD_DELETED_SUCCESS,
+            result
+        };
     }
 }
 
