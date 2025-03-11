@@ -1,6 +1,6 @@
 import databaseServices from "./database.services";
 import { ObjectId } from 'mongodb'
-import { AccountVerifyStatus, Category } from '~/constants/enums'
+import { AccountVerifyStatus, Category, ProductStatus } from '~/constants/enums'
 import { PRODUCT_MESSAGES } from "~/constants/messages";
 
 class AdminService {
@@ -32,6 +32,17 @@ class AdminService {
         return {
             message: PRODUCT_MESSAGES.PRODUCTS_FETCHED_SUCCESS,
             result: formattedResult,
+        };
+    }
+
+    async updateBlindboxStatus(slug: string, id: string, status?: ProductStatus) {
+        const result = await databaseServices.products.updateOne(
+            { slug, _id: new ObjectId(id) },
+            { $set: { status } }
+        );
+        return {
+            message: "Blindbox status updated successfully",
+            result,
         };
     }
 }
