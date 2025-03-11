@@ -67,7 +67,8 @@ const USER_MESSAGES = {
   NEW_PASSWORD_SAME_AS_OLD_PASSWORD: 'New password cannot be the same as the old password.',
   UPDATE_SUCCESS: 'Update success',
   USER_NOT_SELLER: 'User is not a seller',
-  REGISTERED_SELLING_SUCCESS: 'Registered selling success'
+  REGISTERED_SELLING_SUCCESS: 'Registered selling success',
+  USER_NOT_ADMIN: 'User is not admin'
 } as const
 
 const PRODUCT_MESSAGES = {

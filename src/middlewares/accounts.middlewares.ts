@@ -471,3 +471,16 @@ export const validateRegisterSelling = (req: Request, res: Response, next: NextF
   }
   next()
 }
+
+export const adminValidation = (req: Request, res: Response, next: NextFunction) => {
+  const { role } = req.decode_authorization as TokenPayload
+  if (role !== 0) {
+    return next(
+      new ErrorWithStatus({
+        message: USER_MESSAGES.USER_NOT_ADMIN,
+        status: HTTP_STATUS.UNAUTHORIZED
+      })
+    )
+  }
+  next()
+}
