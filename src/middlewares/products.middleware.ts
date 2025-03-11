@@ -59,13 +59,28 @@ const sizeSchema: ParamSchema = {
   }
 }
 
+const imageSchema: ParamSchema = {
+  optional: true,
+  isString: {
+    errorMessage: PRODUCT_MESSAGES.IMAGE_MUST_BE_A_STRING
+  },
+  trim: true,
+  isLength: {
+    errorMessage: PRODUCT_MESSAGES.IMAGE_LENGTH_MUST_BE_FROM_1_TO_100
+  }
+}
+
 export const createBlindBoxesValidation = validate(
-  checkSchema({
-    name: nameSchema,
-    description: descriptionSchema,
-    quantity: quantitySchema,
-    price: priceSchema,
-    brand: brandSchema,
-    size: sizeSchema
-  })
+  checkSchema(
+    {
+      image: imageSchema,
+      name: nameSchema,
+      description: descriptionSchema,
+      quantity: quantitySchema,
+      price: priceSchema,
+      brand: brandSchema,
+      size: sizeSchema
+    },
+    ['body']
+  )
 )

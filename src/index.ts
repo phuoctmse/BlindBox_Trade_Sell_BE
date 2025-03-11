@@ -9,6 +9,10 @@ import cors from 'cors'
 import { config } from 'dotenv'
 import productsRouter from './routes/product.routes'
 import cookieParser from 'cookie-parser'
+import mediasRouter from './routes/media.routes'
+import { initFolder } from './utils/file'
+import { UPLOAD_DIR } from './constants/dir'
+import adminRouter from './routes/admin.routes'
 config()
 
 const app = express()
@@ -22,6 +26,9 @@ const corsOptions = {
 // Load Swagger document
 const swaggerDocument = YAML.load(path.join(__dirname, '../blindbox-swagger.yaml'))
 
+// Init Folder Image
+initFolder()
+
 // Connect to database
 databaseServices.connect()
 
@@ -34,13 +41,16 @@ app.use(cors(corsOptions))
 // Setup Cookie Parser
 app.use(cookieParser())
 
+app.use('/medias/images/', express.static(UPLOAD_DIR))
+
 // Setup Swagger
 app.use('/api', swaggerUi.serve, swaggerUi.setup(swaggerDocument))
 
 // Routes
 app.use('/accounts', accountsRouter)
 app.use('/products', productsRouter)
-app.use()
+app.use('/medias', mediasRouter)
+app.use('/admin', adminRouter)
 
 // Error handling
 app.use(defaultErrorHandler as any)
