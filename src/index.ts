@@ -40,6 +40,7 @@ app.use('/api', swaggerUi.serve, swaggerUi.setup(swaggerDocument))
 // Routes
 app.use('/accounts', accountsRouter)
 app.use('/products', productsRouter)
+app.use()
 
 // Error handling
 app.use(defaultErrorHandler as any)
