@@ -52,8 +52,6 @@ const USER_MESSAGES = {
   FULL_NAME_LENGTH_MUST_BE_FROM_1_TO_50: 'Full name length must be from 1 to 50',
   ADDRESS_MUST_BE_A_STRING: 'Address must be a string',
   ADDRESS_LENGTH_MUST_BE_FROM_10_TO_255: 'Address length must be from 10 to 255',
-  IMAGE_MUST_BE_A_STRING: 'Image must be a string',
-  IMAGE_LENGTH_MUST_BE_FROM_1_TO_400: 'Image length must be from 1 to 400',
   UPDATE_ME_SUCCESS: 'Update me success',
   LOGIN_OAUTH_FAILED: 'Login oauth failed',
   OLD_PASSWORD_IS_REQUIRED: 'Old password is required',
@@ -70,6 +68,7 @@ const USER_MESSAGES = {
   UPDATE_SUCCESS: 'Update success',
   USER_NOT_SELLER: 'User is not a seller',
   REGISTERED_SELLING_SUCCESS: 'Registered selling success',
+  USER_NOT_ADMIN: 'User is not admin'
 } as const
 
 const PRODUCT_MESSAGES = {
@@ -87,6 +86,8 @@ const PRODUCT_MESSAGES = {
   PRODUCT_NOT_FOUND: 'Product not found',
   INVALID_PRODUCT_ID: 'Invalid product ID',
   INVALID_PAYLOAD: 'Invalid payload',
+  IMAGE_MUST_BE_A_STRING: 'Image must be a string',
+  IMAGE_LENGTH_MUST_BE_FROM_1_TO_100: 'Image length must be from 1 to 100'
 } as const
 
 export { USER_MESSAGES, PRODUCT_MESSAGES }

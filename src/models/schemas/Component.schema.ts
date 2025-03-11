@@ -1,21 +1,25 @@
 import { ObjectId } from 'mongodb'
 
+interface BeadDetails {
+  quantity: number
+  beadId: ObjectId
+}
 interface ComponentType {
-  accessoryId: ObjectId
-  color: string
-  shape: string
-  size: string
+  _id: ObjectId
+  quantity: number
+  totalPrice: number
+  beads: BeadDetails
 }
 
 export default class Components {
-  accessoryId: ObjectId
-  color: string
-  shape: string
-  size: string
+  _id: ObjectId
+  quantity: number
+  totalPrice: number
+  beads: BeadDetails
   constructor(component: ComponentType) {
-    this.accessoryId = component.accessoryId
-    this.color = component.color
-    this.shape = component.shape
-    this.size = component.size
+    this._id = component._id
+    this.quantity = component.quantity
+    this.totalPrice = component.totalPrice
+    this.beads = component.beads
   }
 }

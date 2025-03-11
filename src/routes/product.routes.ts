@@ -27,7 +27,7 @@ productsRouter.post(
   accessTokenValidation,
   validateRegisterSelling,
   createBlindBoxesValidation,
-  filterMiddleware<CreateBlindBoxesReqBody>(['brand', 'description', 'name', 'price', 'quantity', 'size']),
+  filterMiddleware<CreateBlindBoxesReqBody>(['image', 'brand', 'description', 'name', 'price', 'quantity', 'size']),
   wrapRequestHandler(createBlindBoxesController)
 )
 productsRouter.put(
@@ -41,5 +41,9 @@ productsRouter.delete('/seller/blind-boxes/:id', accessTokenValidation, wrapRequ
 //Buyer
 productsRouter.get('/blind-boxes', wrapRequestHandler(getALlBlindBoxesController))
 productsRouter.get('/blind-boxes/:slug', accessTokenValidation, wrapRequestHandler(getBlindBoxesDetailsController))
+
+//Accessory
+productsRouter.get('/accessories', wrapRequestHandler(getALlBlindBoxesController))
+productsRouter.get('/accessories/:slug', wrapRequestHandler(getALlBlindBoxesController))
 
 export default productsRouter
