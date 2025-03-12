@@ -51,7 +51,7 @@ app.use('/api', swaggerUi.serve, swaggerUi.setup(swaggerDocument))
 app.use('/accounts', accountsRouter)
 app.use('/products', productsRouter)
 app.use('/medias', mediasRouter)
-app.use('/admin', adminRouter)
+app.use('/admins', adminRouter)
 app.use('/cart', cartRouter)
 
 // Error handling

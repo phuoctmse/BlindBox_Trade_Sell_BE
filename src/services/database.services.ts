@@ -3,6 +3,7 @@ import { config } from 'dotenv'
 import Accounts from '~/models/schemas/Account.schema'
 import RefreshToken from '~/models/schemas/RefreshToken.schema'
 import Products from '~/models/schemas/Product.schema'
+import Beads from '~/models/schemas/Bead.schema'
 import Cart from '~/models/schemas/Cart.schema'
 import CartItem from '~/models/schemas/CartItem.schema'
 config()
@@ -33,6 +34,10 @@ class DatabaseServices {
 
   get products(): Collection<Products> {
     return this.db.collection(process.env.DB_PRODUCTS_COLLECTION as string)
+  }
+
+  get beads(): Collection<Beads> {
+    return this.db.collection(process.env.DB_BEADS_COLLECTION as string)
   }
 
   get refreshTokens(): Collection<RefreshToken> {

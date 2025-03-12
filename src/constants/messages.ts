@@ -87,7 +87,16 @@ const PRODUCT_MESSAGES = {
   INVALID_PRODUCT_ID: 'Invalid product ID',
   INVALID_PAYLOAD: 'Invalid payload',
   IMAGE_MUST_BE_A_STRING: 'Image must be a string',
-  IMAGE_LENGTH_MUST_BE_FROM_1_TO_100: 'Image length must be from 1 to 100'
+  IMAGE_LENGTH_MUST_BE_FROM_1_TO_100: 'Image length must be from 1 to 100',
+  COLOR_MUST_BE_A_STRING: 'Color must be a string',
+  COLOR_LENGTH_MUST_BE_FROM_1_TO_100: 'Color length must be from 1 to 100',
+  TYPE_MUST_BE_A_STRING: 'Type must be a string',
+  TYPE_LENGTH_MUST_BE_FROM_1_TO_100: 'Type length must be from 1 to 100',
+  BEAD_CREATED_SUCCESS: 'Bead created successfully',
+  BEAD_FETCHED_SUCCESS: 'Bead fetched successfully',
+  BEAD_UPDATED_SUCCESS: 'Bead updated successfully',
+  BEAD_DELETED_SUCCESS: 'Bead deleted successfully',
+  BEAD_LINKED_WITH_PRODUCT: 'Bead linked with product',
 } as const
 
 export const CART_MESSAGES = {
