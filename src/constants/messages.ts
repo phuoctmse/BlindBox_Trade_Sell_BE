@@ -99,4 +99,17 @@ const PRODUCT_MESSAGES = {
   BEAD_LINKED_WITH_PRODUCT: 'Bead linked with product',
 } as const
 
+export const CART_MESSAGES = {
+  QUANTITY_MUST_BE_A_POSITIVE_INTEGER: 'Quantity must be a positive integer',
+  QUANTITY_EXCEEDS_STOCK: 'Quantity exceeds stock',
+  PRODUCT_NOT_FOUND: 'Product not found',
+  INSUFFICIENT_STOCK: 'Insufficient stock',
+  CART_ITEM_NOT_FOUND: 'Cart item not found',
+  CART_FETCHED: 'Cart fetched successfully',
+  CART_CLEARED: 'Cart cleared successfully',
+  CART_ITEM_ADDED: 'Cart item added successfully',
+  CART_ITEM_UPDATED: 'Cart item updated successfully',
+  CART_ITEM_DELETED: 'Cart item deleted successfully'
+}
+
 export { USER_MESSAGES, PRODUCT_MESSAGES }
