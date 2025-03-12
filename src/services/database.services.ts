@@ -3,6 +3,8 @@ import { config } from 'dotenv'
 import Accounts from '~/models/schemas/Account.schema'
 import RefreshToken from '~/models/schemas/RefreshToken.schema'
 import Products from '~/models/schemas/Product.schema'
+import Cart from '~/models/schemas/Cart.schema'
+import CartItem from '~/models/schemas/CartItem.schema'
 config()
 
 const uri = process.env.MONGODB_URL as string
@@ -35,6 +37,14 @@ class DatabaseServices {
 
   get refreshTokens(): Collection<RefreshToken> {
     return this.db.collection(process.env.DB_REFRESH_TOKENS_COLLECTION as string)
+  }
+
+  get carts(): Collection<Cart> {
+    return this.db.collection(process.env.DB_CARTS_COLLECTION as string)
+  }
+
+  get cartItems(): Collection<CartItem> {
+    return this.db.collection(process.env.DB_CART_ITEMS_COLLECTION as string)
   }
 }
 
