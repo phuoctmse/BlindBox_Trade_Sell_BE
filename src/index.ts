@@ -13,6 +13,7 @@ import mediasRouter from './routes/media.routes'
 import { initFolder } from './utils/file'
 import { UPLOAD_DIR } from './constants/dir'
 import adminRouter from './routes/admin.routes'
+import cartRouter from './routes/cart.routes'
 config()
 
 const app = express()
@@ -51,6 +52,7 @@ app.use('/accounts', accountsRouter)
 app.use('/products', productsRouter)
 app.use('/medias', mediasRouter)
 app.use('/admins', adminRouter)
+app.use('/cart', cartRouter)
 
 // Error handling
 app.use(defaultErrorHandler as any)

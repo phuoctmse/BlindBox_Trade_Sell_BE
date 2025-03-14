@@ -14,7 +14,7 @@ class MediasService {
   async uploadSingleImage(req: Request) {
     const file = await handleUploadSingleImage(req)
     const newName = getNameFromFullName(file.newFilename)
-    const newFullFileName = `${newName}.jpg`
+    const newFullFileName = `${newName}.png`
     const newPath = path.resolve(UPLOAD_DIR, newFullFileName)
     sharp.cache(false)
     await sharp(file.filepath).jpeg().toFile(newPath)
