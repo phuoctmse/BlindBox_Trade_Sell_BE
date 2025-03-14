@@ -10,28 +10,22 @@ interface BlindBox {
   size?: number
 }
 
-interface Accessory {
-  totalPrice?: Double
-  totalBeads?: number
-  components?: ObjectId
-}
-
 interface ProductType {
   _id?: ObjectId
   name: string
   slug: string
-  description: string
+  description?: string
   quantity: number
   price: Double
   category: Category
   image?: string
   createdBy: ObjectId
   status?: ProductStatus
-  brand: string
+  brand?: string
   feedBack?: ObjectId[]
   openedItems?: OpenedItems
   blindBoxes?: BlindBox
-  accessories?: Accessory
+  accessories?: ObjectId[]
   createdAt?: Date
   updatedAt?: Date
 }
@@ -51,7 +45,7 @@ export default class Products {
   feedBack: ObjectId[]
   openedItems: OpenedItems
   blindBoxes: BlindBox
-  accessories: Accessory
+  accessories: ObjectId[]
   createdAt: Date
   updatedAt: Date
 
@@ -60,18 +54,18 @@ export default class Products {
     this._id = product._id
     this.name = product.name
     this.slug = product.slug
-    this.description = product.description
+    this.description = product.description || ''
     this.quantity = product.quantity
     this.price = product.price
     this.category = product.category
     this.image = product.image || ''
     this.createdBy = product.createdBy
     this.status = product.status || ProductStatus.Inactive
-    this.brand = product.brand
+    this.brand = product.brand || ''
     this.feedBack = product.feedBack || []
     this.openedItems = product.openedItems || {}
     this.blindBoxes = product.blindBoxes || {}
-    this.accessories = product.accessories || {}
+    this.accessories = product.accessories || []
     this.createdAt = product.createdAt || date
     this.updatedAt = product.updatedAt || date
   }

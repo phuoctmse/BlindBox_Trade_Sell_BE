@@ -97,6 +97,7 @@ const PRODUCT_MESSAGES = {
   BEAD_UPDATED_SUCCESS: 'Bead updated successfully',
   BEAD_DELETED_SUCCESS: 'Bead deleted successfully',
   BEAD_LINKED_WITH_PRODUCT: 'Bead linked with product',
+  BEAD_NOT_FOUND: 'Bead not found',
 } as const
 
 export const CART_MESSAGES = {

@@ -6,6 +6,7 @@ import Products from '~/models/schemas/Product.schema'
 import Beads from '~/models/schemas/Bead.schema'
 import Cart from '~/models/schemas/Cart.schema'
 import CartItem from '~/models/schemas/CartItem.schema'
+import BeadDetails from '~/models/schemas/BeadDetails.schema'
 config()
 
 const uri = process.env.MONGODB_URL as string
@@ -38,6 +39,10 @@ class DatabaseServices {
 
   get beads(): Collection<Beads> {
     return this.db.collection(process.env.DB_BEADS_COLLECTION as string)
+  }
+
+  get beadDetails(): Collection<BeadDetails> {
+    return this.db.collection(process.env.DB_BEAD_DETAILS_COLLECTION as string)
   }
 
   get refreshTokens(): Collection<RefreshToken> {

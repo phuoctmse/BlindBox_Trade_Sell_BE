@@ -77,7 +77,7 @@ const colorSchema: ParamSchema = {
   trim: true,
   isLength: {
     options: { min: 1, max: 100 },
-    errorMessage: PRODUCT_MESSAGES.COLOR_LENGTH_MUST_BE_FROM_1_TO_100,
+    errorMessage: PRODUCT_MESSAGES.COLOR_LENGTH_MUST_BE_FROM_1_TO_100
   }
 }
 
@@ -88,7 +88,7 @@ const typeSchema: ParamSchema = {
   trim: true,
   isLength: {
     options: { min: 1, max: 100 },
-    errorMessage: PRODUCT_MESSAGES.TYPE_LENGTH_MUST_BE_FROM_1_TO_100,
+    errorMessage: PRODUCT_MESSAGES.TYPE_LENGTH_MUST_BE_FROM_1_TO_100
   }
 }
 
@@ -116,4 +116,43 @@ export const createBeadsValidation = validate(
     },
     ['body']
   )
+)
+
+export const validateCreateCustomization = validate(
+  checkSchema({
+    customItems: {
+      isArray: {
+        errorMessage: PRODUCT_MESSAGES.INVALID_PAYLOAD
+      },
+      custom: {
+        options: (value) => {
+          if (!Array.isArray(value) || value.length === 0) {
+            throw new Error(PRODUCT_MESSAGES.INVALID_PAYLOAD)
+          }
+
+          value.forEach((item, index) => {
+            if (!item.quantity || !Number.isInteger(item.quantity) || item.quantity < 1) {
+              throw new Error(`Item ${index + 1}: ${PRODUCT_MESSAGES.QUANTITY_MUST_BE_A_POSITIVE_INTEGER}`)
+            }
+
+            if (
+              !item.color ||
+              typeof item.color !== 'string' ||
+              item.color.trim().length < 1 ||
+              item.color.trim().length > 100
+            ) {
+              throw new Error(`Item ${index + 1}: ${PRODUCT_MESSAGES.COLOR_LENGTH_MUST_BE_FROM_1_TO_100}`)
+            }
+
+            if (!item.beadId || !/^[0-9a-fA-F]{24}$/.test(item.beadId)) {
+              throw new Error(`Item ${index + 1}: ${PRODUCT_MESSAGES.INVALID_PAYLOAD}`)
+            }
+          })
+
+          return true
+        }
+      }
+    },
+    image: imageSchema,
+  })
 )
