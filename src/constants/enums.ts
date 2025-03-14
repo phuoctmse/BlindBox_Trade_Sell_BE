@@ -34,3 +34,11 @@ export enum RarityLevel {
   Epic,
   Legendary
 }
+
+export enum OrderStatus {
+  Pending,
+  Confirmed,
+  Processing,
+  Completed,
+  Cancelled
+}
