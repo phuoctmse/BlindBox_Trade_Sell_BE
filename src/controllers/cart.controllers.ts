@@ -36,3 +36,9 @@ export const deleteCartItemController = async (req: Request, res: Response) => {
   const result = await cartService.deleteCartItem(accountId, id)
   res.status(HTTP_STATUS.OK).json(result)
 }
+
+export const clearAllCartItemController = async (req: Request, res: Response) => {
+  const { accountId } = req.decode_authorization as TokenPayload
+  const result = await cartService.clearAllCartItem(accountId)
+  res.status(HTTP_STATUS.OK).json(result)
+}

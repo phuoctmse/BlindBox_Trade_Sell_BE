@@ -213,6 +213,21 @@ class CartService {
       result: updatedCart.result
     }
   }
+
+  async clearAllCartItem(accountId: string) {
+    const cart = await this.findOrCreateCart(accountId)
+
+    await databaseServices.cartItems.deleteMany({ cartId: cart._id })
+
+    await this.updateCartTimestamp(cart._id)
+
+    const updatedCart = await this.getCart(accountId)
+
+    return {
+      message: CART_MESSAGES.CART_CLEARED,
+      result: updatedCart.result
+    }
+  }
 }
 
 const cartService = new CartService()
