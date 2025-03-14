@@ -188,6 +188,7 @@ class ProductService {
         status: ProductStatus.Active,
         accessories: beadDetails,
         slug,
+        brand: 'BlindB!ox',
         createdAt: new Date(),
         updatedAt: new Date()
       })
@@ -258,7 +259,6 @@ class ProductService {
 
     const description = `Custom accessory created by ${userIdentifier} with ${beadDetailIds.length} different bead types and ${Array.from(beadColors).length} colors.`
 
-    // Bước 5: Tạo sản phẩm phụ kiện
     const productId = await this.createAccessoryProduct(
       beadDetailIds,
       productName,
