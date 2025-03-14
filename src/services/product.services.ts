@@ -1,7 +1,7 @@
 import { Double, ObjectId } from 'mongodb'
 import slugify from 'slugify'
 import databaseServices from './database.services'
-import { CreateAccessoriesReqBody, CreateBlindBoxesReqBody } from '~/models/requests/Product.request'
+import { CreateAccessoriesReqBody, CreateBeadsReqBody, CreateBlindBoxesReqBody } from '~/models/requests/Product.request'
 import { Category, ProductStatus } from '~/constants/enums'
 import Products from '~/models/schemas/Product.schema'
 import { PRODUCT_MESSAGES } from '~/constants/messages'
@@ -271,6 +271,31 @@ class ProductService {
     return {
       message: PRODUCT_MESSAGES.PRODUCT_CREATED_SUCCESS,
       productId
+    }
+  }
+
+  async getAllBeads() {
+    const result = await databaseServices.beads.find().toArray()
+    return {
+      message: PRODUCT_MESSAGES.BEAD_FETCHED_SUCCESS,
+      result
+    }
+  }
+
+  async getBeadsDetails(id: string) {
+    if (!ObjectId.isValid(id)) {
+      return { success: false, message: PRODUCT_MESSAGES.INVALID_PRODUCT_ID }
+    }
+    const result = await databaseServices.beads.findOne({
+      _id: new ObjectId(id)
+    })
+    if (!result) {
+      return { success: false, message: PRODUCT_MESSAGES.PRODUCT_NOT_FOUND }
+    }
+    return {
+      success: true,
+      message: PRODUCT_MESSAGES.BEAD_FETCHED_SUCCESS,
+      result
     }
   }
 }

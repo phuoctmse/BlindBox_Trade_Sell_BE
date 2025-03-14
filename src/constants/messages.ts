@@ -113,4 +113,17 @@ export const CART_MESSAGES = {
   CART_ITEM_DELETED: 'Cart item deleted successfully'
 }
 
+export const ORDER_MESSAGES = {
+  ORDER_CREATED: 'Order created successfully',
+  ORDER_FETCHED: 'Order fetched successfully',
+  ORDER_UPDATED: 'Order updated successfully',
+  ORDER_DELETED: 'Order deleted successfully',
+  ORDER_NOT_FOUND: 'Order not found',
+  ORDER_STATUS_UPDATED: 'Order status updated successfully',
+  ORDER_ITEM_NOT_FOUND: 'Order item not found',
+  ORDER_ITEM_ADDED: 'Order item added successfully',
+  ORDER_ITEM_UPDATED: 'Order item updated successfully',
+  ORDER_ITEM_DELETED: 'Order item deleted successfully'
+}
+
 export { USER_MESSAGES, PRODUCT_MESSAGES }

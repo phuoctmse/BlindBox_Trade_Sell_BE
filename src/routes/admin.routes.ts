@@ -4,12 +4,12 @@ import {
   deleteBeadsController,
   getAllAccountsController,
   getAllBeadsController,
+  getAllProductController,
   getBeadsDetailsController,
   updateAccountVerifyStatusController,
   updateBeadsController,
   updateBlindboxStatusController
 } from '~/controllers/admin.controllers'
-import { getALlBlindBoxesController } from '~/controllers/product.controllers'
 import { accessTokenValidation, adminValidation } from '~/middlewares/accounts.middlewares'
 import { filterMiddleware } from '~/middlewares/common.middlewares'
 import { createBeadsValidation } from '~/middlewares/products.middleware'
@@ -49,7 +49,7 @@ adminRouter.put(
   adminValidation,
   wrapRequestHandler(updateAccountVerifyStatusController)
 )
-adminRouter.get('/blind-boxes', accessTokenValidation, adminValidation, wrapRequestHandler(getALlBlindBoxesController))
+adminRouter.get('/products', accessTokenValidation, adminValidation, wrapRequestHandler(getAllProductController))
 adminRouter.put(
   '/blind-boxes/:slug',
   accessTokenValidation,
