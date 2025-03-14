@@ -1,111 +1,108 @@
-import databaseServices from "./database.services";
+import databaseServices from './database.services'
 import { ObjectId } from 'mongodb'
 import { AccountVerifyStatus, Category, ProductStatus } from '~/constants/enums'
-import { PRODUCT_MESSAGES } from "~/constants/messages";
-import { CreateBeadsReqBody } from "~/models/requests/Product.request";
-import Beads from "~/models/schemas/Bead.schema";
+import { PRODUCT_MESSAGES } from '~/constants/messages'
+import { CreateBeadsReqBody } from '~/models/requests/Product.request'
+import Beads from '~/models/schemas/Bead.schema'
 
 class AdminService {
-    async getAllAccounts() {
-        const result = await databaseServices.accounts.find().toArray();
-        return {
-            message: "Accounts fetched successfully",
-            result,
-        };
+  async getAllAccounts() {
+    const result = await databaseServices.accounts.find().toArray()
+    return {
+      message: 'Accounts fetched successfully',
+      result
     }
+  }
 
-    async updateAccountVerifyStatus(accountId: string, verifyStatus: AccountVerifyStatus) {
-        const result = await databaseServices.accounts.updateOne(
-            { _id: new ObjectId(accountId) },
-            { $set: { verify: verifyStatus } }
-        );
-        return {
-            message: "Account verification status updated successfully",
-            result,
-        };
+  async updateAccountVerifyStatus(accountId: string, verifyStatus: AccountVerifyStatus) {
+    const result = await databaseServices.accounts.updateOne(
+      { _id: new ObjectId(accountId) },
+      { $set: { verify: verifyStatus } }
+    )
+    return {
+      message: 'Account verification status updated successfully',
+      result
     }
+  }
 
-    async updateBlindboxStatus(slug: string, id: string, status?: ProductStatus) {
-        const result = await databaseServices.products.updateOne(
-            {
-                slug,
-                _id: new ObjectId(id)
-            },
-            { $set: { status } }
-        );
-        return {
-            message: PRODUCT_MESSAGES.PRODUCT_UPDATED_SUCCESS,
-            result,
-        };
+  async updateBlindboxStatus(slug: string, id: string, status?: ProductStatus) {
+    const result = await databaseServices.products.updateOne(
+      {
+        slug,
+        _id: new ObjectId(id)
+      },
+      { $set: { status } }
+    )
+    return {
+      message: PRODUCT_MESSAGES.PRODUCT_UPDATED_SUCCESS,
+      result
     }
+  }
 
-    async createBead(payload: CreateBeadsReqBody) {
-        const newBeadId = new ObjectId()
-        const result = await databaseServices.beads.insertOne(
-            new Beads({
-                ...payload,
-                _id: newBeadId,
-            })
-        )
-        return {
-            message: PRODUCT_MESSAGES.BEAD_CREATED_SUCCESS
-        }
+  async createBead(payload: CreateBeadsReqBody) {
+    const newBeadId = new ObjectId()
+    const result = await databaseServices.beads.insertOne(
+      new Beads({
+        ...payload,
+        _id: newBeadId
+      })
+    )
+    return {
+      message: PRODUCT_MESSAGES.BEAD_CREATED_SUCCESS
     }
+  }
 
-    async getAllBeads() {
-        const result = await databaseServices.beads.find().toArray();
-        return {
-            message: PRODUCT_MESSAGES.BEAD_FETCHED_SUCCESS,
-            result,
-        };
+  async getAllBeads() {
+    const result = await databaseServices.beads.find().toArray()
+    return {
+      message: PRODUCT_MESSAGES.BEAD_FETCHED_SUCCESS,
+      result
     }
+  }
 
-    async getBeadsDetails(id: string) {
-        if (!ObjectId.isValid(id)) {
-          return { success: false, message: PRODUCT_MESSAGES.INVALID_PRODUCT_ID };
-        }
-        const result = await databaseServices.beads.findOne({
-          _id: new ObjectId(id)
-        });
-        if (!result) {
-          return { success: false, message: PRODUCT_MESSAGES.PRODUCT_NOT_FOUND };
-        }
-        return {
-          success: true,
-          message: PRODUCT_MESSAGES.BEAD_FETCHED_SUCCESS,
-          result
-        };
+  async getBeadsDetails(id: string) {
+    if (!ObjectId.isValid(id)) {
+      return { success: false, message: PRODUCT_MESSAGES.INVALID_PRODUCT_ID }
+    }
+    const result = await databaseServices.beads.findOne({
+      _id: new ObjectId(id)
+    })
+    if (!result) {
+      return { success: false, message: PRODUCT_MESSAGES.PRODUCT_NOT_FOUND }
+    }
+    return {
+      success: true,
+      message: PRODUCT_MESSAGES.BEAD_FETCHED_SUCCESS,
+      result
+    }
+  }
+
+  async updateBead(id: string, payload: CreateBeadsReqBody) {
+    const result = await databaseServices.beads.updateOne({ _id: new ObjectId(id) }, { $set: { ...payload } })
+    return {
+      message: PRODUCT_MESSAGES.BEAD_UPDATED_SUCCESS,
+      result
+    }
+  }
+
+  async deleteBead(id: string) {
+    const linkedProduct = await databaseServices.products.findOne({
+      beadId: new ObjectId(id)
+    })
+    if (linkedProduct) {
+      return {
+        message: PRODUCT_MESSAGES.BEAD_LINKED_WITH_PRODUCT,
+        result: null
       }
-
-    async updateBead(id: string, payload: CreateBeadsReqBody) {
-        const result = await databaseServices.beads.updateOne(
-            { _id: new ObjectId(id) },
-            { $set: { ...payload } }
-        )
-        return {
-            message: PRODUCT_MESSAGES.BEAD_UPDATED_SUCCESS,
-            result
-        }
     }
-
-    async deleteBead(id: string) {
-        const linkedProduct = await databaseServices.products.findOne({
-            beadId: new ObjectId(id)
-        });
-        if (linkedProduct) {
-            return {
-                message: PRODUCT_MESSAGES.BEAD_LINKED_WITH_PRODUCT,
-                result: null
-            };
-        }
-        const result = await databaseServices.beads.deleteOne({
-            _id: new ObjectId(id)
-        });
-        return {
-            message: PRODUCT_MESSAGES.BEAD_DELETED_SUCCESS,
-            result
-        };
+    const result = await databaseServices.beads.deleteOne({
+      _id: new ObjectId(id)
+    })
+    return {
+      message: PRODUCT_MESSAGES.BEAD_DELETED_SUCCESS,
+      result
     }
+  }
 }
 
 const adminService = new AdminService()

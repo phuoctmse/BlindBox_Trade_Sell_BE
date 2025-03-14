@@ -3,7 +3,7 @@ import { ParamsDictionary } from 'express-serve-static-core'
 import HTTP_STATUS from '~/constants/httpStatus'
 import { PRODUCT_MESSAGES } from '~/constants/messages'
 import { LogoutReqBody, TokenPayload } from '~/models/requests/Account.requests'
-import { CreateBlindBoxesReqBody } from '~/models/requests/Product.request'
+import { CreateAccessoriesReqBody, CreateBlindBoxesReqBody } from '~/models/requests/Product.request'
 import productService from '~/services/product.services'
 
 export const getMyBlindBoxesController = async (req: Request, res: Response) => {
@@ -35,8 +35,8 @@ export const getBlindBoxesDetailsController = async (req: Request, res: Response
 }
 
 export const getAllApprovedBlindBoxesController = async (req: Request, res: Response) => {
-  const result = await productService.getAllBlindBoxes()
-  const approvedBlindBoxes = result.result.filter((box: any) => box.status === 1)
+  const allBlindBoxes = await productService.getAllBlindBoxes()
+  const approvedBlindBoxes = allBlindBoxes.result.filter((box: any) => box.status === 1)
   res.status(HTTP_STATUS.OK).json(approvedBlindBoxes)
 }
 
@@ -63,4 +63,14 @@ export const deleteProductController = async (req: Request, res: Response): Prom
     return
   }
   res.status(HTTP_STATUS.OK).json(result)
+}
+
+export const createAccessoriesController = async (
+  req: Request<ParamsDictionary, any, CreateAccessoriesReqBody>,
+  res: Response
+): Promise<void> => {
+  const { accountId } = req.decode_authorization as TokenPayload
+  const payload = { ...req.body } as CreateAccessoriesReqBody
+  const accessories = await productService.createAccessories(payload, accountId)
+  res.status(HTTP_STATUS.CREATED).json(accessories)
 }
