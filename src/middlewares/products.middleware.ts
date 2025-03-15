@@ -64,10 +64,16 @@ const brandSchema: ParamSchema = {
 
 const sizeSchema: ParamSchema = {
   notEmpty: true,
-  isNumeric: true,
-  isInt: {
-    options: { min: 1 },
-    errorMessage: PRODUCT_MESSAGES.SIZE_MUST_BE_POSITIVE_NUMBER
+  custom: {
+    options: (value) => {
+      if (typeof value === 'string') {
+        throw new Error(PRODUCT_MESSAGES.SIZE_MUST_BE_POSITIVE_NUMBER)
+      }
+      if (typeof value === 'number' && value <= 0) {
+        throw new Error(PRODUCT_MESSAGES.SIZE_MUST_BE_POSITIVE_NUMBER)
+      }
+      return true
+    }
   }
 }
 
