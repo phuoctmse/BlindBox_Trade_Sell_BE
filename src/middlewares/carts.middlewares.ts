@@ -16,13 +16,39 @@ export const addToCartValidation = validate(
       },
       quantity: {
         notEmpty: true,
-        isInt: {
-          options: {
-            min: 1
-          },
-          errorMessage: CART_MESSAGES.QUANTITY_MUST_BE_A_POSITIVE_INTEGER
-        },
-        toInt: true
+        custom: {
+          options: (value) => {
+            if (typeof value === 'string') {
+              throw new Error(CART_MESSAGES.QUANTITY_MUST_BE_A_POSITIVE_INTEGER)
+            }
+            if (typeof value === 'number' && value <= 0) {
+              throw new Error(CART_MESSAGES.QUANTITY_MUST_BE_A_POSITIVE_INTEGER)
+            }
+            return true
+          }
+        }
+      }
+    },
+    ['body']
+  )
+)
+
+export const updateCartValidation = validate(
+  checkSchema(
+    {
+      quantity: {
+        notEmpty: true,
+        custom: {
+          options: (value) => {
+            if (typeof value === 'string') {
+              throw new Error(CART_MESSAGES.QUANTITY_MUST_BE_A_POSITIVE_INTEGER)
+            }
+            if (typeof value === 'number' && value <= 0) {
+              throw new Error(CART_MESSAGES.QUANTITY_MUST_BE_A_POSITIVE_INTEGER)
+            }
+            return true
+          }
+        }
       }
     },
     ['body']
