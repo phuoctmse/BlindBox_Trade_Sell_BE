@@ -52,3 +52,9 @@ export enum OrderType {
   Direct,
   Cart
 }
+
+export enum TypeBeads {
+  LowPoly,
+  Spike,
+  Solid
+}
