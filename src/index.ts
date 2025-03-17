@@ -15,6 +15,7 @@ import { UPLOAD_DIR } from './constants/dir'
 import adminRouter from './routes/admin.routes'
 import cartRouter from './routes/cart.routes'
 import orderRouter from './routes/order.routes'
+import { setupAutoCompleteOrders } from './utils/cronjob'
 config()
 
 const app = express()
@@ -32,7 +33,9 @@ const swaggerDocument = YAML.load(path.join(__dirname, '../blindbox-swagger.yaml
 initFolder()
 
 // Connect to database
-databaseServices.connect()
+databaseServices.connect().then(() => {
+  setupAutoCompleteOrders()
+})
 
 // Middleware
 app.use(express.json())
