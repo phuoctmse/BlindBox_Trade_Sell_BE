@@ -17,7 +17,7 @@ class MediasService {
     const newFullFileName = `${newName}.png`
     const newPath = path.resolve(UPLOAD_DIR, newFullFileName)
     sharp.cache(false)
-    await sharp(file.filepath).jpeg().toFile(newPath)
+    await sharp(file.filepath).png().toFile(newPath)
     const s3result = await uploadFileToS3({
       fileName: newFullFileName,
       filePath: newPath,

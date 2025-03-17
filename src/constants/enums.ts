@@ -34,3 +34,21 @@ export enum RarityLevel {
   Epic,
   Legendary
 }
+
+export enum OrderStatus {
+  Pending,
+  Confirmed,
+  Processing,
+  Completed,
+  Cancelled
+}
+
+export enum PaymentMethod {
+  COD,
+  Banking
+}
+
+export enum OrderType {
+  Direct,
+  Cart
+}

@@ -288,7 +288,6 @@ class AccountService {
         },
         true
       )
-      console.log('data', data)
       return {
         ...data,
         newUser: true,

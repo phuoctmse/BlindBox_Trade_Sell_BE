@@ -98,6 +98,7 @@ const PRODUCT_MESSAGES = {
   BEAD_DELETED_SUCCESS: 'Bead deleted successfully',
   BEAD_LINKED_WITH_PRODUCT: 'Bead linked with product',
   BEAD_NOT_FOUND: 'Bead not found',
+  INSUFFICIENT_STOCK: 'Insufficient stock',
 } as const
 
 export const CART_MESSAGES = {
@@ -110,7 +111,19 @@ export const CART_MESSAGES = {
   CART_CLEARED: 'Cart cleared successfully',
   CART_ITEM_ADDED: 'Cart item added successfully',
   CART_ITEM_UPDATED: 'Cart item updated successfully',
-  CART_ITEM_DELETED: 'Cart item deleted successfully'
+  CART_ITEM_DELETED: 'Cart item deleted successfully',
+  CART_NOT_FOUND: 'Cart not found',
+}
+
+export const ORDER_MESSAGES = {
+  ORDERS_FETCHED_SUCCESS: 'Orders fetched successfully',
+  ORDER_NOT_FOUND: 'Order not found',
+  ORDER_CREATED_SUCCESS: 'Order created successfully', 
+  RECEIVER_INFO_REQUIRED: 'Receiver info required',
+  INCOMPLETE_RECEIVER_INFO: 'Incomplete receiver info',
+  INVALID_ORDER_TYPE: 'Invalid order type',
+  CANNOT_CANCEL_ORDER: 'Cannot cancel order',
+  ORDER_CANCELLED_SUCCESS: 'Order cancelled successfully',
 }
 
 export { USER_MESSAGES, PRODUCT_MESSAGES }
