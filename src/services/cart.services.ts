@@ -163,12 +163,8 @@ class CartService {
 
     const product = await this.getProductById(cartItem.productId.toString())
 
-    if (quantity === 0) {
-      await databaseServices.cartItems.deleteOne({ _id: cartItem._id })
-    } else {
-      this.validateProductQuantity(product.quantity, quantity)
-      await databaseServices.cartItems.updateOne({ _id: cartItem._id }, { $set: { quantity } })
-    }
+    this.validateProductQuantity(product.quantity, quantity)
+    await databaseServices.cartItems.updateOne({ _id: cartItem._id }, { $set: { quantity } })
 
     await this.updateCartTimestamp(cart._id)
 
