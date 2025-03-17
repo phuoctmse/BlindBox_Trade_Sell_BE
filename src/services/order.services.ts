@@ -288,7 +288,6 @@ class OrderService {
   }
 
   async cancelOrder(accountId: string, orderId: string) {
-
     const order = await databaseServices.orders.findOne({
       _id: new ObjectId(orderId),
       'buyerInfo.accountId': new ObjectId(accountId)
@@ -337,6 +336,292 @@ class OrderService {
       result: {
         _id: order._id,
         status: OrderStatus.Cancelled,
+        updatedAt: new Date()
+      }
+    }
+  }
+
+  async getSellerOrders(accountId: string) {
+    const products = await databaseServices.products.find({ sellerId: new ObjectId(accountId) }).toArray()
+
+    if (products.length === 0) {
+      return {
+        message: ORDER_MESSAGES.NO_ORDERS_FOUND,
+        result: []
+      }
+    }
+
+    const productNames = products.map((product) => product.name)
+
+    const orderDetails = await databaseServices.orderDetails.find({ productName: { $in: productNames } }).toArray()
+
+    if (orderDetails.length === 0) {
+      return {
+        message: ORDER_MESSAGES.NO_ORDERS_FOUND,
+        result: []
+      }
+    }
+
+    const orderIds = [...new Set(orderDetails.map((detail) => detail.orderId))]
+
+    const orders = await databaseServices.orders
+      .find({ _id: { $in: orderIds } })
+      .sort({ createdAt: -1 })
+      .toArray()
+
+    const ordersWithDetails = await Promise.all(
+      orders.map(async (order) => {
+        const details = orderDetails.filter(
+          (detail) => detail.orderId.equals(order._id) && productNames.includes(detail.productName)
+        )
+
+        const buyerInfo = await databaseServices.accounts.findOne(
+          {
+            _id: order.buyerInfo.accountId
+          },
+          { projection: { password: 0, passwordConfirm: 0 } }
+        )
+
+        return {
+          ...order,
+          items: details,
+          buyer: buyerInfo || {}
+        }
+      })
+    )
+
+    return {
+      message: ORDER_MESSAGES.ORDERS_FETCHED_SUCCESS,
+      result: ordersWithDetails
+    }
+  }
+
+  private async validateOrderBelongsToSeller(sellerId: string, orderId: ObjectId) {
+    const products = await databaseServices.products.find({ sellerId: new ObjectId(sellerId) }).toArray()
+
+    if (products.length === 0) {
+      throw new ErrorWithStatus({
+        status: HTTP_STATUS.NOT_FOUND,
+        message: ORDER_MESSAGES.ORDER_NOT_BELONG_TO_SELLER
+      })
+    }
+
+    const productNames = products.map((product) => product.name)
+
+    const orderDetail = await databaseServices.orderDetails.findOne({
+      orderId,
+      productName: { $in: productNames }
+    })
+
+    if (!orderDetail) {
+      throw new ErrorWithStatus({
+        status: HTTP_STATUS.FORBIDDEN,
+        message: ORDER_MESSAGES.ORDER_NOT_BELONG_TO_SELLER
+      })
+    }
+
+    return true
+  }
+
+  async confirmOrder(sellerId: string, orderId: string) {
+    if (!ObjectId.isValid(orderId)) {
+      throw new ErrorWithStatus({
+        status: HTTP_STATUS.BAD_REQUEST,
+        message: ORDER_MESSAGES.ORDER_NOT_FOUND
+      })
+    }
+
+    const order = await databaseServices.orders.findOne({
+      _id: new ObjectId(orderId)
+    })
+
+    if (!order) {
+      throw new ErrorWithStatus({
+        status: HTTP_STATUS.NOT_FOUND,
+        message: ORDER_MESSAGES.ORDER_NOT_FOUND
+      })
+    }
+
+    if (order.status !== OrderStatus.Pending) {
+      throw new ErrorWithStatus({
+        status: HTTP_STATUS.BAD_REQUEST,
+        message: ORDER_MESSAGES.CANNOT_CONFIRM_ORDER
+      })
+    }
+
+    await this.validateOrderBelongsToSeller(sellerId, order._id)
+
+    await databaseServices.orders.updateOne(
+      { _id: order._id },
+      {
+        $set: {
+          status: OrderStatus.Confirmed,
+          updatedAt: new Date()
+        }
+      }
+    )
+    return {
+      message: ORDER_MESSAGES.ORDER_CONFIRMED_SUCCESS,
+      result: {
+        _id: order._id,
+        status: OrderStatus.Confirmed,
+        updatedAt: new Date()
+      }
+    }
+  }
+
+  async processOrder(sellerId: string, orderId: string) {
+    if (!ObjectId.isValid(orderId)) {
+      throw new ErrorWithStatus({
+        status: HTTP_STATUS.BAD_REQUEST,
+        message: ORDER_MESSAGES.ORDER_NOT_FOUND
+      })
+    }
+
+    const order = await databaseServices.orders.findOne({
+      _id: new ObjectId(orderId)
+    })
+
+    if (!order) {
+      throw new ErrorWithStatus({
+        status: HTTP_STATUS.NOT_FOUND,
+        message: ORDER_MESSAGES.ORDER_NOT_FOUND
+      })
+    }
+
+    if (order.status !== OrderStatus.Confirmed) {
+      throw new ErrorWithStatus({
+        status: HTTP_STATUS.BAD_REQUEST,
+        message: ORDER_MESSAGES.CANNOT_PROCESS_ORDER
+      })
+    }
+
+    await this.validateOrderBelongsToSeller(sellerId, order._id)
+
+    await databaseServices.orders.updateOne(
+      { _id: order._id },
+      {
+        $set: {
+          status: OrderStatus.Processing,
+          updatedAt: new Date()
+        }
+      }
+    )
+
+    return {
+      message: ORDER_MESSAGES.ORDER_PROCESSED_SUCCESS,
+      result: {
+        _id: order._id,
+        status: OrderStatus.Processing,
+        updatedAt: new Date()
+      }
+    }
+  }
+
+  async sellerCancelOrder(sellerId: string, orderId: string) {
+    if (!ObjectId.isValid(orderId)) {
+      throw new ErrorWithStatus({
+        status: HTTP_STATUS.BAD_REQUEST,
+        message: ORDER_MESSAGES.ORDER_NOT_FOUND
+      })
+    }
+
+    const order = await databaseServices.orders.findOne({
+      _id: new ObjectId(orderId)
+    })
+
+    if (!order) {
+      throw new ErrorWithStatus({
+        status: HTTP_STATUS.NOT_FOUND,
+        message: ORDER_MESSAGES.ORDER_NOT_FOUND
+      })
+    }
+
+    if (order.status !== OrderStatus.Pending) {
+      throw new ErrorWithStatus({
+        status: HTTP_STATUS.BAD_REQUEST,
+        message: ORDER_MESSAGES.CANNOT_CANCEL_ORDER
+      })
+    }
+
+    await this.validateOrderBelongsToSeller(sellerId, order._id)
+
+    const orderDetails = await databaseServices.orderDetails.find({ orderId: order._id }).toArray()
+
+    const productUpdatePromises = orderDetails.map(async (detail) => {
+      const product = await databaseServices.products.findOne({
+        name: detail.productName
+      })
+
+      if (product) {
+        await databaseServices.products.updateOne({ _id: product._id }, { $inc: { quantity: detail.quantity } })
+      }
+    })
+
+    await Promise.all(productUpdatePromises)
+
+    await databaseServices.orders.updateOne(
+      { _id: order._id },
+      {
+        $set: {
+          status: OrderStatus.Cancelled,
+          updatedAt: new Date()
+        }
+      }
+    )
+
+    return {
+      message: ORDER_MESSAGES.ORDER_CANCELLED_SUCCESS,
+      result: {
+        _id: order._id,
+        status: OrderStatus.Cancelled,
+        updatedAt: new Date()
+      }
+    }
+  }
+
+  async completeOrder(accountId: string, orderId: string) {
+    if (!ObjectId.isValid(orderId)) {
+      throw new ErrorWithStatus({
+        status: HTTP_STATUS.BAD_REQUEST,
+        message: ORDER_MESSAGES.ORDER_NOT_FOUND
+      })
+    }
+
+    const order = await databaseServices.orders.findOne({
+      _id: new ObjectId(orderId),
+      'buyerInfo.accountId': new ObjectId(accountId)
+    })
+
+    if (!order) {
+      throw new ErrorWithStatus({
+        status: HTTP_STATUS.NOT_FOUND,
+        message: ORDER_MESSAGES.ORDER_NOT_FOUND
+      })
+    }
+
+    if (order.status !== OrderStatus.Processing) {
+      throw new ErrorWithStatus({
+        status: HTTP_STATUS.BAD_REQUEST,
+        message: ORDER_MESSAGES.CANNOT_COMPLETE_ORDER
+      })
+    }
+
+    await databaseServices.orders.updateOne(
+      { _id: order._id },
+      {
+        $set: {
+          status: OrderStatus.Completed,
+          updatedAt: new Date()
+        }
+      }
+    )
+
+    return {
+      message: ORDER_MESSAGES.ORDER_COMPLETED_SUCCESS,
+      result: {
+        _id: order._id,
+        status: OrderStatus.Completed,
         updatedAt: new Date()
       }
     }
