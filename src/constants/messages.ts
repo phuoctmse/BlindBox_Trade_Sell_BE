@@ -101,7 +101,7 @@ const PRODUCT_MESSAGES = {
   INSUFFICIENT_STOCK: 'Insufficient stock',
 } as const
 
-export const CART_MESSAGES = {
+const CART_MESSAGES = {
   QUANTITY_MUST_BE_A_POSITIVE_INTEGER: 'Quantity must be a positive integer',
   QUANTITY_EXCEEDS_STOCK: 'Quantity exceeds stock',
   PRODUCT_NOT_FOUND: 'Product not found',
@@ -115,7 +115,7 @@ export const CART_MESSAGES = {
   CART_NOT_FOUND: 'Cart not found',
 }
 
-export const ORDER_MESSAGES = {
+const ORDER_MESSAGES = {
   ORDERS_FETCHED_SUCCESS: 'Orders fetched successfully',
   ORDER_NOT_FOUND: 'Order not found',
   ORDER_CREATED_SUCCESS: 'Order created successfully', 
@@ -136,4 +136,4 @@ export const ORDER_MESSAGES = {
   ORDER_COMPLETED_SUCCESS: 'Order completed successfully',
 }
 
-export { USER_MESSAGES, PRODUCT_MESSAGES }
+export { USER_MESSAGES, PRODUCT_MESSAGES, CART_MESSAGES, ORDER_MESSAGES }

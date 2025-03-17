@@ -1,8 +1,23 @@
-import { create } from 'axios'
 import { Router } from 'express'
-import { cancelOrderController, completeOrderController, confirmOrderController, createOrderController, getAccountOrdersController, getSellerOrdersController, processOrderController, sellerCancelOrderController } from '~/controllers/order.controllers'
+import {
+  cancelOrderController,
+  completeOrderController,
+  confirmOrderController,
+  createOrderController,
+  getAccountOrdersController,
+  getSellerOrdersController,
+  processOrderController,
+  sellerCancelOrderController
+} from '~/controllers/order.controllers'
 import { accessTokenValidation, validateRegisterSelling } from '~/middlewares/accounts.middlewares'
-import { createOrderValidation, validateCancelOrder, validateChangeOrderStatus, validateCompleteOrder, validateReceiverInfo, validateSellerNotBuyingOwnProducts } from '~/middlewares/order.middlewares'
+import {
+  createOrderValidation,
+  validateCancelOrder,
+  validateChangeOrderStatus,
+  validateCompleteOrder,
+  validateReceiverInfo,
+  validateSellerNotBuyingOwnProducts
+} from '~/middlewares/order.middlewares'
 import { wrapRequestHandler } from '~/utils/handlers'
 
 const orderRouter = Router()
