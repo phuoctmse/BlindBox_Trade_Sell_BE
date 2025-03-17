@@ -24,19 +24,31 @@ const descriptionSchema: ParamSchema = {
 
 const quantitySchema: ParamSchema = {
   notEmpty: true,
-  isNumeric: true,
-  isInt: {
-    options: { min: 1 },
-    errorMessage: PRODUCT_MESSAGES.QUANTITY_MUST_BE_A_POSITIVE_INTEGER
+  custom: {
+    options: (value) => {
+      if (typeof value === 'string') {
+        throw new Error(PRODUCT_MESSAGES.QUANTITY_MUST_BE_A_POSITIVE_INTEGER)
+      }
+      if (typeof value === 'number' && value <= 0) {
+        throw new Error(PRODUCT_MESSAGES.QUANTITY_MUST_BE_A_POSITIVE_INTEGER)
+      }
+      return true
+    }
   }
 }
 
 const priceSchema: ParamSchema = {
   notEmpty: true,
-  isNumeric: true,
-  isFloat: {
-    options: { min: 0 },
-    errorMessage: PRODUCT_MESSAGES.PRICE_MUST_BE_A_POSITIVE_NUMBER
+  custom: {
+    options: (value) => {
+      if (typeof value === 'string') {
+        throw new Error(PRODUCT_MESSAGES.PRICE_MUST_BE_A_POSITIVE_NUMBER)
+      }
+      if (typeof value === 'number' && value <= 0) {
+        throw new Error(PRODUCT_MESSAGES.PRICE_MUST_BE_A_POSITIVE_NUMBER)
+      }
+      return true
+    }
   }
 }
 
@@ -52,10 +64,16 @@ const brandSchema: ParamSchema = {
 
 const sizeSchema: ParamSchema = {
   notEmpty: true,
-  isNumeric: true,
-  isInt: {
-    options: { min: 1 },
-    errorMessage: PRODUCT_MESSAGES.SIZE_MUST_BE_POSITIVE_NUMBER
+  custom: {
+    options: (value) => {
+      if (typeof value === 'string') {
+        throw new Error(PRODUCT_MESSAGES.SIZE_MUST_BE_POSITIVE_NUMBER)
+      }
+      if (typeof value === 'number' && value <= 0) {
+        throw new Error(PRODUCT_MESSAGES.SIZE_MUST_BE_POSITIVE_NUMBER)
+      }
+      return true
+    }
   }
 }
 
@@ -153,6 +171,6 @@ export const validateCreateCustomization = validate(
         }
       }
     },
-    image: imageSchema,
+    image: imageSchema
   })
 )

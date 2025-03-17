@@ -42,3 +42,13 @@ export enum OrderStatus {
   Completed,
   Cancelled
 }
+
+export enum PaymentMethod {
+  COD,
+  Banking
+}
+
+export enum OrderType {
+  Direct,
+  Cart
+}
