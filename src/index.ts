@@ -18,6 +18,7 @@ import orderRouter from './routes/order.routes'
 import { setupAutoCompleteOrders } from './utils/cronjob'
 import { initSocketServer } from './utils/socket'
 import http from 'http'
+import paymentRouter from './routes/payment.routes'
 config()
 
 const app = express()
@@ -63,6 +64,7 @@ app.use('/medias', mediasRouter)
 app.use('/admins', adminRouter)
 app.use('/cart', cartRouter)
 app.use('/orders', orderRouter)
+app.use('/payment', paymentRouter)
 
 // Error handling
 app.use(defaultErrorHandler as any)
