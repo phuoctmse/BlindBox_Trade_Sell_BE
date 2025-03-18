@@ -18,10 +18,6 @@ class ProductService {
         category: Category.Blindbox,
         createdBy: new ObjectId(accountId)
       })
-      .project({
-        _id: 1,
-        name: 1
-      })
       .toArray()
 
     const formattedResult = result.map((product) => ({
