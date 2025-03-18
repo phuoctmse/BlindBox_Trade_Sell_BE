@@ -3,7 +3,7 @@ import { ParamsDictionary } from 'express-serve-static-core'
 import HTTP_STATUS from '~/constants/httpStatus'
 import { PRODUCT_MESSAGES } from '~/constants/messages'
 import { LogoutReqBody, TokenPayload } from '~/models/requests/Account.requests'
-import { CreateAccessoriesReqBody, CreateBlindBoxesReqBody } from '~/models/requests/Product.request'
+import { CreateAccessoriesReqBody, CreateBeadsReqBody, CreateBlindBoxesReqBody } from '~/models/requests/Product.request'
 import productService from '~/services/product.services'
 
 export const getMyBlindBoxesController = async (req: Request, res: Response) => {
@@ -40,11 +40,6 @@ export const getAllApprovedBlindBoxesController = async (req: Request, res: Resp
   res.status(HTTP_STATUS.OK).json(approvedBlindBoxes)
 }
 
-export const getALlBlindBoxesController = async (req: Request, res: Response) => {
-  const result = await productService.getAllBlindBoxes()
-  res.status(HTTP_STATUS.OK).json(result)
-}
-
 export const updateProductController = async (
   req: Request<ParamsDictionary, any, CreateBlindBoxesReqBody>,
   res: Response
@@ -73,4 +68,15 @@ export const createAccessoriesController = async (
   const payload = { ...req.body } as CreateAccessoriesReqBody
   const accessories = await productService.createAccessories(payload, accountId)
   res.status(HTTP_STATUS.CREATED).json(accessories)
+}
+
+export const getAllBeadsController = async (req: Request, res: Response) => {
+  const result = await productService.getAllBeads()
+  res.status(HTTP_STATUS.OK).json(result)
+}
+
+export const getBeadsDetailsController = async (req: Request, res: Response) => {
+  const { id } = req.params
+  const result = await productService.getBeadsDetails(id as string)
+  res.status(HTTP_STATUS.OK).json(result)
 }

@@ -1,14 +1,13 @@
 import { Router } from 'express'
-import { getAllBeadsController } from '~/controllers/admin.controllers'
 import {
   createAccessoriesController,
   createBlindBoxesController,
   deleteProductController,
   getAllApprovedBlindBoxesController,
-  getALlBlindBoxesController,
   getBlindBoxesDetailsController,
   getMyBlindBoxesController,
-  updateProductController
+  updateProductController,
+  getAllBeadsController
 } from '~/controllers/product.controllers'
 import { accessTokenValidation, validateRegisterSelling } from '~/middlewares/accounts.middlewares'
 import { filterMiddleware } from '~/middlewares/common.middlewares'
@@ -46,7 +45,7 @@ productsRouter.get('/blind-boxes', wrapRequestHandler(getAllApprovedBlindBoxesCo
 productsRouter.get('/blind-boxes/:slug', accessTokenValidation, wrapRequestHandler(getBlindBoxesDetailsController))
 
 //Customize
-productsRouter.get('/accessories/customization', accessTokenValidation, wrapRequestHandler(getAllBeadsController)) //need to change for buyer route
+productsRouter.get('/accessories/customization', accessTokenValidation, wrapRequestHandler(getAllBeadsController))
 productsRouter.post(
   '/accessories/customization',
   accessTokenValidation,

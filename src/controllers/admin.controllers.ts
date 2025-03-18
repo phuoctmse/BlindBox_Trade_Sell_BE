@@ -55,3 +55,8 @@ export const deleteBeadsController = async (req: Request, res: Response) => {
   const result = await adminService.deleteBead(id)
   res.status(HTTP_STATUS.OK).json(result)
 }
+
+export const getAllProductController = async (req: Request, res: Response) => {
+  const result = await adminService.getAllProducts()
+  res.status(HTTP_STATUS.OK).json(result)
+}
