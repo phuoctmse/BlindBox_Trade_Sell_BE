@@ -1,4 +1,5 @@
 import { Double, ObjectId } from 'mongodb'
+import { TypeBeads } from '~/constants/enums'
 
 export interface CreateBlindBoxesReqBody {
   image: string
@@ -12,7 +13,7 @@ export interface CreateBlindBoxesReqBody {
 
 export interface CreateBeadsReqBody {
   color: string
-  type: string
+  type: TypeBeads
   price: Double
 }
 

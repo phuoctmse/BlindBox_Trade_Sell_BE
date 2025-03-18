@@ -99,6 +99,10 @@ const PRODUCT_MESSAGES = {
   BEAD_LINKED_WITH_PRODUCT: 'Bead linked with product',
   BEAD_NOT_FOUND: 'Bead not found',
   INSUFFICIENT_STOCK: 'Insufficient stock',
+  RATE_MUST_BE_A_NUMBER: 'Rate must be a number',
+  RATE_MUST_BE_BETWEEN_1_AND_5: 'Rate must be between 1 and 5',
+  CONTENT_MUST_BE_FROM_10_TO_1000: 'Content must be between 10 and 1000 characters',
+  PRODUCT_NOT_FOUND_IN_ORDERS: 'Product not found in orders',
 } as const
 
 export const CART_MESSAGES = {
@@ -126,5 +130,10 @@ export const ORDER_MESSAGES = {
   ORDER_CANCELLED_SUCCESS: 'Order cancelled successfully',
 }
 
+export const FEEDBACK_MESSAGES = {
+  FEEDBACK_CREATED_SUCCESS: 'Feedback created successfully',
+  FEEDBACKS_FETCHED_SUCCESS: 'Feedbacks fetched successfully',
+  FEEDBACK_UPDATED_SUCCESS: 'Feedback updated successfully',
+}
 
 export { USER_MESSAGES, PRODUCT_MESSAGES }

@@ -1,5 +1,9 @@
 import { checkSchema, ParamSchema } from 'express-validator'
+import { WithId } from 'mongodb'
 import { PRODUCT_MESSAGES } from '~/constants/messages'
+import { TokenPayload } from '~/models/requests/Account.requests'
+import OrderDetails from '~/models/schemas/OrderDetail.schema'
+import orderService from '~/services/order.services'
 import { validate } from '~/utils/validation'
 
 const nameSchema: ParamSchema = {
@@ -110,6 +114,30 @@ const typeSchema: ParamSchema = {
   }
 }
 
+const rateSchema: ParamSchema = {
+  isNumeric: {
+    errorMessage: PRODUCT_MESSAGES.RATE_MUST_BE_A_NUMBER
+  },
+  custom: {
+    options: (value) => {
+      if (typeof value !== 'number' || value < 1 || value > 5) {
+        throw new Error(PRODUCT_MESSAGES.RATE_MUST_BE_BETWEEN_1_AND_5)
+      }
+      return true
+    }
+  }
+}
+
+const contentSchema: ParamSchema = {
+  notEmpty: true,
+  isString: true,
+  trim: true,
+  isLength: {
+    options: { min: 10, max: 1000 },
+    errorMessage: PRODUCT_MESSAGES.CONTENT_MUST_BE_FROM_10_TO_1000
+  }
+}
+
 export const createBlindBoxesValidation = validate(
   checkSchema(
     {
@@ -174,3 +202,35 @@ export const validateCreateCustomization = validate(
     image: imageSchema
   })
 )
+
+export const validateCreateFeedback = validate(
+  checkSchema({
+    rate: rateSchema,
+    content: contentSchema
+  })
+)
+
+//Handle validate if user have ordered the products
+// export const userOrderedValidation = validate(
+//   checkSchema({
+//     custom: {
+//       custom: {
+//         options: async (value, { req }) => {
+//           const { accountId } = req.decode_authorization as TokenPayload;
+//           const { productId } = req.body;
+//           const orders = await orderService.getOrdersByAccountId(accountId);
+
+//           const productExistsInOrders = orders.result.some((order: { items: WithId<OrderDetails>[] }) =>
+//             order.items.some(item => item.productId.toString() === productId)
+//           );
+
+//           if (!productExistsInOrders) {
+//             throw new Error(PRODUCT_MESSAGES.PRODUCT_NOT_FOUND_IN_ORDERS);
+//           }
+
+//           return true;
+//         }
+//       }
+//     }
+//   })
+// );

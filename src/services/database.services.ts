@@ -10,6 +10,7 @@ import BeadDetails from '~/models/schemas/BeadDetails.schema'
 import Orders from '~/models/schemas/Order.schema'
 import OrderDetails from '~/models/schemas/OrderDetail.schema'
 import Promotions from '~/models/schemas/Promotion.schema'
+import Feedbacks from '~/models/schemas/Feedback.schema'
 config()
 
 const uri = process.env.MONGODB_URL as string
@@ -70,6 +71,10 @@ class DatabaseServices {
 
   get promotions(): Collection<Promotions> {
     return this.db.collection(process.env.DB_PROMOTIONS_COLLECTION as string)
+  }
+
+  get feedbacks(): Collection<Feedbacks> {
+    return this.db.collection(process.env.DB_FEEDBACKS_COLLECTION as string)
   }
 }
 
