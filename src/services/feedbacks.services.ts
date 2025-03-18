@@ -6,6 +6,16 @@ import Feedbacks from "~/models/schemas/Feedback.schema";
 
 class FeedbackService {
   async createFeedback(payload: CreateFeedbackReqBody, accountId: string) {
+    // Check if feedback already exists for this product and account
+    const existingFeedback = await databaseServices.feedbacks.findOne({
+      accountId: new ObjectId(accountId),
+      productId: new ObjectId(payload.productId)
+    });
+
+    if (existingFeedback) {
+      throw new Error(FEEDBACK_MESSAGES.ALREADY_LEFT_FEEDBACK);
+    }
+
     const newFeedbackId = new ObjectId();
     const feedback = new Feedbacks({
       _id: newFeedbackId,

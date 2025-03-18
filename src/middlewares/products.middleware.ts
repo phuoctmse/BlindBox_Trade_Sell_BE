@@ -103,17 +103,6 @@ const colorSchema: ParamSchema = {
   }
 }
 
-const typeSchema: ParamSchema = {
-  isString: {
-    errorMessage: PRODUCT_MESSAGES.TYPE_MUST_BE_A_STRING
-  },
-  trim: true,
-  isLength: {
-    options: { min: 1, max: 100 },
-    errorMessage: PRODUCT_MESSAGES.TYPE_LENGTH_MUST_BE_FROM_1_TO_100
-  }
-}
-
 const rateSchema: ParamSchema = {
   isNumeric: {
     errorMessage: PRODUCT_MESSAGES.RATE_MUST_BE_A_NUMBER
@@ -148,17 +137,6 @@ export const createBlindBoxesValidation = validate(
       price: priceSchema,
       brand: brandSchema,
       size: sizeSchema
-    },
-    ['body']
-  )
-)
-
-export const createBeadsValidation = validate(
-  checkSchema(
-    {
-      color: colorSchema,
-      type: typeSchema,
-      price: priceSchema
     },
     ['body']
   )
@@ -211,26 +189,26 @@ export const validateCreateFeedback = validate(
 )
 
 //Handle validate if user have ordered the products
-// export const userOrderedValidation = validate(
-//   checkSchema({
-//     custom: {
-//       custom: {
-//         options: async (value, { req }) => {
-//           const { accountId } = req.decode_authorization as TokenPayload;
-//           const { productId } = req.body;
-//           const orders = await orderService.getOrdersByAccountId(accountId);
+export const userOrderedValidation = validate(
+  checkSchema({
+    custom: {
+      custom: {
+        options: async (value, { req }) => {
+          const { accountId } = req.decode_authorization as TokenPayload;
+          const { productId } = req.body;
+          const orders = await orderService.getOrdersByAccountId(accountId);
 
-//           const productExistsInOrders = orders.result.some((order: { items: WithId<OrderDetails>[] }) =>
-//             order.items.some(item => item.productId.toString() === productId)
-//           );
+          const productExistsInOrders = orders.result.some((order: { items: WithId<OrderDetails>[] }) =>
+            order.items.some(item => item.productId.toString() === productId)
+          );
 
-//           if (!productExistsInOrders) {
-//             throw new Error(PRODUCT_MESSAGES.PRODUCT_NOT_FOUND_IN_ORDERS);
-//           }
+          if (!productExistsInOrders) {
+            throw new Error(PRODUCT_MESSAGES.HAVEN_T_ORDERED_THIS_PRODUCT);
+          }
 
-//           return true;
-//         }
-//       }
-//     }
-//   })
-// );
+          return true;
+        }
+      }
+    }
+  })
+);

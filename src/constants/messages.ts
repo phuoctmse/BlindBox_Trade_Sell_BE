@@ -102,7 +102,7 @@ const PRODUCT_MESSAGES = {
   RATE_MUST_BE_A_NUMBER: 'Rate must be a number',
   RATE_MUST_BE_BETWEEN_1_AND_5: 'Rate must be between 1 and 5',
   CONTENT_MUST_BE_FROM_10_TO_1000: 'Content must be between 10 and 1000 characters',
-  PRODUCT_NOT_FOUND_IN_ORDERS: 'Product not found in orders',
+  HAVEN_T_ORDERED_THIS_PRODUCT: 'Haven\'t ordered this product',
 } as const
 
 const CART_MESSAGES = {
@@ -144,6 +144,7 @@ export const FEEDBACK_MESSAGES = {
   FEEDBACK_CREATED_SUCCESS: 'Feedback created successfully',
   FEEDBACKS_FETCHED_SUCCESS: 'Feedbacks fetched successfully',
   FEEDBACK_UPDATED_SUCCESS: 'Feedback updated successfully',
+  ALREADY_LEFT_FEEDBACK: 'Already left feedback',
 }
 
 export { USER_MESSAGES, PRODUCT_MESSAGES, CART_MESSAGES, ORDER_MESSAGES }
