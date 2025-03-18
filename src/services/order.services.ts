@@ -118,6 +118,7 @@ class OrderService {
     const orderDetail = new OrderDetails({
       orderId: orderId,
       productName: product.name,
+      productId: product._id,
       quantity: payload.item.quantity,
       price: product.price,
       image: product.image
@@ -245,6 +246,7 @@ class OrderService {
       const orderDetail = new OrderDetails({
         orderId: orderId,
         productName: item.productName,
+        productId: item.productId,
         quantity: item.quantity,
         price: item.price,
         image: item.image
@@ -342,7 +344,7 @@ class OrderService {
   }
 
   async getSellerOrders(accountId: string) {
-    const products = await databaseServices.products.find({ sellerId: new ObjectId(accountId) }).toArray()
+    const products = await databaseServices.products.find({ createdBy: new ObjectId(accountId) }).toArray()
 
     if (products.length === 0) {
       return {
