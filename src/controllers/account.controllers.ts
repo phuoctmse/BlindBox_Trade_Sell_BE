@@ -18,6 +18,7 @@ import Accounts from '~/models/schemas/Account.schema'
 import accountService from '~/services/accounts.services'
 import databaseServices from '~/services/database.services'
 import { hashPassword } from '~/utils/crypto'
+import { notifyEmailVerified, notifySellerRegistered } from '~/utils/socket'
 config()
 
 export const registerController = async (
@@ -111,6 +112,9 @@ export const emailVerifyController = async (req: Request<ParamsDictionary, any, 
       message: USER_MESSAGES.EMAIL_ALREADY_VERIFIED
     })
   }
+
+  notifyEmailVerified(accountId)
+
   const result = await accountService.verifyEmail(accountId)
   res.status(HTTP_STATUS.OK).json({
     result
@@ -229,6 +233,7 @@ export const changePasswordController = async (req: Request, res: Response): Pro
 export const registerSellerController = async (req: Request, res: Response): Promise<void> => {
   const { accountId } = req.decode_authorization as TokenPayload
   const result = await accountService.registerSeller(accountId)
+  notifySellerRegistered(accountId)
   res.status(HTTP_STATUS.OK).json({
     result
   })

@@ -15,15 +15,21 @@ import { UPLOAD_DIR } from './constants/dir'
 import adminRouter from './routes/admin.routes'
 import cartRouter from './routes/cart.routes'
 import orderRouter from './routes/order.routes'
+import { setupAutoCompleteOrders } from './utils/cronjob'
+import { initSocketServer } from './utils/socket'
+import http from 'http'
 config()
 
 const app = express()
+const httpServer = http.createServer(app)
 const port = process.env.PORT || 8080
 const corsOptions = {
   origin: process.env.CLIENT_URL,
   credentials: true,
   optionsSuccessStatus: 200
 }
+
+initSocketServer(httpServer)
 
 // Load Swagger document
 const swaggerDocument = YAML.load(path.join(__dirname, '../blindbox-swagger.yaml'))
@@ -32,7 +38,9 @@ const swaggerDocument = YAML.load(path.join(__dirname, '../blindbox-swagger.yaml
 initFolder()
 
 // Connect to database
-databaseServices.connect()
+databaseServices.connect().then(() => {
+  setupAutoCompleteOrders()
+})
 
 // Middleware
 app.use(express.json())

@@ -10,6 +10,8 @@ import BeadDetails from '~/models/schemas/BeadDetails.schema'
 import Orders from '~/models/schemas/Order.schema'
 import OrderDetails from '~/models/schemas/OrderDetail.schema'
 import Promotions from '~/models/schemas/Promotion.schema'
+import Transactions from '~/models/schemas/Transaction.schema'
+import CreditConversions from '~/models/schemas/CreditConversion.schema'
 config()
 
 const uri = process.env.MONGODB_URL as string
@@ -70,6 +72,14 @@ class DatabaseServices {
 
   get promotions(): Collection<Promotions> {
     return this.db.collection(process.env.DB_PROMOTIONS_COLLECTION as string)
+  }
+
+  get transactions(): Collection<Transactions> {
+    return this.db.collection(process.env.DB_TRANSACTIONS_COLLECTION as string)
+  }
+
+  get creditConversion(): Collection<CreditConversions> {
+    return this.db.collection(process.env.DB_CREDIT_CONVERSION_COLLECTION as string)
   }
 }
 

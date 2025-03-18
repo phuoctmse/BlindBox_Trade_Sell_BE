@@ -3,10 +3,11 @@ import { NextFunction, Request, Response } from 'express'
 import { checkSchema } from 'express-validator'
 import { forEach } from 'lodash'
 import { ObjectId } from 'mongodb'
-import { OrderType, PaymentMethod } from '~/constants/enums'
+import { OrderStatus, OrderType, PaymentMethod } from '~/constants/enums'
 import HTTP_STATUS from '~/constants/httpStatus'
 import { ORDER_MESSAGES, PRODUCT_MESSAGES } from '~/constants/messages'
 import { ErrorWithStatus } from '~/models/Errors'
+import { TokenPayload } from '~/models/requests/Account.requests'
 import databaseServices from '~/services/database.services'
 import { validate } from '~/utils/validation'
 
@@ -282,6 +283,151 @@ export const validateCancelOrder = validate(
               throw new Error('Invalid Order ID format')
             }
             return true
+          }
+        }
+      }
+    },
+    ['params']
+  )
+)
+
+export const validateSellerNotBuyingOwnProducts = async (req: Request, res: Response, next: NextFunction) => {
+  const { orderType } = req.body
+  const { accountId, isSeller } = req.decode_authorization as TokenPayload
+
+  if (!isSeller) {
+    return next()
+  }
+  if (orderType === OrderType.Direct) {
+    const { productId } = req.body.item
+
+    if (!productId || !ObjectId.isValid(productId)) {
+      return next()
+    }
+
+    const product = await databaseServices.products.findOne({
+      _id: ObjectId.createFromHexString(productId)
+    })
+
+    if (!product) {
+      return next()
+    }
+
+    if (product.createdBy && product.createdBy.toString() === accountId) {
+      return next(
+        new ErrorWithStatus({
+          status: HTTP_STATUS.FORBIDDEN,
+          message: ORDER_MESSAGES.CANNOT_BUY_OWN_PRODUCT
+        })
+      )
+    }
+  } else if (orderType === OrderType.Cart) {
+    const { items } = req.body
+
+    if (!Array.isArray(items) || items.length === 0) {
+      return next()
+    }
+
+    const cart = await databaseServices.carts.findOne({
+      accountId: new ObjectId(accountId)
+    })
+
+    if (!cart) {
+      return next()
+    }
+
+    for (const item of items) {
+      if (!item.itemId || !ObjectId.isValid(item.itemId)) {
+        continue
+      }
+
+      const cartItem = await databaseServices.cartItems.findOne({
+        _id: ObjectId.createFromHexString(item.itemId),
+        cartId: cart._id
+      })
+
+      if (!cartItem) {
+        continue
+      }
+
+      const product = await databaseServices.products.findOne({
+        _id: cartItem.productId
+      })
+
+      if (!product) {
+        continue
+      }
+
+      if (product.createdBy && product.createdBy.toString() === accountId) {
+        return next(
+          new ErrorWithStatus({
+            status: HTTP_STATUS.FORBIDDEN,
+            message: ORDER_MESSAGES.SELLER_PRODUCT_IN_CART
+          })
+        )
+      }
+    }
+  }
+  next()
+}
+
+export const validateChangeOrderStatus = validate(
+  checkSchema(
+    {
+      orderId: {
+        isString: true,
+        notEmpty: {
+          errorMessage: 'Order ID is required'
+        },
+        custom: {
+          options: (value) => {
+            if (!ObjectId.isValid(value)) {
+              throw new Error('Invalid Order ID format')
+            }
+            return true
+          }
+        }
+      }
+    },
+    ['params']
+  )
+)
+
+export const validateCompleteOrder = validate(
+  checkSchema(
+    {
+      orderId: {
+        isString: true,
+        notEmpty: {
+          errorMessage: 'Order ID is required'
+        },
+        custom: {
+          options: async (value, { req }) => {
+            try {
+              if (!ObjectId.isValid(value)) {
+                throw new Error('Invalid Order ID format')
+              }
+
+              const { accountId } = req.decode_authorization as TokenPayload
+
+              const order = await databaseServices.orders.findOne({
+                _id: ObjectId.createFromHexString(value),
+                'buyerInfo.accountId': new ObjectId(accountId)
+              })
+
+              if (!order) {
+                throw new Error(ORDER_MESSAGES.ORDER_NOT_FOUND)
+              }
+
+              if (order.status !== OrderStatus.Processing) {
+                throw new Error(ORDER_MESSAGES.CANNOT_COMPLETE_ORDER)
+              }
+
+              return true
+            } catch (error) {
+              console.error('Error in validateCompleteOrder:', error)
+              throw error
+            }
           }
         }
       }

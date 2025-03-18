@@ -48,6 +48,12 @@ export enum PaymentMethod {
   Banking
 }
 
+export enum PaymentStatus {
+  Pending,
+  Success,
+  Cancelled
+}
+
 export enum OrderType {
   Direct,
   Cart
