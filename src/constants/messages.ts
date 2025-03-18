@@ -98,7 +98,7 @@ const PRODUCT_MESSAGES = {
   BEAD_DELETED_SUCCESS: 'Bead deleted successfully',
   BEAD_LINKED_WITH_PRODUCT: 'Bead linked with product',
   BEAD_NOT_FOUND: 'Bead not found',
-  INSUFFICIENT_STOCK: 'Insufficient stock',
+  INSUFFICIENT_STOCK: 'Insufficient stock'
 } as const
 
 const CART_MESSAGES = {
@@ -112,13 +112,13 @@ const CART_MESSAGES = {
   CART_ITEM_ADDED: 'Cart item added successfully',
   CART_ITEM_UPDATED: 'Cart item updated successfully',
   CART_ITEM_DELETED: 'Cart item deleted successfully',
-  CART_NOT_FOUND: 'Cart not found',
+  CART_NOT_FOUND: 'Cart not found'
 }
 
 const ORDER_MESSAGES = {
   ORDERS_FETCHED_SUCCESS: 'Orders fetched successfully',
   ORDER_NOT_FOUND: 'Order not found',
-  ORDER_CREATED_SUCCESS: 'Order created successfully', 
+  ORDER_CREATED_SUCCESS: 'Order created successfully',
   RECEIVER_INFO_REQUIRED: 'Receiver info required',
   INCOMPLETE_RECEIVER_INFO: 'Incomplete receiver info',
   INVALID_ORDER_TYPE: 'Invalid order type',
@@ -133,9 +133,14 @@ const ORDER_MESSAGES = {
   CANNOT_PROCESS_ORDER: 'Cannot process order',
   ORDER_PROCESSED_SUCCESS: 'Order processed successfully',
   CANNOT_COMPLETE_ORDER: 'Cannot complete order',
-  ORDER_COMPLETED_SUCCESS: 'Order completed successfully',
+  ORDER_COMPLETED_SUCCESS: 'Order completed successfully'
 }
 
+const PAYMENT_MESSAGES = {
+  PAYMENT_PROCESSED_SUCCESS: 'Payment processed successfully',
+  PAYMENT_INSTRUCTION_GENERATED: 'Payment instructions generated',
+  CREDIT_CONVERSION_NOT_FOUND: 'Credit conversion rate not found',
+  TOP_UP_INSTRUCTION_GENRATED: 'Topup instructions generated'
+}
 
-export { USER_MESSAGES, PRODUCT_MESSAGES, CART_MESSAGES, ORDER_MESSAGES }
-
+export { USER_MESSAGES, PRODUCT_MESSAGES, CART_MESSAGES, ORDER_MESSAGES, PAYMENT_MESSAGES }
