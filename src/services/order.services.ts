@@ -398,8 +398,8 @@ class OrderService {
     }
   }
 
-  private async validateOrderBelongsToSeller(sellerId: string, orderId: ObjectId) {
-    const products = await databaseServices.products.find({ sellerId: new ObjectId(sellerId) }).toArray()
+  private async validateOrderBelongsToSeller(createdBy: string, orderId: ObjectId) {
+    const products = await databaseServices.products.find({ createdBy: new ObjectId(createdBy) }).toArray()
 
     if (products.length === 0) {
       throw new ErrorWithStatus({
@@ -425,7 +425,7 @@ class OrderService {
     return true
   }
 
-  async confirmOrder(sellerId: string, orderId: string) {
+  async confirmOrder(createdBy: string, orderId: string) {
     if (!ObjectId.isValid(orderId)) {
       throw new ErrorWithStatus({
         status: HTTP_STATUS.BAD_REQUEST,
@@ -451,7 +451,7 @@ class OrderService {
       })
     }
 
-    await this.validateOrderBelongsToSeller(sellerId, order._id)
+    await this.validateOrderBelongsToSeller(createdBy, order._id)
 
     await databaseServices.orders.updateOne(
       { _id: order._id },
@@ -472,7 +472,7 @@ class OrderService {
     }
   }
 
-  async processOrder(sellerId: string, orderId: string) {
+  async processOrder(createdBy: string, orderId: string) {
     if (!ObjectId.isValid(orderId)) {
       throw new ErrorWithStatus({
         status: HTTP_STATUS.BAD_REQUEST,
@@ -498,7 +498,7 @@ class OrderService {
       })
     }
 
-    await this.validateOrderBelongsToSeller(sellerId, order._id)
+    await this.validateOrderBelongsToSeller(createdBy, order._id)
 
     await databaseServices.orders.updateOne(
       { _id: order._id },
@@ -520,7 +520,7 @@ class OrderService {
     }
   }
 
-  async sellerCancelOrder(sellerId: string, orderId: string) {
+  async sellerCancelOrder(createdBy: string, orderId: string) {
     if (!ObjectId.isValid(orderId)) {
       throw new ErrorWithStatus({
         status: HTTP_STATUS.BAD_REQUEST,
@@ -546,7 +546,7 @@ class OrderService {
       })
     }
 
-    await this.validateOrderBelongsToSeller(sellerId, order._id)
+    await this.validateOrderBelongsToSeller(createdBy, order._id)
 
     const orderDetails = await databaseServices.orderDetails.find({ orderId: order._id }).toArray()
 
