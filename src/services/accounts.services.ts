@@ -12,6 +12,7 @@ import { USER_MESSAGES } from '~/constants/messages'
 import axios from 'axios'
 import { ErrorWithStatus } from '~/models/Errors'
 import HTTP_STATUS from '~/constants/httpStatus'
+import { sendForgotPasswordEmail, sendVerifyRegisterEmail } from '~/utils/email'
 config()
 
 class AccountService {
@@ -168,6 +169,7 @@ class AccountService {
         refresh_token
       }
     } else {
+      await sendVerifyRegisterEmail(payload.email, email_verify_token)
       return {
         message: USER_MESSAGES.REGISTER_SUCCESS
       }
@@ -362,6 +364,7 @@ class AccountService {
         }
       }
     )
+    await sendVerifyRegisterEmail(accountId, email_verify_token)
     return {
       message: USER_MESSAGES.EMAIL_VERIFY_RESENT_SUCCESS
     }
@@ -378,6 +381,7 @@ class AccountService {
       { _id: user._id },
       { $set: { forgot_password_token: forgotPasswordToken } }
     )
+    await sendForgotPasswordEmail(email, forgotPasswordToken)
     return {
       message: USER_MESSAGES.FORGOT_PASSWORD_EMAIL_SENT
     }
