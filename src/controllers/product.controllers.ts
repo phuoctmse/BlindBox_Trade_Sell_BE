@@ -96,3 +96,8 @@ export const getAccessoryDetailController = async (req: Request, res: Response) 
   const result = await productService.getAccessoryDetail(slug, id as string)
   res.status(HTTP_STATUS.OK).json(result)
 }
+
+export const getAllOpenedItemsController = async (req: Request, res: Response) => {
+  const result = await productService.getAllOpenedItems()
+  res.status(HTTP_STATUS.OK).json(result)
+}

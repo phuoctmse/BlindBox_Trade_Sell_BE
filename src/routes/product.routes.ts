@@ -8,7 +8,8 @@ import {
   getMyBlindBoxesController,
   updateProductController,
   getAllBeadsController,
-  getAccessoryDetailController
+  getAccessoryDetailController,
+  getAllOpenedItemsController
 } from '~/controllers/product.controllers'
 import { accessTokenValidation, validateRegisterSelling } from '~/middlewares/accounts.middlewares'
 import { filterMiddleware } from '~/middlewares/common.middlewares'
@@ -54,5 +55,7 @@ productsRouter.post(
   wrapRequestHandler(createAccessoriesController)
 )
 productsRouter.get('/accessories/:slug', accessTokenValidation, wrapRequestHandler(getAccessoryDetailController))
+
+productsRouter.get('/opened-items', accessTokenValidation, wrapRequestHandler(getAllOpenedItemsController))
 
 export default productsRouter

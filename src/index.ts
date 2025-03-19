@@ -21,6 +21,7 @@ import http from 'http'
 import feedbackRouter from './routes/feedback.routes'
 import paymentRouter from './routes/payment.routes'
 import redisServices from './services/redis.services'
+import tradesRouter from './routes/trade.routes'
 config()
 
 const app = express()
@@ -68,6 +69,7 @@ app.use('/cart', cartRouter)
 app.use('/orders', orderRouter)
 app.use('/feedbacks', feedbackRouter)
 app.use('/payment', paymentRouter)
+app.use('/trade', tradesRouter)
 
 // Error handling
 app.use(defaultErrorHandler as any)

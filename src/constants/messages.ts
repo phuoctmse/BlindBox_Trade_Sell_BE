@@ -70,6 +70,7 @@ const USER_MESSAGES = {
   REGISTERED_SELLING_SUCCESS: 'Registered selling success',
   USER_NOT_ADMIN: 'User is not admin',
   SESSION_EXPIRED: 'Session expired',
+  ACCOUNT_NOT_FOUND: 'Account not found'
 } as const
 
 const PRODUCT_MESSAGES = {
@@ -103,7 +104,7 @@ const PRODUCT_MESSAGES = {
   RATE_MUST_BE_A_NUMBER: 'Rate must be a number',
   RATE_MUST_BE_BETWEEN_1_AND_5: 'Rate must be between 1 and 5',
   CONTENT_MUST_BE_FROM_10_TO_1000: 'Content must be between 10 and 1000 characters',
-  HAVEN_T_ORDERED_THIS_PRODUCT: 'Haven\'t ordered this product',
+  HAVEN_T_ORDERED_THIS_PRODUCT: "Haven't ordered this product"
 } as const
 
 const CART_MESSAGES = {
@@ -117,13 +118,13 @@ const CART_MESSAGES = {
   CART_ITEM_ADDED: 'Cart item added successfully',
   CART_ITEM_UPDATED: 'Cart item updated successfully',
   CART_ITEM_DELETED: 'Cart item deleted successfully',
-  CART_NOT_FOUND: 'Cart not found',
+  CART_NOT_FOUND: 'Cart not found'
 }
 
 const ORDER_MESSAGES = {
   ORDERS_FETCHED_SUCCESS: 'Orders fetched successfully',
   ORDER_NOT_FOUND: 'Order not found',
-  ORDER_CREATED_SUCCESS: 'Order created successfully', 
+  ORDER_CREATED_SUCCESS: 'Order created successfully',
   RECEIVER_INFO_REQUIRED: 'Receiver info required',
   INCOMPLETE_RECEIVER_INFO: 'Incomplete receiver info',
   INVALID_ORDER_TYPE: 'Invalid order type',
@@ -138,7 +139,7 @@ const ORDER_MESSAGES = {
   CANNOT_PROCESS_ORDER: 'Cannot process order',
   ORDER_PROCESSED_SUCCESS: 'Order processed successfully',
   CANNOT_COMPLETE_ORDER: 'Cannot complete order',
-  ORDER_COMPLETED_SUCCESS: 'Order completed successfully',
+  ORDER_COMPLETED_SUCCESS: 'Order completed successfully'
 }
 
 export const FEEDBACK_MESSAGES = {
@@ -147,16 +148,39 @@ export const FEEDBACK_MESSAGES = {
   FEEDBACK_UPDATED_SUCCESS: 'Feedback updated successfully',
   ALREADY_LEFT_FEEDBACK: 'Already left feedback',
   FEEDBACK_DELETED_SUCCESS: 'Feedback deleted successfully',
-  FEEDBACK_NOT_FOUND: 'Feedback not found',
+  FEEDBACK_NOT_FOUND: 'Feedback not found'
 }
 
 const PAYMENT_MESSAGES = {
   PAYMENT_PROCESSED_SUCCESS: 'Payment processed successfully',
   PAYMENT_INSTRUCTION_GENERATED: 'Payment instructions generated',
   CREDIT_CONVERSION_NOT_FOUND: 'Credit conversion rate not found',
-  TOP_UP_INSTRUCTION_GENRATED: 'Topup instructions generated'
+  TOP_UP_INSTRUCTION_GENRATED: 'Topup instructions generated',
+  INVALID_PAYMENT_GATEWAY: 'Invalid payment gateway'
 }
 
+const TRADE_MESSAGES = {
+  NO_TRADES_FOUND: 'No trade posts found',
+  TRADE_CREATED: 'Trade post created',
+  WAIT_FOR_APPROVE: 'Trade post created, wait for approve',
+  TRADE_POSTS_FETCHED: 'Trade posts fetched successfully',
+  AUTHOR_NOT_FOUND: 'Author not found',
+  TRADE_POST_NOT_FOUND: 'Trade post not found',
+  ITEM_NOT_FOUND: 'Item not found',
+  TRADE_PROPOSAL_CREATED: 'Trade proposal created',
+  TRADE_PROPOSAL_FETCHED: 'Trade proposal fetched',
+  TRADE_POST_STATUS_UPDATED: 'Trade post status updated',
+  TRADE_PROPOSAL_STATUS_UPDATED: 'Trade proposal status updated',
+  GET_MY_TRADES_SUCCESS: 'Get my trades success',
+  CANNOT_PROPOSE_OWN_POST: 'Cannot propose own post',
+  UNAUTHORIZED_ACCESS_TO_PROPOSALS: 'Unauthorized access to proposals',
+  GET_MY_PROPOSALS_SUCCESS: 'Get my proposals success',
+  PROPOSAL_NOT_FOUND: 'Proposal not found',
+  UNAUTHORIZED_COUNTER_OFFER: 'Unauthorized counter offer',
+  COUNTER_OFFER_CREATED: 'Counter offer created',
+  UNAUTHORIZED_ACTION: 'Unauthorized action',
+  PROPOSAL_ACCEPTED: 'Proposal accepted',
+  PROPOSAL_REJECTED: 'Proposal rejected',
+}
 
-export { USER_MESSAGES, PRODUCT_MESSAGES, CART_MESSAGES, ORDER_MESSAGES }
-
+export { USER_MESSAGES, PRODUCT_MESSAGES, CART_MESSAGES, ORDER_MESSAGES, PAYMENT_MESSAGES, TRADE_MESSAGES }

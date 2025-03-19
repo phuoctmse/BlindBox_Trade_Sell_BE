@@ -5,6 +5,7 @@ import adminService from '~/services/admin.services'
 import { CreateBeadsReqBody } from '~/models/requests/Product.request'
 import { ParamsDictionary } from 'express-serve-static-core'
 import { TokenPayload } from '~/models/requests/Account.requests'
+import { TradePostStatusReqBody } from '~/models/requests/Trade.requests'
 
 export const getAllAccountsController = async (req: Request, res: Response) => {
   const result = await adminService.getAllAccounts()
@@ -58,5 +59,20 @@ export const deleteBeadsController = async (req: Request, res: Response) => {
 
 export const getAllProductController = async (req: Request, res: Response) => {
   const result = await adminService.getAllProducts()
+  res.status(HTTP_STATUS.OK).json(result)
+}
+
+export const getAllTradePostsController = async (req: Request, res: Response) => {
+  const result = await adminService.getAllTradePosts()
+  res.status(HTTP_STATUS.OK).json(result)
+}
+
+export const UpdateTradePostStatusController = async (
+  req: Request<ParamsDictionary, any, TradePostStatusReqBody>,
+  res: Response
+) => {
+  const { id } = req.params
+  const { status } = req.body
+  const result = await adminService.updateTradePostStatus(id, status)
   res.status(HTTP_STATUS.OK).json(result)
 }

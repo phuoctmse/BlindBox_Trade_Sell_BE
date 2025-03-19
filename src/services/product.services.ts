@@ -372,6 +372,18 @@ class ProductService {
       }
     }
   }
+
+  async getAllOpenedItems() {
+    const result = await databaseServices.products
+      .find({
+        category: Category.OpenedItems
+      })
+      .toArray()
+    return {
+      message: PRODUCT_MESSAGES.PRODUCTS_FETCHED_SUCCESS,
+      result
+    }
+  }
 }
 const productService = new ProductService()
 export default productService
