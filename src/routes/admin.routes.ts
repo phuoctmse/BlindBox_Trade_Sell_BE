@@ -7,9 +7,12 @@ import {
   getAllProductController,
   getAllTradePostsController,
   getBeadsDetailsController,
+  getCreditConversionController,
+  getTradePostsDetailsController,
   updateAccountVerifyStatusController,
   updateBeadsController,
   updateBlindboxStatusController,
+  updateCreditConversionController,
   UpdateTradePostStatusController
 } from '~/controllers/admin.controllers'
 import { accessTokenValidation, adminValidation } from '~/middlewares/accounts.middlewares'
@@ -57,6 +60,27 @@ adminRouter.patch(
   accessTokenValidation,
   adminValidation,
   wrapRequestHandler(UpdateTradePostStatusController)
+)
+
+adminRouter.get(
+  '/trade-post/:id',
+  accessTokenValidation,
+  adminValidation,
+  wrapRequestHandler(getTradePostsDetailsController)
+)
+
+adminRouter.get(
+  'credit-conversion',
+  accessTokenValidation,
+  adminValidation,
+  wrapRequestHandler(getCreditConversionController)
+)
+
+adminRouter.patch(
+  'credit-conversion',
+  accessTokenValidation,
+  adminValidation,
+  wrapRequestHandler(updateCreditConversionController)
 )
 
 export default adminRouter
