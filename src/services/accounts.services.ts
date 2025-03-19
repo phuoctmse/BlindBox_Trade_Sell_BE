@@ -13,6 +13,7 @@ import axios from 'axios'
 import { ErrorWithStatus } from '~/models/Errors'
 import HTTP_STATUS from '~/constants/httpStatus'
 import { sendForgotPasswordEmail, sendVerifyRegisterEmail } from '~/utils/email'
+import redisServices from './redis.services'
 config()
 
 class AccountService {
@@ -299,6 +300,15 @@ class AccountService {
   }
 
   async logout(refreshToken: string) {
+    const decodedToken = await this.decodeRefreshToken(refreshToken)
+
+    const currentTimeInSeconds = Math.floor(Date.now() / 1000)
+    const expiryTimeInSeconds = decodedToken.exp
+    const timeLeftInSeconds = expiryTimeInSeconds - currentTimeInSeconds
+
+    if (timeLeftInSeconds > 0) {
+      await redisServices.blacklistToken(refreshToken, timeLeftInSeconds)
+    }
     await databaseServices.refreshTokens.deleteOne({ token: refreshToken })
     return {
       message: USER_MESSAGES.LOGOUT_SUCCESS
