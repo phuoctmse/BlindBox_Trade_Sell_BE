@@ -1,7 +1,11 @@
 import { Double, ObjectId } from 'mongodb'
 import slugify from 'slugify'
 import databaseServices from './database.services'
-import { CreateAccessoriesReqBody, CreateBeadsReqBody, CreateBlindBoxesReqBody } from '~/models/requests/Product.request'
+import {
+  CreateAccessoriesReqBody,
+  CreateBeadsReqBody,
+  CreateBlindBoxesReqBody
+} from '~/models/requests/Product.request'
 import { Category, ProductStatus } from '~/constants/enums'
 import Products from '~/models/schemas/Product.schema'
 import { PRODUCT_MESSAGES } from '~/constants/messages'
@@ -55,7 +59,8 @@ class ProductService {
   async getBlindBoxesDetails(slug: string, id: string) {
     const result = await databaseServices.products.findOne({
       slug,
-      _id: new ObjectId(id)
+      _id: new ObjectId(id),
+      category: Category.Blindbox
     })
     return {
       message: PRODUCT_MESSAGES.PRODUCTS_FETCHED_SUCCESS,
@@ -292,6 +297,79 @@ class ProductService {
       success: true,
       message: PRODUCT_MESSAGES.BEAD_FETCHED_SUCCESS,
       result
+    }
+  }
+
+  async getAccessoryDetail(slug: string, id: string) {
+    if (!slug || !id || !ObjectId.isValid(id)) {
+      throw new ErrorWithStatus({
+        status: HTTP_STATUS.BAD_REQUEST,
+        message: PRODUCT_MESSAGES.INVALID_PRODUCT_ID
+      })
+    }
+
+    const product = await databaseServices.products.findOne({
+      slug,
+      _id: new ObjectId(id),
+      category: Category.Accessory
+    })
+
+    if (!product) {
+      throw new ErrorWithStatus({
+        status: HTTP_STATUS.NOT_FOUND,
+        message: PRODUCT_MESSAGES.PRODUCT_NOT_FOUND
+      })
+    }
+
+    const beadDetailIds = product.accessories || []
+
+    if (beadDetailIds.length === 0) {
+      return {
+        message: PRODUCT_MESSAGES.PRODUCTS_FETCHED_SUCCESS,
+        result: {
+          product,
+          beadDetails: []
+        }
+      }
+    }
+
+    const objectIdArray = beadDetailIds.map((id) => (id instanceof ObjectId ? id : new ObjectId(id)))
+
+    const beadDetails = await databaseServices.beadDetails.find({ _id: { $in: objectIdArray } }).toArray()
+
+    const beadDetailsWithInfo = await Promise.all(
+      beadDetails.map(async (detail) => {
+        const bead = await databaseServices.beads.findOne({
+          _id: detail.beadId instanceof ObjectId ? detail.beadId : ObjectId.createFromHexString(detail.beadId)
+        })
+
+        return {
+          ...detail,
+          beadInfo: bead
+            ? {
+                _id: bead._id,
+                type: bead.type,
+                price: bead.price
+              }
+            : null
+        }
+      })
+    )
+
+    const totalQuantity = beadDetailsWithInfo.reduce((sum, detail) => sum + detail.quantity, 0)
+    const totalPrice = beadDetailsWithInfo.reduce((sum, detail) => sum + detail.totalPrice, 0)
+
+    return {
+      message: PRODUCT_MESSAGES.PRODUCTS_FETCHED_SUCCESS,
+      result: {
+        product,
+        beadDetails: beadDetailsWithInfo,
+        summary: {
+          totalBeads: beadDetailsWithInfo.length,
+          totalQuantity,
+          totalPrice
+        }
+      }
     }
   }
 }

@@ -3,7 +3,11 @@ import { ParamsDictionary } from 'express-serve-static-core'
 import HTTP_STATUS from '~/constants/httpStatus'
 import { PRODUCT_MESSAGES } from '~/constants/messages'
 import { LogoutReqBody, TokenPayload } from '~/models/requests/Account.requests'
-import { CreateAccessoriesReqBody, CreateBeadsReqBody, CreateBlindBoxesReqBody } from '~/models/requests/Product.request'
+import {
+  CreateAccessoriesReqBody,
+  CreateBeadsReqBody,
+  CreateBlindBoxesReqBody
+} from '~/models/requests/Product.request'
 import productService from '~/services/product.services'
 
 export const getMyBlindBoxesController = async (req: Request, res: Response) => {
@@ -78,5 +82,17 @@ export const getAllBeadsController = async (req: Request, res: Response) => {
 export const getBeadsDetailsController = async (req: Request, res: Response) => {
   const { id } = req.params
   const result = await productService.getBeadsDetails(id as string)
+  res.status(HTTP_STATUS.OK).json(result)
+}
+
+export const getAccessoryDetailController = async (req: Request, res: Response) => {
+  const { slug } = req.params
+  const { id } = req.query
+  if (id === undefined) {
+    res.status(HTTP_STATUS.BAD_REQUEST).json({
+      message: PRODUCT_MESSAGES.PRODUCT_ID_REQUIRED
+    })
+  }
+  const result = await productService.getAccessoryDetail(slug, id as string)
   res.status(HTTP_STATUS.OK).json(result)
 }
