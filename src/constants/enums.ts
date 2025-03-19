@@ -60,7 +60,7 @@ export enum OrderType {
 }
 
 export enum TypeBeads {
-  LowPoly,
+  Low,
   Spike,
   Solid
 }

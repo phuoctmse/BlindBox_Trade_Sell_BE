@@ -1,6 +1,6 @@
 import databaseServices from './database.services'
-import { ObjectId } from 'mongodb'
-import { AccountVerifyStatus, Category, ProductStatus } from '~/constants/enums'
+import { Double, ObjectId } from 'mongodb'
+import { AccountVerifyStatus, Category, ProductStatus, TypeBeads } from '~/constants/enums'
 import { PRODUCT_MESSAGES } from '~/constants/messages'
 import { CreateBeadsReqBody } from '~/models/requests/Product.request'
 import Beads from '~/models/schemas/Bead.schema'
@@ -39,28 +39,20 @@ class AdminService {
     }
   }
 
-  async createBead(payload: CreateBeadsReqBody) {
-    const newBeadId = new ObjectId()
-    const result = await databaseServices.beads.insertOne(
-      new Beads({
-        ...payload,
-        _id: newBeadId
-
-
-
-
-
-
-
-
-
-
-        bugggggggggggingggggggggggggg
-      })
-    )
+  async createBeads(payload: CreateBeadsReqBody) {
+    const newBeadId = new ObjectId();
+    const bead = new Beads({
+      _id: newBeadId,
+      type: payload.type,
+      price: payload.price
+    });
+  
+    const result = await databaseServices.beads.insertOne(bead);
+  
     return {
-      message: PRODUCT_MESSAGES.BEAD_CREATED_SUCCESS
-    }
+      message: PRODUCT_MESSAGES.BEAD_CREATED_SUCCESS,
+      result
+    };
   }
 
   async getAllBeads() {
