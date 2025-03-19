@@ -1,0 +1,215 @@
+openapi: 3.0.3
+info:
+  title: BlindBox Trade Sell API
+  description: |-
+    This is the API documentation for the BlindBox Trade Sell platform.
+  termsOfService: http://swagger.io/terms/
+  contact:
+    email: apiteam@swagger.io
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  version: 1.0.0
+servers:
+  - url: http://localhost:5000
+    description: Development server
+tags:
+  - name: Accounts
+    description: Operations related to user accounts
+paths:
+  /accounts/login:
+    post:
+      summary: Login
+      tags: [Accounts]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        200:
+          description: Login success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        400:
+          description: Invalid input
+  /accounts/register:
+    post:
+      summary: Register
+      tags: [Accounts]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        201:
+          description: Register success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegisterResponse'
+        400:
+          description: Invalid input
+  /accounts/logout:
+    post:
+      summary: Logout
+      tags: [Accounts]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LogoutRequest'
+      responses:
+        200:
+          description: Logout success
+        400:
+          description: Invalid input
+  /accounts/refresh-token:
+    post:
+      summary: Refresh Token
+      tags: [Accounts]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshTokenRequest'
+      responses:
+        200:
+          description: Refresh token success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RefreshTokenResponse'
+        400:
+          description: Invalid input
+  /accounts/verify-email:
+    post:
+      summary: Verify Email
+      tags: [Accounts]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VerifyEmailRequest'
+      responses:
+        200:
+          description: Email verified success
+        400:
+          description: Invalid input
+  /accounts/resend-verify-email:
+    post:
+      summary: Resend Verify Email
+      tags: [Accounts]
+      responses:
+        200:
+          description: Email verify resent success
+        400:
+          description: Invalid input
+
+components:
+  schemas:
+    Accounts:
+      type: object
+      properties:
+        id:
+          type: string
+        userName:
+          type: string
+        password:
+          type: string
+        email:
+          type: string
+        phoneNumber:
+          type: string
+        address:
+          type: string
+        email_verify_token:
+          type: string
+        forgotPasswordToken:
+          type: string
+        verify:
+          type: string
+          enum:
+            - Unverified
+            - Verified
+            - BannedBanned
+        role:
+          type: string
+          enum:
+            - Admin
+            - User
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+    LoginRequest:
+      type: object
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+    LoginResponse:
+      type: object
+      properties:
+        accessToken:
+          type: string
+        refreshToken:
+          type: string
+    RegisterRequest:
+      type: object
+      properties:
+        userName:
+          type: string
+        email:
+          type: string
+        password:
+          type: string
+        phoneNumber:
+          type: string
+    RegisterResponse:
+      type: object
+      properties:
+        accessToken:
+          type: string
+        refreshToken:
+          type: string
+    LogoutRequest:
+      type: object
+      properties:
+        refresh_token:
+          type: string
+    RefreshTokenRequest:
+      type: object
+      properties:
+        refresh_token:
+          type: string
+    RefreshTokenResponse:
+      type: object
+      properties:
+        accessToken:
+          type: string
+        refreshToken:
+          type: string
+    VerifyEmailRequest:
+      type: object
+      properties:
+        email_verified_token:
+          type: string
+    ResetPasswordRequest:
+      type: object
+      properties:
+        forgot_password_token:
+          type: string
+        password:
+          type: string
+        confirm_password:
+          type: string
