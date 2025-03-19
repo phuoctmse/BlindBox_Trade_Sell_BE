@@ -12,7 +12,6 @@ import {
 } from '~/controllers/admin.controllers'
 import { accessTokenValidation, adminValidation } from '~/middlewares/accounts.middlewares'
 import { filterMiddleware } from '~/middlewares/common.middlewares'
-import { createBeadsValidation } from '~/middlewares/products.middleware'
 import { CreateBeadsReqBody } from '~/models/requests/Product.request'
 import { wrapRequestHandler } from '~/utils/handlers'
 
@@ -27,8 +26,6 @@ adminRouter.post(
   '/beads',
   accessTokenValidation,
   adminValidation,
-  createBeadsValidation,
-  filterMiddleware<CreateBeadsReqBody>(['color', 'price', 'type']),
   wrapRequestHandler(createBeadsController)
 )
 adminRouter.get('/beads/:id', accessTokenValidation, adminValidation, wrapRequestHandler(getBeadsDetailsController))
@@ -36,7 +33,7 @@ adminRouter.put(
   '/beads/:id',
   accessTokenValidation,
   adminValidation,
-  filterMiddleware<CreateBeadsReqBody>(['color', 'price', 'type']),
+  filterMiddleware<CreateBeadsReqBody>(['price', 'type']),
   wrapRequestHandler(updateBeadsController)
 )
 adminRouter.delete('/beads/:id', accessTokenValidation, adminValidation, wrapRequestHandler(deleteBeadsController))

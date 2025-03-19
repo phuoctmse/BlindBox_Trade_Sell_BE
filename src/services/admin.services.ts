@@ -1,6 +1,6 @@
 import databaseServices from './database.services'
-import { ObjectId } from 'mongodb'
-import { AccountVerifyStatus, Category, ProductStatus } from '~/constants/enums'
+import { Double, ObjectId } from 'mongodb'
+import { AccountVerifyStatus, Category, ProductStatus, TypeBeads } from '~/constants/enums'
 import { PRODUCT_MESSAGES } from '~/constants/messages'
 import { CreateBeadsReqBody } from '~/models/requests/Product.request'
 import Beads from '~/models/schemas/Bead.schema'
@@ -39,17 +39,20 @@ class AdminService {
     }
   }
 
-  async createBead(payload: CreateBeadsReqBody) {
-    const newBeadId = new ObjectId()
-    const result = await databaseServices.beads.insertOne(
-      new Beads({
-        ...payload,
-        _id: newBeadId
-      })
-    )
+  async createBeads(payload: CreateBeadsReqBody) {
+    const newBeadId = new ObjectId();
+    const bead = new Beads({
+      _id: newBeadId,
+      type: payload.type,
+      price: payload.price
+    });
+  
+    const result = await databaseServices.beads.insertOne(bead);
+  
     return {
-      message: PRODUCT_MESSAGES.BEAD_CREATED_SUCCESS
-    }
+      message: PRODUCT_MESSAGES.BEAD_CREATED_SUCCESS,
+      result
+    };
   }
 
   async getAllBeads() {
@@ -104,20 +107,18 @@ class AdminService {
     }
   }
 
-async getAllProducts() {
-    const result = await databaseServices.products
-        .find({})
-        .toArray()
+  async getAllProducts() {
+    const result = await databaseServices.products.find({}).toArray()
 
     const formattedResult = result.map((product) => ({
-        ...product,
-        _id: product._id.toString()
+      ...product,
+      _id: product._id.toString()
     }))
     return {
-        message: PRODUCT_MESSAGES.PRODUCTS_FETCHED_SUCCESS,
-        result: formattedResult
+      message: PRODUCT_MESSAGES.PRODUCTS_FETCHED_SUCCESS,
+      result: formattedResult
     }
-}
+  }
 }
 
 const adminService = new AdminService()

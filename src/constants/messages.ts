@@ -99,7 +99,11 @@ const PRODUCT_MESSAGES = {
   BEAD_DELETED_SUCCESS: 'Bead deleted successfully',
   BEAD_LINKED_WITH_PRODUCT: 'Bead linked with product',
   BEAD_NOT_FOUND: 'Bead not found',
-  INSUFFICIENT_STOCK: 'Insufficient stock'
+  INSUFFICIENT_STOCK: 'Insufficient stock',
+  RATE_MUST_BE_A_NUMBER: 'Rate must be a number',
+  RATE_MUST_BE_BETWEEN_1_AND_5: 'Rate must be between 1 and 5',
+  CONTENT_MUST_BE_FROM_10_TO_1000: 'Content must be between 10 and 1000 characters',
+  HAVEN_T_ORDERED_THIS_PRODUCT: 'Haven\'t ordered this product',
 } as const
 
 const CART_MESSAGES = {
@@ -113,13 +117,13 @@ const CART_MESSAGES = {
   CART_ITEM_ADDED: 'Cart item added successfully',
   CART_ITEM_UPDATED: 'Cart item updated successfully',
   CART_ITEM_DELETED: 'Cart item deleted successfully',
-  CART_NOT_FOUND: 'Cart not found'
+  CART_NOT_FOUND: 'Cart not found',
 }
 
 const ORDER_MESSAGES = {
   ORDERS_FETCHED_SUCCESS: 'Orders fetched successfully',
   ORDER_NOT_FOUND: 'Order not found',
-  ORDER_CREATED_SUCCESS: 'Order created successfully',
+  ORDER_CREATED_SUCCESS: 'Order created successfully', 
   RECEIVER_INFO_REQUIRED: 'Receiver info required',
   INCOMPLETE_RECEIVER_INFO: 'Incomplete receiver info',
   INVALID_ORDER_TYPE: 'Invalid order type',
@@ -134,7 +138,16 @@ const ORDER_MESSAGES = {
   CANNOT_PROCESS_ORDER: 'Cannot process order',
   ORDER_PROCESSED_SUCCESS: 'Order processed successfully',
   CANNOT_COMPLETE_ORDER: 'Cannot complete order',
-  ORDER_COMPLETED_SUCCESS: 'Order completed successfully'
+  ORDER_COMPLETED_SUCCESS: 'Order completed successfully',
+}
+
+export const FEEDBACK_MESSAGES = {
+  FEEDBACK_CREATED_SUCCESS: 'Feedback created successfully',
+  FEEDBACKS_FETCHED_SUCCESS: 'Feedbacks fetched successfully',
+  FEEDBACK_UPDATED_SUCCESS: 'Feedback updated successfully',
+  ALREADY_LEFT_FEEDBACK: 'Already left feedback',
+  FEEDBACK_DELETED_SUCCESS: 'Feedback deleted successfully',
+  FEEDBACK_NOT_FOUND: 'Feedback not found',
 }
 
 const PAYMENT_MESSAGES = {
@@ -144,4 +157,6 @@ const PAYMENT_MESSAGES = {
   TOP_UP_INSTRUCTION_GENRATED: 'Topup instructions generated'
 }
 
-export { USER_MESSAGES, PRODUCT_MESSAGES, CART_MESSAGES, ORDER_MESSAGES, PAYMENT_MESSAGES }
+
+export { USER_MESSAGES, PRODUCT_MESSAGES, CART_MESSAGES, ORDER_MESSAGES }
+

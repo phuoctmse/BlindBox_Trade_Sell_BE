@@ -28,7 +28,7 @@ export const updateBlindboxStatusController = async (req: Request, res: Response
 
 export const createBeadsController = async (req: Request<ParamsDictionary, any, CreateBeadsReqBody>, res: Response) => {
   const payload = { ...req.body } as CreateBeadsReqBody
-  const result = await adminService.createBead(payload)
+  const result = await adminService.createBeads(payload)
   res.status(HTTP_STATUS.CREATED).json(result)
 }
 
