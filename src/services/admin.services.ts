@@ -104,20 +104,18 @@ class AdminService {
     }
   }
 
-async getAllProducts() {
-    const result = await databaseServices.products
-        .find({})
-        .toArray()
+  async getAllProducts() {
+    const result = await databaseServices.products.find({}).toArray()
 
     const formattedResult = result.map((product) => ({
-        ...product,
-        _id: product._id.toString()
+      ...product,
+      _id: product._id.toString()
     }))
     return {
-        message: PRODUCT_MESSAGES.PRODUCTS_FETCHED_SUCCESS,
-        result: formattedResult
+      message: PRODUCT_MESSAGES.PRODUCTS_FETCHED_SUCCESS,
+      result: formattedResult
     }
-}
+  }
 }
 
 const adminService = new AdminService()

@@ -73,7 +73,8 @@ class CartService {
             name: product.name,
             price: product.price,
             image: product.image,
-            quantity: product.quantity
+            quantity: product.quantity,
+            type: product.category
           }
         })
       }
