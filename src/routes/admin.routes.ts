@@ -5,10 +5,15 @@ import {
   getAllAccountsController,
   getAllBeadsController,
   getAllProductController,
+  getAllTradePostsController,
   getBeadsDetailsController,
+  getCreditConversionController,
+  getTradePostsDetailsController,
   updateAccountVerifyStatusController,
   updateBeadsController,
-  updateBlindboxStatusController
+  updateBlindboxStatusController,
+  updateCreditConversionController,
+  UpdateTradePostStatusController
 } from '~/controllers/admin.controllers'
 import { accessTokenValidation, adminValidation } from '~/middlewares/accounts.middlewares'
 import { filterMiddleware } from '~/middlewares/common.middlewares'
@@ -22,12 +27,7 @@ const adminRouter = Router()
 // adminRouter.post('/accessories', accessTokenValidation, adminValidation)
 
 adminRouter.get('/beads', accessTokenValidation, adminValidation, wrapRequestHandler(getAllBeadsController))
-adminRouter.post(
-  '/beads',
-  accessTokenValidation,
-  adminValidation,
-  wrapRequestHandler(createBeadsController)
-)
+adminRouter.post('/beads', accessTokenValidation, adminValidation, wrapRequestHandler(createBeadsController))
 adminRouter.get('/beads/:id', accessTokenValidation, adminValidation, wrapRequestHandler(getBeadsDetailsController))
 adminRouter.put(
   '/beads/:id',
@@ -52,6 +52,35 @@ adminRouter.put(
   accessTokenValidation,
   adminValidation,
   wrapRequestHandler(updateBlindboxStatusController)
+)
+
+adminRouter.get('/trade-post', accessTokenValidation, adminValidation, wrapRequestHandler(getAllTradePostsController))
+adminRouter.patch(
+  '/trade-post/:id',
+  accessTokenValidation,
+  adminValidation,
+  wrapRequestHandler(UpdateTradePostStatusController)
+)
+
+adminRouter.get(
+  '/trade-post/:id',
+  accessTokenValidation,
+  adminValidation,
+  wrapRequestHandler(getTradePostsDetailsController)
+)
+
+adminRouter.get(
+  'credit-conversion',
+  accessTokenValidation,
+  adminValidation,
+  wrapRequestHandler(getCreditConversionController)
+)
+
+adminRouter.patch(
+  'credit-conversion',
+  accessTokenValidation,
+  adminValidation,
+  wrapRequestHandler(updateCreditConversionController)
 )
 
 export default adminRouter
