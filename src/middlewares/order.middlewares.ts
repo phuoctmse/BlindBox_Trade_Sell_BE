@@ -358,7 +358,7 @@ export const validateSellerNotBuyingOwnProducts = async (req: Request, res: Resp
         continue
       }
 
-      if (product.createdBy && product.createdBy.toString() === accountId) {
+      if (product.createdBy && product.createdBy.toString() !== accountId) {
         return next(
           new ErrorWithStatus({
             status: HTTP_STATUS.FORBIDDEN,

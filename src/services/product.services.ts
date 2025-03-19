@@ -253,7 +253,7 @@ class ProductService {
     const formattedDate = `${date.getDate()}-${date.getMonth() + 1}-${date.getFullYear().toString().slice(2)}`
     productName += ` - ${formattedDate}`
 
-    const description = `Custom accessory created by ${userIdentifier} with ${beadDetailIds.length} different bead types and ${Array.from(beadColors).length} colors.`
+    const description = `Custom accessory created by ${userIdentifier} `
 
     const productId = await this.createAccessoryProduct(
       beadDetailIds,
