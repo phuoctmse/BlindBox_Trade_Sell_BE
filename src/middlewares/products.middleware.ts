@@ -1,5 +1,6 @@
 import { checkSchema, ParamSchema } from 'express-validator'
 import { WithId } from 'mongodb'
+import HTTP_STATUS from '~/constants/httpStatus'
 import { PRODUCT_MESSAGES } from '~/constants/messages'
 import { TokenPayload } from '~/models/requests/Account.requests'
 import OrderDetails from '~/models/schemas/OrderDetail.schema'
@@ -196,16 +197,17 @@ export const userOrderedValidation = validate(
         options: async (value, { req }) => {
           const { accountId } = req.decode_authorization as TokenPayload;
           const { productId } = req.body;
+
           const orders = await orderService.getOrdersByAccountId(accountId);
 
           const productExistsInOrders = orders.result.some((order: { items: WithId<OrderDetails>[] }) =>
-            order.items.some(item => item.productId.toString() === productId)
+            order.items.some(item => item.productId && item.productId.toString() === productId)
           );
-
           if (!productExistsInOrders) {
-            throw new Error(PRODUCT_MESSAGES.HAVEN_T_ORDERED_THIS_PRODUCT);
+            const error = new Error(PRODUCT_MESSAGES.HAVEN_T_ORDERED_THIS_PRODUCT);
+            (error as any).status = HTTP_STATUS.FORBIDDEN;
+            throw error;
           }
-
           return true;
         }
       }

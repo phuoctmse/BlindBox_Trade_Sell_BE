@@ -57,24 +57,49 @@ class FeedbackService {
   }
 
   async updateFeedback(feedbackId: string, payload: CreateFeedbackReqBody) {
-    const feedback = new Feedbacks({
-      _id: new ObjectId(feedbackId),
-      accountId: new ObjectId(payload.accountId),
-      productId: new ObjectId(payload.productId),
-      rate: payload.rate,
-      content: payload.content,
-      createdAt: new Date(),
-      updatedAt: new Date(),
+    const existingFeedback = await databaseServices.feedbacks.findOne({
+      _id: new ObjectId(feedbackId)
     });
-
+    if (!existingFeedback) {
+      throw new Error(FEEDBACK_MESSAGES.FEEDBACK_NOT_FOUND);
+    }
+    const updateFields: Partial<CreateFeedbackReqBody> & { updatedAt?: Date } = {};
+    if (payload.rate !== undefined) {
+      updateFields.rate = payload.rate;
+    }
+    if (payload.content !== undefined) {
+      updateFields.content = payload.content;
+    }
     const result = await databaseServices.feedbacks.updateOne(
-      { _id: feedback._id },
-      { $set: feedback }
+      { _id: new ObjectId(feedbackId) },
+      { $set: updateFields }
     );
 
     return {
-      message: FEEDBACK_MESSAGES.FEEDBACK_UPDATED_SUCCESS
+      message: FEEDBACK_MESSAGES.FEEDBACK_UPDATED_SUCCESS,
+      result
+    };
+  }
+
+  async deleteFeedback(feedbackId: string) {
+    const feedback = await databaseServices.feedbacks.findOne({
+      _id: new ObjectId(feedbackId)
+    });
+    if (!feedback) {
+      throw new Error(FEEDBACK_MESSAGES.FEEDBACK_NOT_FOUND);
     }
+    const result = await databaseServices.feedbacks.deleteOne({
+      _id: new ObjectId(feedbackId)
+    });
+    await databaseServices.products.updateOne(
+      { _id: feedback.productId },
+      { $pull: { feedBack: new ObjectId(feedbackId) } }
+    );
+
+    return {
+      message: FEEDBACK_MESSAGES.FEEDBACK_DELETED_SUCCESS,
+      result
+    };
   }
 }
 

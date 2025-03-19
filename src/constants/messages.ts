@@ -145,6 +145,8 @@ export const FEEDBACK_MESSAGES = {
   FEEDBACKS_FETCHED_SUCCESS: 'Feedbacks fetched successfully',
   FEEDBACK_UPDATED_SUCCESS: 'Feedback updated successfully',
   ALREADY_LEFT_FEEDBACK: 'Already left feedback',
+  FEEDBACK_DELETED_SUCCESS: 'Feedback deleted successfully',
+  FEEDBACK_NOT_FOUND: 'Feedback not found',
 }
 
 export { USER_MESSAGES, PRODUCT_MESSAGES, CART_MESSAGES, ORDER_MESSAGES }

@@ -24,3 +24,9 @@ export const updateFeedbackController = async (req: Request<ParamsDictionary, an
     const result = await feedbacksServices.updateFeedback(feedbackId, payload);
     res.status(HTTP_STATUS.OK).json(result);
 }
+
+export const deleteFeedbackController = async (req: Request<ParamsDictionary, any, any>, res: Response) => {
+    const { feedbackId } = req.params;
+    const result = await feedbacksServices.deleteFeedback(feedbackId);
+    res.status(HTTP_STATUS.OK).json(result);  
+}
