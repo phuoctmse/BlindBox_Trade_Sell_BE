@@ -45,6 +45,17 @@ class AdminService {
       new Beads({
         ...payload,
         _id: newBeadId
+
+
+
+
+
+
+
+
+
+
+        bugggggggggggingggggggggggggg
       })
     )
     return {
