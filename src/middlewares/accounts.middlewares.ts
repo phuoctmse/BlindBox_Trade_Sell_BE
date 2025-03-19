@@ -9,6 +9,7 @@ import { ErrorWithStatus } from '~/models/Errors'
 import { TokenPayload } from '~/models/requests/Account.requests'
 import accountService from '~/services/accounts.services'
 import databaseServices from '~/services/database.services'
+import redisServices from '~/services/redis.services'
 import { hashPassword } from '~/utils/crypto'
 import { verifyToken } from '~/utils/jwt'
 import { validate } from '~/utils/validation'
@@ -175,6 +176,16 @@ export const accessTokenValidation = validate(
                 token: access_token,
                 secretKey: process.env.JWT_SECRET_ACCESS_TOKEN as string
               })
+              const refreshToken = req.cookies?.refresh_token
+              if (refreshToken) {
+                const isBlacklisted = await redisServices.isTokenBlacklisted(refreshToken)
+                if (isBlacklisted) {
+                  throw new ErrorWithStatus({
+                    message: USER_MESSAGES.SESSION_EXPIRED,
+                    status: HTTP_STATUS.UNAUTHORIZED
+                  })
+                }
+              }
               ;(req as Request).decode_authorization = decoded_authorization
             } catch (error) {
               throw new ErrorWithStatus({
@@ -207,6 +218,13 @@ export const refreshTokenValidation = validate(
               })
             }
             try {
+              const isBlacklisted = await redisServices.isTokenBlacklisted(value)
+              if (isBlacklisted) {
+                throw new ErrorWithStatus({
+                  message: USER_MESSAGES.USED_REFRESH_TOKEN_OR_NOT_EXIST,
+                  status: HTTP_STATUS.UNAUTHORIZED
+                })
+              }
               const [decoded_refresh_token, refresh_token] = await Promise.all([
                 verifyToken({ token: value, secretKey: process.env.JWT_SECRET_REFRESH_TOKEN as string }),
                 databaseServices.refreshTokens.findOne({ token: value })
