@@ -68,14 +68,7 @@ class CartService {
           _id: item._id,
           cartQuantity: item.quantity,
           totalPrice: item.quantity * Number(product.price),
-          product: {
-            _id: product._id,
-            name: product.name,
-            price: product.price,
-            image: product.image,
-            quantity: product.quantity,
-            type: product.category
-          }
+          product
         })
       }
     }
