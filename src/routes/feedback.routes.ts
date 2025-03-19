@@ -5,7 +5,7 @@ import { userOrderedValidation, validateCreateFeedback } from "~/middlewares/pro
 import { wrapRequestHandler } from "~/utils/handlers";
 
 const feedbackRouter = Router();
-
+//request productId, rate, content
 feedbackRouter.post('/', accessTokenValidation,validateCreateFeedback ,userOrderedValidation, wrapRequestHandler(createFeedbackController));
 
 feedbackRouter.get('/:productId', accessTokenValidation, wrapRequestHandler(getFeedbacksByProductIdController))
