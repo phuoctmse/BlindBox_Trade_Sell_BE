@@ -108,9 +108,7 @@ class AdminService {
   }
 
   async getAllProducts() {
-    const result = await databaseServices.products
-      .find({})
-      .toArray()
+    const result = await databaseServices.products.find({}).toArray()
 
     const formattedResult = result.map((product) => ({
       ...product,
