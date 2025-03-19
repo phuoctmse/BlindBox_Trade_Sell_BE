@@ -68,7 +68,8 @@ const USER_MESSAGES = {
   UPDATE_SUCCESS: 'Update success',
   USER_NOT_SELLER: 'User is not a seller',
   REGISTERED_SELLING_SUCCESS: 'Registered selling success',
-  USER_NOT_ADMIN: 'User is not admin'
+  USER_NOT_ADMIN: 'User is not admin',
+  SESSION_EXPIRED: 'Session expired',
 } as const
 
 const PRODUCT_MESSAGES = {
