@@ -1,7 +1,7 @@
 import { ErrorWithStatus } from '~/models/Errors'
 import databaseServices from './database.services'
 import HTTP_STATUS from '~/constants/httpStatus'
-import { TRADE_MESSAGES } from '~/constants/messages'
+import { TRADE_MESSAGES, USER_MESSAGES } from '~/constants/messages'
 import { ProposalReqBody, TradePostReqBody } from '~/models/requests/Trade.requests'
 import { ObjectId } from 'mongodb'
 import TradePosts from '~/models/schemas/TradePost.schema'
@@ -39,6 +39,28 @@ class TradeService {
 
   async createTrade(payload: TradePostReqBody, accountId: string) {
     const { description, item, title } = payload
+    const creditConversion = await databaseServices.creditConversion.findOne()
+    if (!creditConversion) {
+      throw new ErrorWithStatus({
+        message: TRADE_MESSAGES.CREDIT_CONVERSION_NOT_FOUND,
+        status: HTTP_STATUS.INTERNAL_SERVER_ERROR
+      })
+    }
+    const userAccount = await databaseServices.accounts.findOne({
+      _id: new ObjectId(accountId)
+    })
+    if (!userAccount) {
+      throw new ErrorWithStatus({
+        message: USER_MESSAGES.USER_NOT_FOUND,
+        status: HTTP_STATUS.NOT_FOUND
+      })
+    }
+    if (userAccount.remainingCredits < creditConversion.creditCharged) {
+      throw new ErrorWithStatus({
+        message: TRADE_MESSAGES.INSUFFICIENT_CREDITS,
+        status: HTTP_STATUS.BAD_REQUEST
+      })
+    }
     const tradePost = new TradePosts({
       description,
       item,
@@ -46,11 +68,29 @@ class TradeService {
       authorId: new ObjectId(accountId)
     })
 
-    await databaseServices.tradePosts.insertOne(tradePost)
+    try {
+      await databaseServices.tradePosts.insertOne(tradePost)
 
-    return {
-      message: TRADE_MESSAGES.WAIT_FOR_APPROVE,
-      data: tradePost
+      await databaseServices.accounts.updateOne(
+        { _id: new ObjectId(accountId) },
+        { $inc: { remainingCredits: -creditConversion.creditCharged } }
+      )
+
+      return {
+        message: TRADE_MESSAGES.WAIT_FOR_APPROVE,
+        data: tradePost
+      }
+    } catch (error) {
+      try {
+        await databaseServices.tradePosts.deleteOne({ _id: tradePost._id })
+      } catch (cleanupError) {
+        console.error('Failed to clean up trade post:', cleanupError)
+      }
+
+      throw new ErrorWithStatus({
+        message: 'Failed to create trade post',
+        status: HTTP_STATUS.INTERNAL_SERVER_ERROR
+      })
     }
   }
 
@@ -275,7 +315,6 @@ class TradeService {
       })
     }
 
-
     if (originalProposal.parentProposalId) {
       // const parentProposal = await databaseServices.tradeProposals.findOne({
       //   _id: originalProposal.parentProposalId
@@ -471,7 +510,6 @@ class TradeService {
       data: proposal
     }
   }
-
 
   private async findAllRelatedProposals(rootProposalId: ObjectId): Promise<TradeProposals[]> {
     const result = []

@@ -10,6 +10,7 @@ import {
   sellerCancelOrderController
 } from '~/controllers/order.controllers'
 import { accessTokenValidation, validateRegisterSelling } from '~/middlewares/accounts.middlewares'
+import { filterMiddleware } from '~/middlewares/common.middlewares'
 import {
   createOrderValidation,
   validateCancelOrder,
@@ -18,6 +19,7 @@ import {
   validateReceiverInfo,
   validateSellerNotBuyingOwnProducts
 } from '~/middlewares/order.middlewares'
+import { CreateOrderReqBody } from '~/models/requests/Order.requests'
 import { wrapRequestHandler } from '~/utils/handlers'
 
 const orderRouter = Router()
@@ -30,6 +32,7 @@ orderRouter.post(
   validateReceiverInfo,
   validateSellerNotBuyingOwnProducts,
   createOrderValidation,
+  filterMiddleware<CreateOrderReqBody>(['orderType', 'notes', 'receiverInfo', 'paymentMethod', 'promotionId']),
   wrapRequestHandler(createOrderController)
 )
 orderRouter.patch(

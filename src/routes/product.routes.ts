@@ -9,12 +9,17 @@ import {
   updateProductController,
   getAllBeadsController,
   getAccessoryDetailController,
-  getAllOpenedItemsController
+  getAllOpenedItemsController,
+  createOpenedItemController
 } from '~/controllers/product.controllers'
 import { accessTokenValidation, validateRegisterSelling } from '~/middlewares/accounts.middlewares'
 import { filterMiddleware } from '~/middlewares/common.middlewares'
-import { createBlindBoxesValidation, validateCreateCustomization } from '~/middlewares/products.middleware'
-import { CreateBlindBoxesReqBody } from '~/models/requests/Product.request'
+import {
+  createBlindBoxesValidation,
+  validateCreateCustomization,
+  validationOpenedItem
+} from '~/middlewares/products.middleware'
+import { CreateBlindBoxesReqBody, CreateOpenedItem } from '~/models/requests/Product.request'
 import { wrapRequestHandler } from '~/utils/handlers'
 
 const productsRouter = Router()
@@ -57,5 +62,13 @@ productsRouter.post(
 productsRouter.get('/accessories/:slug', accessTokenValidation, wrapRequestHandler(getAccessoryDetailController))
 
 productsRouter.get('/opened-items', accessTokenValidation, wrapRequestHandler(getAllOpenedItemsController))
+
+productsRouter.post(
+  '/opened-items',
+  accessTokenValidation,
+  validationOpenedItem,
+  filterMiddleware<CreateOpenedItem>(['image', 'brand', 'description', 'name', 'price', 'quantity', 'condition']),
+  wrapRequestHandler(createOpenedItemController)
+)
 
 export default productsRouter

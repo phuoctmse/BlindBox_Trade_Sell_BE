@@ -4,7 +4,8 @@ import databaseServices from './database.services'
 import {
   CreateAccessoriesReqBody,
   CreateBeadsReqBody,
-  CreateBlindBoxesReqBody
+  CreateBlindBoxesReqBody,
+  CreateOpenedItem
 } from '~/models/requests/Product.request'
 import { Category, ProductStatus } from '~/constants/enums'
 import Products from '~/models/schemas/Product.schema'
@@ -381,6 +382,25 @@ class ProductService {
       .toArray()
     return {
       message: PRODUCT_MESSAGES.PRODUCTS_FETCHED_SUCCESS,
+      result
+    }
+  }
+  async createOpenedItem(payload: CreateOpenedItem, accountId: string) {
+    const newProductId = new ObjectId()
+    const slug = slugify(payload.name, { lower: true, strict: true })
+    const result = await databaseServices.products.insertOne(
+      new Products({
+        ...payload,
+        _id: newProductId,
+        createdBy: new ObjectId(accountId),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        category: Category.OpenedItems,
+        slug
+      })
+    )
+    return {
+      message: PRODUCT_MESSAGES.PRODUCT_CREATED_SUCCESS,
       result
     }
   }

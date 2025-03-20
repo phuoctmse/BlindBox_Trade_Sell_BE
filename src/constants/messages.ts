@@ -104,7 +104,8 @@ const PRODUCT_MESSAGES = {
   RATE_MUST_BE_A_NUMBER: 'Rate must be a number',
   RATE_MUST_BE_BETWEEN_1_AND_5: 'Rate must be between 1 and 5',
   CONTENT_MUST_BE_FROM_10_TO_1000: 'Content must be between 10 and 1000 characters',
-  HAVEN_T_ORDERED_THIS_PRODUCT: "Haven't ordered this product"
+  HAVEN_T_ORDERED_THIS_PRODUCT: "Haven't ordered this product",
+  CONDITION_MUST_BE_A_NUMBER: 'Condition must be a number',
 } as const
 
 const CART_MESSAGES = {
@@ -181,6 +182,10 @@ const TRADE_MESSAGES = {
   UNAUTHORIZED_ACTION: 'Unauthorized action',
   PROPOSAL_ACCEPTED: 'Proposal accepted',
   PROPOSAL_REJECTED: 'Proposal rejected',
+  INSUFFICIENT_CREDITS: 'Insufficient credits',
+  CREDIT_CONVERSION_NOT_FOUND: 'Credit conversion rate not found',
+  TRADE_POST_CANCELLED_WITH_REFUND: 'Trade post cancelled with refund',
+  TRADE_POST_CANCELLED: 'Trade post cancelled',
 }
 
 const ADMIN_MESSAGES = {
