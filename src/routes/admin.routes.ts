@@ -20,7 +20,7 @@ import {
   updateCreditConversionController,
   UpdateTradePostStatusController
 } from '~/controllers/admin.controllers'
-import { deleteProductController, deletePromotionController, editPromotionController, getAllPromotionsController } from '~/controllers/product.controllers'
+import { createPromotionController, deleteProductController, deletePromotionController, editPromotionController, getAllPromotionsController } from '~/controllers/product.controllers'
 import { accessTokenValidation, adminValidation } from '~/middlewares/accounts.middlewares'
 import { filterMiddleware } from '~/middlewares/common.middlewares'
 import { CreditConversion } from '~/models/requests/Admin.requests'
@@ -103,6 +103,7 @@ adminRouter.patch(
 )
 
 adminRouter.get('/promotions', accessTokenValidation, adminValidation, wrapRequestHandler(getAllPromotionsController))
+adminRouter.post('/promotions', accessTokenValidation, adminValidation, wrapRequestHandler(createPromotionController))
 adminRouter.put('/promotions/:promotionId', accessTokenValidation, adminValidation, wrapRequestHandler(editPromotionController))
 adminRouter.delete('/promotions/:promotionId', accessTokenValidation, adminValidation, wrapRequestHandler(deletePromotionController))
 
