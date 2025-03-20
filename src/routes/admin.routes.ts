@@ -12,6 +12,7 @@ import {
   getAllTradePostsController,
   getBeadsDetailsController,
   getCreditConversionController,
+  getDashboardStatsController,
   getTradePostsDetailsController,
   updateAccountVerifyStatusController,
   updateBeadsController,
@@ -114,6 +115,13 @@ adminRouter.patch(
   adminValidation,
   filterMiddleware<CreditConversion>(['chargedCredit', 'rate']),
   wrapRequestHandler(updateCreditConversionController)
+)
+
+adminRouter.get(
+  '/dashboard/stats',
+  accessTokenValidation,
+  adminValidation,
+  wrapRequestHandler(getDashboardStatsController)
 )
 
 export default adminRouter
