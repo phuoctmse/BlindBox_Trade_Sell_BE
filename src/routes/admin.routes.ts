@@ -2,8 +2,10 @@ import { Router } from 'express'
 import {
   createBeadsController,
   deleteBeadsController,
+  deleteFeedbackController,
   getAllAccountsController,
   getAllBeadsController,
+  getAllFeedbackController,
   getAllProductController,
   getAllTradePostsController,
   getBeadsDetailsController,
@@ -48,11 +50,13 @@ adminRouter.put(
 )
 adminRouter.get('/products', accessTokenValidation, adminValidation, wrapRequestHandler(getAllProductController))
 adminRouter.put(
-  '/blind-boxes/:slug',
+  '/products/:slug',
   accessTokenValidation,
   adminValidation,
   wrapRequestHandler(updateBlindboxStatusController)
 )
+adminRouter.get('/feedbacks', accessTokenValidation, adminValidation, wrapRequestHandler(getAllFeedbackController))
+adminRouter.delete('/feedbacks/:id', accessTokenValidation, adminValidation, wrapRequestHandler(deleteFeedbackController))
 
 adminRouter.get('/trade-post', accessTokenValidation, adminValidation, wrapRequestHandler(getAllTradePostsController))
 adminRouter.patch(

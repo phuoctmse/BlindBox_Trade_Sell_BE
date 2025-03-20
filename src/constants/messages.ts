@@ -186,6 +186,8 @@ const TRADE_MESSAGES = {
 const ADMIN_MESSAGES = {
   CREDIT_CONVERSION_FETCHED: 'Credit conversion fetched successfully',
   CREDIT_CONVERSION_UPDATED: 'Credit conversion updated successfully',
+  FEEDBACKS_FETCHED_SUCCESS: 'Feedbacks fetched successfully',
+  FEEDBACK_DELETED_SUCCESS: 'Feedback deleted successfully'
 }
 
 export { USER_MESSAGES, PRODUCT_MESSAGES, CART_MESSAGES, ORDER_MESSAGES, PAYMENT_MESSAGES, TRADE_MESSAGES, ADMIN_MESSAGES }

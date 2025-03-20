@@ -14,7 +14,7 @@ export interface CreateBlindBoxesReqBody {
 export interface CreateBeadsReqBody {
   color: string
   type: TypeBeads
-  price: Double
+  price: number
 }
 
 export interface CreateAccessoriesReqBody {

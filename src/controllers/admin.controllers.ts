@@ -58,6 +58,17 @@ export const deleteBeadsController = async (req: Request, res: Response) => {
   res.status(HTTP_STATUS.OK).json(result)
 }
 
+export const getAllFeedbackController = async (req: Request, res: Response) => {
+  const result = await adminService.getAllFeedbacks()
+  res.status(HTTP_STATUS.OK).json(result)
+}
+
+export const deleteFeedbackController = async (req: Request, res: Response) => {
+  const { id } = req.params
+  const result = await adminService.deleteFeedback(id)
+  res.status(HTTP_STATUS.OK).json(result)
+}
+
 export const getAllProductController = async (req: Request, res: Response) => {
   const result = await adminService.getAllProducts()
   res.status(HTTP_STATUS.OK).json(result)

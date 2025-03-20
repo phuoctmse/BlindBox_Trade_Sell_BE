@@ -164,6 +164,22 @@ class AdminService {
       result
     }
   }
+
+  async getAllFeedbacks() {
+    const result = await databaseServices.feedbacks.find().toArray()
+    return {
+      message: ADMIN_MESSAGES.FEEDBACKS_FETCHED_SUCCESS,
+      result
+    }
+  }
+
+  async deleteFeedback(feedbackId: string) {
+    const result = await databaseServices.feedbacks.deleteOne({ _id: new ObjectId(feedbackId) })
+    return {
+      message: ADMIN_MESSAGES.FEEDBACK_DELETED_SUCCESS,
+      result
+    }
+  }
 }
 
 const adminService = new AdminService()
