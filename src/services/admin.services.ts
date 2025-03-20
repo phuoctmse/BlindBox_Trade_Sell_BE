@@ -1,7 +1,9 @@
 import databaseServices from './database.services'
 import { Double, ObjectId } from 'mongodb'
-import { AccountVerifyStatus, Category, ProductStatus, TypeBeads } from '~/constants/enums'
+import { AccountVerifyStatus, Category, ProductStatus, TradeStatus, TypeBeads } from '~/constants/enums'
+import HTTP_STATUS from '~/constants/httpStatus'
 import { ADMIN_MESSAGES, PRODUCT_MESSAGES, TRADE_MESSAGES } from '~/constants/messages'
+import { ErrorWithStatus } from '~/models/Errors'
 import { CreditConversion } from '~/models/requests/Admin.requests'
 import { CreateBeadsReqBody } from '~/models/requests/Product.request'
 import Beads from '~/models/schemas/Bead.schema'
@@ -128,7 +130,72 @@ class AdminService {
     }
   }
   async updateTradePostStatus(id: string, status: number) {
-    const result = await databaseServices.tradePosts.updateOne({ _id: new ObjectId(id) }, { $set: { status } })
+    const tradePostId = new ObjectId(id)
+
+    const tradePost = await databaseServices.tradePosts.findOne({ _id: tradePostId })
+    const creditConversion = await databaseServices.creditConversion.findOne()
+    if (!creditConversion) {
+      throw new ErrorWithStatus({
+        message: TRADE_MESSAGES.CREDIT_CONVERSION_NOT_FOUND,
+        status: HTTP_STATUS.INTERNAL_SERVER_ERROR
+      })
+    }
+
+    if (!tradePost) {
+      return {
+        message: TRADE_MESSAGES.TRADE_POST_NOT_FOUND,
+        success: false
+      }
+    }
+
+    if (status === TradeStatus.Cancelled && tradePost.status !== TradeStatus.Completed) {
+      const creditToRefund = creditConversion.creditCharged
+
+      await databaseServices.tradePosts.updateOne(
+        { _id: tradePostId },
+        {
+          $set: {
+            status,
+            cancelledAt: new Date(),
+            updatedAt: new Date()
+          }
+        }
+      )
+
+      // If there are credits to refund and we know who to refund to
+      if (creditToRefund > 0 && tradePost.authorId) {
+        // Refund credits to the post author
+        await databaseServices.accounts.updateOne(
+          { _id: tradePost.authorId },
+          { $inc: { remainingCredits: creditToRefund } }
+        )
+
+        return {
+          message: TRADE_MESSAGES.TRADE_POST_CANCELLED_WITH_REFUND,
+          result: {
+            postId: tradePostId,
+            authorId: tradePost.authorId,
+            creditsRefunded: creditToRefund
+          }
+        }
+      }
+
+      return {
+        message: TRADE_MESSAGES.TRADE_POST_CANCELLED,
+        result: { postId: tradePostId }
+      }
+    }
+
+    const result = await databaseServices.tradePosts.updateOne(
+      { _id: tradePostId },
+      {
+        $set: {
+          status,
+          updatedAt: new Date()
+        }
+      }
+    )
+
     return {
       message: TRADE_MESSAGES.TRADE_POST_STATUS_UPDATED,
       result

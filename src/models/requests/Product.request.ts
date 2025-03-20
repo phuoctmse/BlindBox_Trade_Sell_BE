@@ -12,7 +12,6 @@ export interface CreateBlindBoxesReqBody {
 }
 
 export interface CreateBeadsReqBody {
-  color: string
   type: TypeBeads
   price: number
 }
@@ -26,4 +25,14 @@ export interface CreateAccessoriesReqBody {
     }
   ]
   image: string
+}
+
+export interface CreateOpenedItem {
+  image: string
+  name: string
+  description: string
+  quantity: number
+  price: Double
+  brand: string
+  condition: number
 }

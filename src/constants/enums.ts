@@ -67,10 +67,11 @@ export enum TypeBeads {
 
 export enum TradeStatus {
   Processing,
-  Sent,
-  Approved,
+  Sent, //Sent to Admin
+  Approved, //Admin
+  Cancelled, //Admin
   Countered,
   Accepted,
   Rejected,
-  Completed
+  Completed,
 }

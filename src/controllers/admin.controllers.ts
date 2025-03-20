@@ -7,6 +7,7 @@ import { ParamsDictionary } from 'express-serve-static-core'
 import { TokenPayload } from '~/models/requests/Account.requests'
 import { TradePostStatusReqBody } from '~/models/requests/Trade.requests'
 import { CreditConversion } from '~/models/requests/Admin.requests'
+import { TradeStatus } from '~/constants/enums'
 
 export const getAllAccountsController = async (req: Request, res: Response) => {
   const result = await adminService.getAllAccounts()
@@ -85,6 +86,9 @@ export const UpdateTradePostStatusController = async (
 ) => {
   const { id } = req.params
   const { status } = req.body
+  if (status !== TradeStatus.Cancelled && status !== TradeStatus.Approved) {
+    throw new Error('Invalid status')
+  }
   const result = await adminService.updateTradePostStatus(id, status)
   res.status(HTTP_STATUS.OK).json(result)
 }

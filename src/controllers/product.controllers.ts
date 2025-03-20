@@ -6,7 +6,8 @@ import { LogoutReqBody, TokenPayload } from '~/models/requests/Account.requests'
 import {
   CreateAccessoriesReqBody,
   CreateBeadsReqBody,
-  CreateBlindBoxesReqBody
+  CreateBlindBoxesReqBody,
+  CreateOpenedItem
 } from '~/models/requests/Product.request'
 import productService from '~/services/product.services'
 
@@ -100,4 +101,14 @@ export const getAccessoryDetailController = async (req: Request, res: Response) 
 export const getAllOpenedItemsController = async (req: Request, res: Response) => {
   const result = await productService.getAllOpenedItems()
   res.status(HTTP_STATUS.OK).json(result)
+}
+
+export const createOpenedItemController = async (
+  req: Request<ParamsDictionary, any, CreateOpenedItem>,
+  res: Response
+) => {
+  const { accountId } = req.decode_authorization as TokenPayload
+  const payload = { ...req.body }
+  const result = await productService.createOpenedItem(payload, accountId)
+  res.status(HTTP_STATUS.CREATED).json(result)
 }
