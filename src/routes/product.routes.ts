@@ -1,4 +1,5 @@
 import { Router } from 'express'
+import { wrap } from 'lodash'
 import {
   createAccessoriesController,
   createBlindBoxesController,
@@ -10,7 +11,12 @@ import {
   getAllBeadsController,
   getAccessoryDetailController,
   getAllOpenedItemsController,
-  createOpenedItemController
+  createOpenedItemController,
+  getPromotionsBySellerIdController,
+  createPromotionController,
+  editPromotionController,
+  deletePromotionController,
+  getAllPromotionsController
 } from '~/controllers/product.controllers'
 import { accessTokenValidation, validateRegisterSelling } from '~/middlewares/accounts.middlewares'
 import { filterMiddleware } from '~/middlewares/common.middlewares'
@@ -71,4 +77,9 @@ productsRouter.post(
   wrapRequestHandler(createOpenedItemController)
 )
 
+productsRouter.get('/promotions', accessTokenValidation, wrapRequestHandler(getAllPromotionsController))
+productsRouter.get('/seller/promotions', accessTokenValidation, validateRegisterSelling, wrapRequestHandler(getPromotionsBySellerIdController))
+productsRouter.post('/seller/promotions', accessTokenValidation, validateRegisterSelling, wrapRequestHandler(createPromotionController))
+productsRouter.put('/seller/promotions/:promotionId', accessTokenValidation, validateRegisterSelling, wrapRequestHandler(editPromotionController))
+productsRouter.delete('/seller/promotions/:promotionId', accessTokenValidation, validateRegisterSelling, wrapRequestHandler(deletePromotionController))
 export default productsRouter

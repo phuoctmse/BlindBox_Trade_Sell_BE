@@ -106,6 +106,11 @@ const PRODUCT_MESSAGES = {
   CONTENT_MUST_BE_FROM_10_TO_1000: 'Content must be between 10 and 1000 characters',
   HAVEN_T_ORDERED_THIS_PRODUCT: "Haven't ordered this product",
   CONDITION_MUST_BE_A_NUMBER: 'Condition must be a number',
+  PROMOTION_FETCHED_SUCCESS: 'Promotion fetched successfully',
+  PROMOTION_CREATED_SUCCESS: 'Promotion created successfully',
+  PROMOTION_UPDATED_SUCCESS: 'Promotion updated successfully',
+  PROMOTION_DELETED_SUCCESS: 'Promotion deleted successfully',
+  THIS_PROMOTION_IS_NOT_YOURS: 'This promotion is not yours',
 } as const
 
 const CART_MESSAGES = {
@@ -192,7 +197,9 @@ const ADMIN_MESSAGES = {
   CREDIT_CONVERSION_FETCHED: 'Credit conversion fetched successfully',
   CREDIT_CONVERSION_UPDATED: 'Credit conversion updated successfully',
   FEEDBACKS_FETCHED_SUCCESS: 'Feedbacks fetched successfully',
-  FEEDBACK_DELETED_SUCCESS: 'Feedback deleted successfully'
+  FEEDBACK_DELETED_SUCCESS: 'Feedback deleted successfully',
+  ACCOUNT_DELETED_SUCCESS: 'Account deleted successfully',
+  PROMOTIONS_FETCHED_SUCCESS: 'Promotions fetched successfully',
 }
 
 export { USER_MESSAGES, PRODUCT_MESSAGES, CART_MESSAGES, ORDER_MESSAGES, PAYMENT_MESSAGES, TRADE_MESSAGES, ADMIN_MESSAGES }

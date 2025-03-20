@@ -7,7 +7,8 @@ import {
   CreateAccessoriesReqBody,
   CreateBeadsReqBody,
   CreateBlindBoxesReqBody,
-  CreateOpenedItem
+  CreateOpenedItem,
+  CreatePromotions
 } from '~/models/requests/Product.request'
 import productService from '~/services/product.services'
 
@@ -111,4 +112,36 @@ export const createOpenedItemController = async (
   const payload = { ...req.body }
   const result = await productService.createOpenedItem(payload, accountId)
   res.status(HTTP_STATUS.CREATED).json(result)
+}
+
+export const getPromotionsBySellerIdController = async (req: Request, res: Response) => {
+  const { accountId } = req.decode_authorization as TokenPayload
+  const sellerId = accountId
+  const result = await productService.getPromotionBySellerId(sellerId)
+  res.status(HTTP_STATUS.OK).json(result)
+}
+
+export const getAllPromotionsController = async (req: Request, res: Response) => {
+  const result = await productService.getAllPromotions()
+  res.status(HTTP_STATUS.OK).json(result)
+}
+
+export const createPromotionController = async (req: Request<ParamsDictionary, any, CreatePromotions>, res: Response) => {
+  const { accountId } = req.decode_authorization as TokenPayload
+  const payload = { ...req.body }
+  const result = await productService.createPromotion(payload, accountId)
+  res.status(HTTP_STATUS.CREATED).json(result)
+}
+
+export const editPromotionController = async (req: Request<ParamsDictionary, any, CreatePromotions>, res: Response) => {
+  const { promotionId } = req.params
+  const payload = { ...req.body }
+  const result = await productService.editPromotion(payload, promotionId)
+  res.status(HTTP_STATUS.OK).json(result)
+}
+
+export const deletePromotionController = async (req: Request, res: Response) => {
+  const { promotionId } = req.params
+  const result = await productService.deletePromotion(promotionId)
+  res.status(HTTP_STATUS.OK).json(result)
 }

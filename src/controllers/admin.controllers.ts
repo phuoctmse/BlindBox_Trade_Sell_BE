@@ -21,11 +21,23 @@ export const updateAccountVerifyStatusController = async (req: Request, res: Res
   res.status(HTTP_STATUS.OK).json(result)
 }
 
+export const deleteAccountController = async (req: Request, res: Response) => {
+  const { accountId } = req.params
+  const result = await adminService.deleteAccount(accountId)
+  res.status(HTTP_STATUS.OK).json(result)
+}
+
 export const updateBlindboxStatusController = async (req: Request, res: Response) => {
   const { slug } = req.params
   const { id } = req.query
   const { status } = req.body
   const result = await adminService.updateBlindboxStatus(slug, id as string, status)
+  res.status(HTTP_STATUS.OK).json(result)
+}
+
+export const deleteProductController = async (req: Request, res: Response) => {
+  const { id } = req.params
+  const result = await adminService.deleteProduct(id)
   res.status(HTTP_STATUS.OK).json(result)
 }
 
@@ -110,5 +122,10 @@ export const updateCreditConversionController = async (
 ) => {
   const payload = { ...req.body }
   const result = await adminService.updateCreditConversion(payload)
+  res.status(HTTP_STATUS.OK).json(result)
+}
+
+export const getProductWithAccessoriesController = async (req: Request, res: Response) => {
+  const result = await adminService.getProductWithAccessories()
   res.status(HTTP_STATUS.OK).json(result)
 }
