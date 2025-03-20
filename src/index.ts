@@ -15,7 +15,6 @@ import { UPLOAD_DIR } from './constants/dir'
 import adminRouter from './routes/admin.routes'
 import cartRouter from './routes/cart.routes'
 import orderRouter from './routes/order.routes'
-import { setupAutoCompleteOrders } from './utils/cronjob'
 import { initSocketServer } from './utils/socket'
 import http from 'http'
 import feedbackRouter from './routes/feedback.routes'
@@ -42,9 +41,7 @@ const swaggerDocument = YAML.load(path.join(__dirname, '../blindbox-swagger.yaml
 initFolder()
 
 // Connect to database
-databaseServices.connect().then(() => {
-  setupAutoCompleteOrders()
-})
+databaseServices.connect()
 redisServices.connect()
 // Middleware
 app.use(express.json())

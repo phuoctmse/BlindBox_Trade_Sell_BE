@@ -129,3 +129,8 @@ export const getProductWithAccessoriesController = async (req: Request, res: Res
   const result = await adminService.getProductWithAccessories()
   res.status(HTTP_STATUS.OK).json(result)
 }
+
+export const getDashboardStatsController = async (req: Request, res: Response) => {
+  const result = await adminService.getDashboardStats()
+  res.status(HTTP_STATUS.OK).json(result)
+}
