@@ -247,6 +247,53 @@ class AdminService {
       result
     }
   }
+
+  async deleteAccount(accountId: string) {
+    const result = await databaseServices.accounts.deleteOne({ _id: new ObjectId(accountId) })
+    return {
+      message: ADMIN_MESSAGES.ACCOUNT_DELETED_SUCCESS,
+      result
+    }
+  }
+
+  async getProductWithAccessories() {
+    const result = await databaseServices.products.find({
+      accessories: { $exists: true, $ne: [] }
+    }).toArray()
+    
+    const formattedProducts = result.map(product => ({
+      _id: product._id.toString(),
+      name: product.name,
+      slug: product.slug,
+      description: product.description,
+      quantity: product.quantity,
+      price: product.price,
+      category: product.category,
+      image: product.image,
+      createdBy: product.createdBy.toString(),
+      status: product.status,
+      brand: product.brand || '',
+      feedBack: product.feedBack || [],
+      openedItems: product.openedItems || {},
+      blindBoxes: product.blindBoxes || {},
+      accessories: product.accessories || [],
+      createdAt: product.createdAt,
+      updatedAt: product.updatedAt
+    }))
+
+    return {
+      message: PRODUCT_MESSAGES.PRODUCTS_FETCHED_SUCCESS,
+      result: formattedProducts
+    }
+  }
+
+  async deleteProduct(productId: string) {
+    const result = await databaseServices.products.deleteOne({ _id: new ObjectId(productId) })
+    return {
+      message: PRODUCT_MESSAGES.PRODUCT_DELETED_SUCCESS,
+      result
+    }
+  }
 }
 
 const adminService = new AdminService()

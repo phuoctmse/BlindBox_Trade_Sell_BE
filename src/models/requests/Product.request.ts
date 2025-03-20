@@ -36,3 +36,11 @@ export interface CreateOpenedItem {
   brand: string
   condition: number
 }
+
+export interface CreatePromotions {
+  name: string
+  discountRate: number
+  startDate: Date
+  endDate: Date
+  isActive?: boolean
+}

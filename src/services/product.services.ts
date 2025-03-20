@@ -5,7 +5,8 @@ import {
   CreateAccessoriesReqBody,
   CreateBeadsReqBody,
   CreateBlindBoxesReqBody,
-  CreateOpenedItem
+  CreateOpenedItem,
+  CreatePromotions
 } from '~/models/requests/Product.request'
 import { Category, ProductStatus } from '~/constants/enums'
 import Products from '~/models/schemas/Product.schema'
@@ -14,6 +15,7 @@ import BeadDetails from '~/models/schemas/BeadDetails.schema'
 import { config } from 'dotenv'
 import { ErrorWithStatus } from '~/models/Errors'
 import HTTP_STATUS from '~/constants/httpStatus'
+import Promotions from '~/models/schemas/Promotion.schema'
 config()
 
 class ProductService {
@@ -401,6 +403,57 @@ class ProductService {
     )
     return {
       message: PRODUCT_MESSAGES.PRODUCT_CREATED_SUCCESS,
+      result
+    }
+  }
+
+  async getPromotionBySellerId(sellerId: string) {
+    const result = await databaseServices.promotions.find({ sellerId: new ObjectId(sellerId) }).toArray()
+    return {
+      message: PRODUCT_MESSAGES.PROMOTION_FETCHED_SUCCESS,
+      result
+    }
+  }
+
+  async getAllPromotions() {
+    const result = await databaseServices.promotions.find().toArray()
+    return {
+      message: PRODUCT_MESSAGES.PROMOTION_FETCHED_SUCCESS,
+      result
+    }
+  }
+
+  async createPromotion(payload: CreatePromotions, accountId: string) {
+    const newPromotionId = new ObjectId()
+    const result = await databaseServices.promotions.insertOne(
+      new Promotions({
+        ...payload,
+        _id: newPromotionId,
+        isActive: true,
+        sellerId: new ObjectId(accountId)
+      })
+    )
+    return {
+      message: PRODUCT_MESSAGES.PROMOTION_CREATED_SUCCESS,
+      result
+    }
+  }
+
+  async editPromotion(payload: CreatePromotions, promotionId: string) {
+    const result = await databaseServices.promotions.updateOne(
+      { _id: new ObjectId(promotionId) },
+      { $set: payload }
+    )
+    return {
+      message: PRODUCT_MESSAGES.PROMOTION_UPDATED_SUCCESS,
+      result
+    }
+  }
+
+  async deletePromotion(promotionId: string) {
+    const result = await databaseServices.promotions.deleteOne({ _id: new ObjectId(promotionId) })
+    return {
+      message: PRODUCT_MESSAGES.PROMOTION_DELETED_SUCCESS,
       result
     }
   }

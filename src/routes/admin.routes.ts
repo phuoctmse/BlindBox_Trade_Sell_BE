@@ -1,6 +1,8 @@
 import { Router } from 'express'
+import { wrap } from 'lodash'
 import {
   createBeadsController,
+  deleteAccountController,
   deleteBeadsController,
   deleteFeedbackController,
   getAllAccountsController,
@@ -10,6 +12,7 @@ import {
   getAllTradePostsController,
   getBeadsDetailsController,
   getCreditConversionController,
+  getProductWithAccessoriesController,
   getTradePostsDetailsController,
   updateAccountVerifyStatusController,
   updateBeadsController,
@@ -17,6 +20,7 @@ import {
   updateCreditConversionController,
   UpdateTradePostStatusController
 } from '~/controllers/admin.controllers'
+import { createPromotionController, deleteProductController, deletePromotionController, editPromotionController, getAllPromotionsController } from '~/controllers/product.controllers'
 import { accessTokenValidation, adminValidation } from '~/middlewares/accounts.middlewares'
 import { filterMiddleware } from '~/middlewares/common.middlewares'
 import { CreditConversion } from '~/models/requests/Admin.requests'
@@ -55,6 +59,7 @@ adminRouter.put(
   adminValidation,
   wrapRequestHandler(updateAccountVerifyStatusController)
 )
+adminRouter.delete('/accounts/:accountId', accessTokenValidation, adminValidation, wrapRequestHandler(deleteAccountController))
 adminRouter.get('/products', accessTokenValidation, adminValidation, wrapRequestHandler(getAllProductController))
 adminRouter.put(
   '/products/:slug',
@@ -62,8 +67,10 @@ adminRouter.put(
   adminValidation,
   wrapRequestHandler(updateBlindboxStatusController)
 )
+adminRouter.delete('/products/:id', accessTokenValidation, adminValidation, wrapRequestHandler(deleteProductController))
 adminRouter.get('/feedbacks', accessTokenValidation, adminValidation, wrapRequestHandler(getAllFeedbackController))
 adminRouter.delete('/feedbacks/:id', accessTokenValidation, adminValidation, wrapRequestHandler(deleteFeedbackController))
+adminRouter.get('/products-accessories', accessTokenValidation, adminValidation, wrapRequestHandler(getProductWithAccessoriesController))
 
 adminRouter.get('/trade-post', accessTokenValidation, adminValidation, wrapRequestHandler(getAllTradePostsController))
 adminRouter.patch(
@@ -94,5 +101,10 @@ adminRouter.patch(
   filterMiddleware<CreditConversion>(['chargedCredit', 'rate']),
   wrapRequestHandler(updateCreditConversionController)
 )
+
+adminRouter.get('/promotions', accessTokenValidation, adminValidation, wrapRequestHandler(getAllPromotionsController))
+adminRouter.post('/promotions', accessTokenValidation, adminValidation, wrapRequestHandler(createPromotionController))
+adminRouter.put('/promotions/:promotionId', accessTokenValidation, adminValidation, wrapRequestHandler(editPromotionController))
+adminRouter.delete('/promotions/:promotionId', accessTokenValidation, adminValidation, wrapRequestHandler(deletePromotionController))
 
 export default adminRouter
