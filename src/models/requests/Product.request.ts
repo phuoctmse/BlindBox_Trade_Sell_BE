@@ -12,6 +12,7 @@ export interface CreateBlindBoxesReqBody {
 }
 
 export interface CreateBeadsReqBody {
+  color: string
   type: TypeBeads
   price: number
 }
@@ -23,6 +24,6 @@ export interface CreateAccessoriesReqBody {
       quantity: number
       beadId: string
     }
-  ],
+  ]
   image: string
 }

@@ -7,7 +7,7 @@ import fs from 'fs'
 import fsPromise from 'fs/promises'
 import { config } from 'dotenv'
 import { uploadFileToS3 } from '~/utils/s3'
-import mime from 'mime'
+// import mime from 'mime'
 config()
 
 class MediasService {
@@ -18,10 +18,11 @@ class MediasService {
     const newPath = path.resolve(UPLOAD_DIR, newFullFileName)
     sharp.cache(false)
     await sharp(file.filepath).png().toFile(newPath)
+    const mimeModule = await import('mime')
     const s3result = await uploadFileToS3({
       fileName: newFullFileName,
       filePath: newPath,
-      contentType: mime.getType(newFullFileName) as string
+      contentType: mimeModule.default.getType(newFullFileName) as string
     })
     await Promise.all([fsPromise.unlink(file.filepath), fsPromise.unlink(newPath)])
 

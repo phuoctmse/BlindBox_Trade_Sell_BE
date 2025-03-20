@@ -1,7 +1,8 @@
 import databaseServices from './database.services'
 import { Double, ObjectId } from 'mongodb'
 import { AccountVerifyStatus, Category, ProductStatus, TypeBeads } from '~/constants/enums'
-import { PRODUCT_MESSAGES } from '~/constants/messages'
+import { ADMIN_MESSAGES, PRODUCT_MESSAGES, TRADE_MESSAGES } from '~/constants/messages'
+import { CreditConversion } from '~/models/requests/Admin.requests'
 import { CreateBeadsReqBody } from '~/models/requests/Product.request'
 import Beads from '~/models/schemas/Bead.schema'
 
@@ -40,19 +41,19 @@ class AdminService {
   }
 
   async createBeads(payload: CreateBeadsReqBody) {
-    const newBeadId = new ObjectId();
+    const newBeadId = new ObjectId()
     const bead = new Beads({
       _id: newBeadId,
       type: payload.type,
       price: payload.price
-    });
-  
-    const result = await databaseServices.beads.insertOne(bead);
-  
+    })
+
+    const result = await databaseServices.beads.insertOne(bead)
+
     return {
       message: PRODUCT_MESSAGES.BEAD_CREATED_SUCCESS,
       result
-    };
+    }
   }
 
   async getAllBeads() {
@@ -117,6 +118,50 @@ class AdminService {
     return {
       message: PRODUCT_MESSAGES.PRODUCTS_FETCHED_SUCCESS,
       result: formattedResult
+    }
+  }
+  async getAllTradePosts() {
+    const result = await databaseServices.tradePosts.find().toArray()
+    return {
+      message: TRADE_MESSAGES.TRADE_POSTS_FETCHED,
+      result
+    }
+  }
+  async updateTradePostStatus(id: string, status: number) {
+    const result = await databaseServices.tradePosts.updateOne({ _id: new ObjectId(id) }, { $set: { status } })
+    return {
+      message: TRADE_MESSAGES.TRADE_POST_STATUS_UPDATED,
+      result
+    }
+  }
+
+  async getTradePostDetails(id: string) {
+    const result = await databaseServices.tradePosts.findOne({ _id: new ObjectId(id) })
+    return {
+      message: TRADE_MESSAGES.TRADE_POSTS_FETCHED,
+      result
+    }
+  }
+  async getCreditConversion() {
+    const result = await databaseServices.creditConversion.find().toArray()
+    return {
+      message: ADMIN_MESSAGES.CREDIT_CONVERSION_FETCHED,
+      result
+    }
+  }
+  async updateCreditConversion(payload: CreditConversion) {
+    const result = await databaseServices.creditConversion.updateOne(
+      {},
+      {
+        $set: {
+          rate: payload.rate,
+          chargedCredit: payload.chargedCredit
+        }
+      }
+    )
+    return {
+      message: ADMIN_MESSAGES.CREDIT_CONVERSION_UPDATED,
+      result
     }
   }
 }

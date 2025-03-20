@@ -4,7 +4,7 @@ import { PaymentStatus, OrderStatus } from '~/constants/enums'
 import Transactions from '~/models/schemas/Transaction.schema'
 import { ErrorWithStatus } from '~/models/Errors'
 import HTTP_STATUS from '~/constants/httpStatus'
-import { ORDER_MESSAGES, USER_MESSAGES } from '~/constants/messages'
+import { ORDER_MESSAGES, PAYMENT_MESSAGES, USER_MESSAGES } from '~/constants/messages'
 
 class PaymentService {
   async processWebhook(payload: any) {
@@ -33,7 +33,7 @@ class PaymentService {
     } else {
       throw new ErrorWithStatus({
         status: HTTP_STATUS.BAD_REQUEST,
-        message: 'Invalid payment type'
+        message: PAYMENT_MESSAGES.INVALID_PAYMENT_GATEWAY
       })
     }
   }
@@ -105,7 +105,7 @@ class PaymentService {
     )
 
     return {
-      message: 'Order payment processed successfully',
+      message: PAYMENT_MESSAGES.PAYMENT_PROCESSED_SUCCESS,
       orderId: order._id,
       transactionId: transaction._id
     }
@@ -159,7 +159,7 @@ class PaymentService {
     if (!creditConversion) {
       throw new ErrorWithStatus({
         status: HTTP_STATUS.INTERNAL_SERVER_ERROR,
-        message: 'Credit conversion rate not found'
+        message: PAYMENT_MESSAGES.CREDIT_CONVERSION_NOT_FOUND
       })
     }
 
@@ -173,7 +173,7 @@ class PaymentService {
     )
 
     return {
-      message: 'Credit topup processed successfully',
+      message: PAYMENT_MESSAGES.TOP_UP_INSTRUCTION_GENRATED,
       accountId,
       transactionId: transaction._id,
       creditsAdded: creditsToAdd

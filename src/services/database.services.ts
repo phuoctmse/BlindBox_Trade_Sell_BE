@@ -13,6 +13,8 @@ import Promotions from '~/models/schemas/Promotion.schema'
 import Transactions from '~/models/schemas/Transaction.schema'
 import CreditConversions from '~/models/schemas/CreditConversion.schema'
 import Feedbacks from '~/models/schemas/Feedback.schema'
+import TradePosts from '~/models/schemas/TradePost.schema'
+import TradeProposals from '~/models/schemas/TradeProposal.schema'
 config()
 
 const uri = process.env.MONGODB_URL as string
@@ -85,6 +87,14 @@ class DatabaseServices {
 
   get feedbacks(): Collection<Feedbacks> {
     return this.db.collection(process.env.DB_FEEDBACKS_COLLECTION as string)
+  }
+
+  get tradePosts(): Collection<TradePosts> {
+    return this.db.collection(process.env.DB_TRADE_POSTS_COLLECTION as string)
+  }
+
+  get tradeProposals(): Collection<TradeProposals> {
+    return this.db.collection(process.env.DB_TRADE_PROPOSALS_COLLECTION as string)
   }
 }
 

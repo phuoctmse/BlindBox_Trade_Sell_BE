@@ -64,3 +64,13 @@ export enum TypeBeads {
   Spike,
   Solid
 }
+
+export enum TradeStatus {
+  Processing,
+  Sent,
+  Approved,
+  Countered,
+  Accepted,
+  Rejected,
+  Completed
+}
