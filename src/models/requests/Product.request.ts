@@ -13,7 +13,7 @@ export interface CreateBlindBoxesReqBody {
 
 export interface CreateBeadsReqBody {
   type: TypeBeads
-  price: Double
+  price: number
 }
 
 export interface CreateAccessoriesReqBody {

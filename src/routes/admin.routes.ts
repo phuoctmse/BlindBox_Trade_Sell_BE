@@ -48,7 +48,7 @@ adminRouter.put(
 )
 adminRouter.get('/products', accessTokenValidation, adminValidation, wrapRequestHandler(getAllProductController))
 adminRouter.put(
-  '/blind-boxes/:slug',
+  '/products/:slug',
   accessTokenValidation,
   adminValidation,
   wrapRequestHandler(updateBlindboxStatusController)
