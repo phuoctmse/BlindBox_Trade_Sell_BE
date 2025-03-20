@@ -2,8 +2,10 @@ import { Router } from 'express'
 import {
   createBeadsController,
   deleteBeadsController,
+  deleteFeedbackController,
   getAllAccountsController,
   getAllBeadsController,
+  getAllFeedbackController,
   getAllProductController,
   getAllTradePostsController,
   getBeadsDetailsController,
@@ -53,6 +55,8 @@ adminRouter.put(
   adminValidation,
   wrapRequestHandler(updateBlindboxStatusController)
 )
+adminRouter.get('/feedbacks', accessTokenValidation, adminValidation, wrapRequestHandler(getAllFeedbackController))
+adminRouter.delete('/feedbacks/:id', accessTokenValidation, adminValidation, wrapRequestHandler(deleteFeedbackController))
 
 adminRouter.get('/trade-post', accessTokenValidation, adminValidation, wrapRequestHandler(getAllTradePostsController))
 adminRouter.patch(
