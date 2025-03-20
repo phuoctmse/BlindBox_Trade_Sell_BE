@@ -1,6 +1,6 @@
 import databaseServices from './database.services'
 import { Double, ObjectId } from 'mongodb'
-import { AccountVerifyStatus, Category, ProductStatus, TradeStatus, TypeBeads } from '~/constants/enums'
+import { AccountVerifyStatus, Category, OrderStatus, ProductStatus, TradeStatus, TypeBeads } from '~/constants/enums'
 import HTTP_STATUS from '~/constants/httpStatus'
 import { ADMIN_MESSAGES, PRODUCT_MESSAGES, TRADE_MESSAGES } from '~/constants/messages'
 import { ErrorWithStatus } from '~/models/Errors'
@@ -257,11 +257,13 @@ class AdminService {
   }
 
   async getProductWithAccessories() {
-    const result = await databaseServices.products.find({
-      accessories: { $exists: true, $ne: [] }
-    }).toArray()
-    
-    const formattedProducts = result.map(product => ({
+    const result = await databaseServices.products
+      .find({
+        accessories: { $exists: true, $ne: [] }
+      })
+      .toArray()
+
+    const formattedProducts = result.map((product) => ({
       _id: product._id.toString(),
       name: product.name,
       slug: product.slug,
@@ -292,6 +294,248 @@ class AdminService {
     return {
       message: PRODUCT_MESSAGES.PRODUCT_DELETED_SUCCESS,
       result
+    }
+  }
+
+  async getDashboardStats() {
+    // Calculate date for last 30 days
+    const thirtyDaysAgo = new Date()
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
+
+    // ALL-TIME STATS
+    // Product statistics
+    const activeProducts = await databaseServices.products.countDocuments({
+      status: ProductStatus.Active
+    })
+
+    const inactiveProducts = await databaseServices.products.countDocuments({
+      status: ProductStatus.Inactive
+    })
+
+    const outOfStockProducts = await databaseServices.products.countDocuments({
+      status: ProductStatus.Outstock
+    })
+
+    // Order statistics - all time
+    const totalOrders = await databaseServices.orders.countDocuments({})
+
+    const ordersByStatus = await databaseServices.orders
+      .aggregate([{ $group: { _id: '$status', count: { $sum: 1 } } }])
+      .toArray()
+
+    const ordersStats = ordersByStatus.reduce((acc, curr) => {
+      acc[OrderStatus[curr._id]] = curr.count
+      return acc
+    }, {})
+
+    // User statistics - all time
+    const totalUsers = await databaseServices.accounts.countDocuments({})
+
+    const usersByVerifyStatus = await databaseServices.accounts
+      .aggregate([{ $group: { _id: '$verify', count: { $sum: 1 } } }])
+      .toArray()
+
+    const usersStats = {
+      total: totalUsers,
+      verified: 0,
+      unverified: 0,
+      banned: 0
+    }
+
+    usersByVerifyStatus.forEach((stat) => {
+      if (stat._id === AccountVerifyStatus.Verified) {
+        usersStats.verified = stat.count
+      } else if (stat._id === AccountVerifyStatus.Unverified) {
+        usersStats.unverified = stat.count
+      } else if (stat._id === AccountVerifyStatus.Banned) {
+        usersStats.banned = stat.count
+      }
+    })
+
+    // Trade post statistics - all time
+    const totalTradePosts = await databaseServices.tradePosts.countDocuments({})
+
+    const tradePostsByStatus = await databaseServices.tradePosts
+      .aggregate([{ $group: { _id: '$status', count: { $sum: 1 } } }])
+      .toArray()
+
+    const tradePostsStats = tradePostsByStatus.reduce((acc, curr) => {
+      // Convert numeric status to string name if needed
+      const statusName = curr._id !== null ? TradeStatus[curr._id] || curr._id.toString() : 'null'
+      acc[statusName] = curr.count
+      return acc
+    }, {})
+
+    // LAST 30 DAYS STATS
+    // Product statistics - last 30 days
+    const newProductsCount = await databaseServices.products.countDocuments({
+      createdAt: { $gte: thirtyDaysAgo }
+    })
+
+    // Products updated in last 30 days
+    const updatedProductsCount = await databaseServices.products.countDocuments({
+      updatedAt: { $gte: thirtyDaysAgo },
+      createdAt: { $lt: thirtyDaysAgo } // Exclude newly created products
+    })
+
+    // Order statistics - last 30 days
+    const recentOrdersCount = await databaseServices.orders.countDocuments({
+      createdAt: { $gte: thirtyDaysAgo }
+    })
+
+    const recentOrdersByStatus = await databaseServices.orders
+      .aggregate([
+        { $match: { createdAt: { $gte: thirtyDaysAgo } } },
+        { $group: { _id: '$status', count: { $sum: 1 } } }
+      ])
+      .toArray()
+
+    const recentOrdersStats = recentOrdersByStatus.reduce((acc, curr) => {
+      acc[OrderStatus[curr._id]] = curr.count
+      return acc
+    }, {})
+
+    // User statistics - last 30 days
+    const newUsersCount = await databaseServices.accounts.countDocuments({
+      createdAt: { $gte: thirtyDaysAgo }
+    })
+
+    const recentUsersByVerifyStatus = await databaseServices.accounts
+      .aggregate([
+        { $match: { createdAt: { $gte: thirtyDaysAgo } } },
+        { $group: { _id: '$verify', count: { $sum: 1 } } }
+      ])
+      .toArray()
+
+    const recentUsersStats = {
+      total: newUsersCount,
+      verified: 0,
+      unverified: 0,
+      banned: 0
+    }
+
+    recentUsersByVerifyStatus.forEach((stat) => {
+      if (stat._id === AccountVerifyStatus.Verified) {
+        recentUsersStats.verified = stat.count
+      } else if (stat._id === AccountVerifyStatus.Unverified) {
+        recentUsersStats.unverified = stat.count
+      } else if (stat._id === AccountVerifyStatus.Banned) {
+        recentUsersStats.banned = stat.count
+      }
+    })
+
+    // Trade post statistics - last 30 days
+    const recentTradePostsCount = await databaseServices.tradePosts.countDocuments({
+      createdAt: { $gte: thirtyDaysAgo }
+    })
+
+    const recentTradePostsByStatus = await databaseServices.tradePosts
+      .aggregate([
+        { $match: { createdAt: { $gte: thirtyDaysAgo } } },
+        { $group: { _id: '$status', count: { $sum: 1 } } }
+      ])
+      .toArray()
+
+    const recentTradePostsStats = recentTradePostsByStatus.reduce((acc, curr) => {
+      const statusName = curr._id !== null ? TradeStatus[curr._id] || curr._id.toString() : 'null'
+      acc[statusName] = curr.count
+      return acc
+    }, {})
+
+    // Revenue statistics
+    const totalRevenue = await databaseServices.orders
+      .aggregate([
+        { $match: { status: { $in: [OrderStatus.Completed] } } },
+        { $group: { _id: null, total: { $sum: '$total' } } }
+      ])
+      .toArray()
+      .then((result) => result[0]?.total || 0)
+
+    const recentRevenue = await databaseServices.orders
+      .aggregate([
+        {
+          $match: {
+            status: { $in: [OrderStatus.Completed] },
+            createdAt: { $gte: thirtyDaysAgo }
+          }
+        },
+        { $group: { _id: null, total: { $sum: '$total' } } }
+      ])
+      .toArray()
+      .then((result) => result[0]?.total || 0)
+
+    // Daily orders for last 30 days (for charts)
+    const dailyOrdersStats = await databaseServices.orders
+      .aggregate([
+        { $match: { createdAt: { $gte: thirtyDaysAgo } } },
+        {
+          $group: {
+            _id: {
+              year: { $year: '$createdAt' },
+              month: { $month: '$createdAt' },
+              day: { $dayOfMonth: '$createdAt' }
+            },
+            count: { $sum: 1 },
+            revenue: { $sum: '$total' }
+          }
+        },
+        { $sort: { '_id.year': 1, '_id.month': 1, '_id.day': 1 } }
+      ])
+      .toArray()
+
+    // Transform dailyOrdersStats into a more usable format
+    const dailyStats = dailyOrdersStats.map((day) => ({
+      date: `${day._id.year}-${day._id.month.toString().padStart(2, '0')}-${day._id.day.toString().padStart(2, '0')}`,
+      orders: day.count,
+      revenue: day.revenue
+    }))
+
+    return {
+      message: 'Dashboard statistics fetched successfully',
+      result: {
+        // All-time stats
+        products: {
+          active: activeProducts,
+          inactive: inactiveProducts,
+          outOfStock: outOfStockProducts,
+          total: activeProducts + inactiveProducts + outOfStockProducts
+        },
+        orders: {
+          total: totalOrders,
+          byStatus: ordersStats
+        },
+        users: usersStats,
+        tradePosts: {
+          total: totalTradePosts,
+          byStatus: tradePostsStats
+        },
+        revenue: {
+          total: totalRevenue
+        },
+
+        // Last 30 days stats
+        recent: {
+          dateRange: {
+            from: thirtyDaysAgo.toISOString(),
+            to: new Date().toISOString()
+          },
+          products: {
+            new: newProductsCount,
+            updated: updatedProductsCount
+          },
+          orders: {
+            total: recentOrdersCount,
+            byStatus: recentOrdersStats
+          },
+          users: recentUsersStats,
+          tradePosts: {
+            total: recentTradePostsCount,
+            byStatus: recentTradePostsStats
+          },
+          revenue: recentRevenue,
+          dailyStats: dailyStats
+        }
+      }
     }
   }
 }
