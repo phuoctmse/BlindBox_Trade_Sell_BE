@@ -41,7 +41,17 @@ const swaggerDocument = YAML.load(path.join(__dirname, '../blindbox-swagger.yaml
 initFolder()
 
 // Connect to database
-databaseServices.connect()
+databaseServices.connect().then(() => {
+  databaseServices.indexAccounts()
+  databaseServices.indexRefreshTokens()
+  databaseServices.indexProducts()
+  databaseServices.indexCarts()
+  databaseServices.indexCartItems()
+  databaseServices.indexOrders()
+  databaseServices.indexOrderDetails()
+  databaseServices.indexPromotions()
+  databaseServices.indexFeedbacks()
+})
 redisServices.connect()
 // Middleware
 app.use(express.json())
