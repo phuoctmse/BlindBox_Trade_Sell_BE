@@ -42,15 +42,7 @@ initFolder()
 
 // Connect to database
 databaseServices.connect().then(() => {
-  databaseServices.indexAccounts()
-  databaseServices.indexRefreshTokens()
-  databaseServices.indexProducts()
-  databaseServices.indexCarts()
-  databaseServices.indexCartItems()
-  databaseServices.indexOrders()
-  databaseServices.indexOrderDetails()
-  databaseServices.indexPromotions()
-  databaseServices.indexFeedbacks()
+  databaseServices.initIndexes()
 })
 redisServices.connect()
 // Middleware
