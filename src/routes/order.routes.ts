@@ -32,7 +32,6 @@ orderRouter.post(
   validateReceiverInfo,
   validateSellerNotBuyingOwnProducts,
   createOrderValidation,
-  filterMiddleware<CreateOrderReqBody>(['orderType', 'notes', 'receiverInfo', 'paymentMethod', 'promotionId']),
   wrapRequestHandler(createOrderController)
 )
 orderRouter.patch(

@@ -96,6 +96,48 @@ class DatabaseServices {
   get tradeProposals(): Collection<TradeProposals> {
     return this.db.collection(process.env.DB_TRADE_PROPOSALS_COLLECTION as string)
   }
+
+  indexAccounts() {
+    this.accounts.createIndex({ email: 1 }, { unique: true })
+    this.accounts.createIndex({ userName: 1 }, { unique: true })
+    this.accounts.createIndex({ email: 1, password: 1 })
+  }
+
+  indexRefreshTokens() {
+    this.refreshTokens.createIndex({ token: 1 })
+    this.refreshTokens.createIndex({ exp: 1 }, { expireAfterSeconds: 0 })
+  }
+
+  indexProducts() {
+    this.products.createIndex({ name: 1 })
+    this.products.createIndex({ beadId: 1 })
+    this.products.createIndex({ createdBy: 1 })
+    this.products.createIndex({ slug: 1, category: 1 })
+  }
+
+  indexCarts() {
+    this.carts.createIndex({ accountId: 1 }, { unique: true })
+  }
+
+  indexCartItems() {
+    this.cartItems.createIndex({ cartId: 1, productId: 1 })
+  }
+
+  indexOrders() {
+    this.orders.createIndex({ _id: 1, 'buyerInfo.accountId': 1 }, { unique: true })
+  }
+
+  indexOrderDetails() {
+    this.orderDetails.createIndex({ orderId: 1, productName: 1 })
+  }
+
+  indexPromotions() {
+    this.promotions.createIndex({ sellerId: 1 })
+  }
+
+  indexFeedbacks() {
+    this.feedbacks.createIndex({ productId: 1, accountId: 1 }, { unique: true })
+  }
 }
 
 const databaseServices = new DatabaseServices()
