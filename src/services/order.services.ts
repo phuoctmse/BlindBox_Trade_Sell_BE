@@ -225,8 +225,7 @@ class OrderService {
       })
     }
 
-    // Group items by seller
-    const itemsBySeller: Record<string, typeof cartItemsDetails[0][]> = {}
+    const itemsBySeller: Record<string, (typeof cartItemsDetails)[0][]> = {}
     for (const item of cartItemsDetails) {
       const sellerId = item.createdBy ? item.createdBy.toString() : 'unknown'
       if (!itemsBySeller[sellerId]) {
@@ -612,6 +611,57 @@ class OrderService {
       result: {
         _id: order._id,
         status: OrderStatus.Cancelled,
+        updatedAt: new Date()
+      }
+    }
+  }
+
+  async sellerCompleteOrder(createdBy: string, orderId: string) {
+    if (!ObjectId.isValid(orderId)) {
+      throw new ErrorWithStatus({
+        status: HTTP_STATUS.BAD_REQUEST,
+        message: ORDER_MESSAGES.ORDER_NOT_FOUND
+      })
+    }
+
+    const order = await databaseServices.orders.findOne({
+      _id: new ObjectId(orderId)
+    })
+
+    if (!order) {
+      throw new ErrorWithStatus({
+        status: HTTP_STATUS.NOT_FOUND,
+        message: ORDER_MESSAGES.ORDER_NOT_FOUND
+      })
+    }
+
+    if (order.status !== OrderStatus.Processing) {
+      throw new ErrorWithStatus({
+        status: HTTP_STATUS.BAD_REQUEST,
+        message: ORDER_MESSAGES.CANNOT_COMPLETE_ORDER
+      })
+    }
+
+    await this.validateOrderBelongsToSeller(createdBy, order._id)
+
+    const date = new Date()
+
+    await databaseServices.orders.updateOne(
+      { _id: order._id },
+      {
+        $set: {
+          status: OrderStatus.Completed,
+          updatedAt: date,
+          statusHistory: [{ status: OrderStatus.Processing, timestamp: date }]
+        }
+      }
+    )
+
+    return {
+      message: ORDER_MESSAGES.ORDER_COMPLETED_SUCCESS,
+      result: {
+        _id: order._id,
+        status: OrderStatus.Completed,
         updatedAt: new Date()
       }
     }
