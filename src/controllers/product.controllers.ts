@@ -126,7 +126,10 @@ export const getAllPromotionsController = async (req: Request, res: Response) =>
   res.status(HTTP_STATUS.OK).json(result)
 }
 
-export const createPromotionController = async (req: Request<ParamsDictionary, any, CreatePromotions>, res: Response) => {
+export const createPromotionController = async (
+  req: Request<ParamsDictionary, any, CreatePromotions>,
+  res: Response
+) => {
   const { accountId } = req.decode_authorization as TokenPayload
   const payload = { ...req.body }
   const result = await productService.createPromotion(payload, accountId)

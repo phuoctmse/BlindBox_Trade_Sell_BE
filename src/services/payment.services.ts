@@ -83,7 +83,7 @@ class PaymentService {
 
     const { gateway, transactionDate, transferAmount, content } = paymentInfo
 
-    if(!gateway || !transactionDate || !transferAmount || !content) {
+    if (!gateway || !transactionDate || !transferAmount || !content) {
       throw new ErrorWithStatus({
         status: HTTP_STATUS.NOT_FOUND,
         message: ORDER_MESSAGES.CANNOT_PROCESS_ORDER

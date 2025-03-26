@@ -110,7 +110,7 @@ const PRODUCT_MESSAGES = {
   PROMOTION_CREATED_SUCCESS: 'Promotion created successfully',
   PROMOTION_UPDATED_SUCCESS: 'Promotion updated successfully',
   PROMOTION_DELETED_SUCCESS: 'Promotion deleted successfully',
-  THIS_PROMOTION_IS_NOT_YOURS: 'This promotion is not yours',
+  THIS_PROMOTION_IS_NOT_YOURS: 'This promotion is not yours'
 } as const
 
 const CART_MESSAGES = {
@@ -145,7 +145,8 @@ const ORDER_MESSAGES = {
   CANNOT_PROCESS_ORDER: 'Cannot process order',
   ORDER_PROCESSED_SUCCESS: 'Order processed successfully',
   CANNOT_COMPLETE_ORDER: 'Cannot complete order',
-  ORDER_COMPLETED_SUCCESS: 'Order completed successfully'
+  ORDER_COMPLETED_SUCCESS: 'Order completed successfully',
+  PROMOTIONS_FETCHED_SUCCESS: 'Promotions fetched successfully'
 }
 
 export const FEEDBACK_MESSAGES = {
@@ -190,7 +191,7 @@ const TRADE_MESSAGES = {
   INSUFFICIENT_CREDITS: 'Insufficient credits',
   CREDIT_CONVERSION_NOT_FOUND: 'Credit conversion rate not found',
   TRADE_POST_CANCELLED_WITH_REFUND: 'Trade post cancelled with refund',
-  TRADE_POST_CANCELLED: 'Trade post cancelled',
+  TRADE_POST_CANCELLED: 'Trade post cancelled'
 }
 
 const ADMIN_MESSAGES = {
@@ -199,7 +200,15 @@ const ADMIN_MESSAGES = {
   FEEDBACKS_FETCHED_SUCCESS: 'Feedbacks fetched successfully',
   FEEDBACK_DELETED_SUCCESS: 'Feedback deleted successfully',
   ACCOUNT_DELETED_SUCCESS: 'Account deleted successfully',
-  PROMOTIONS_FETCHED_SUCCESS: 'Promotions fetched successfully',
+  PROMOTIONS_FETCHED_SUCCESS: 'Promotions fetched successfully'
 }
 
-export { USER_MESSAGES, PRODUCT_MESSAGES, CART_MESSAGES, ORDER_MESSAGES, PAYMENT_MESSAGES, TRADE_MESSAGES, ADMIN_MESSAGES }
+export {
+  USER_MESSAGES,
+  PRODUCT_MESSAGES,
+  CART_MESSAGES,
+  ORDER_MESSAGES,
+  PAYMENT_MESSAGES,
+  TRADE_MESSAGES,
+  ADMIN_MESSAGES
+}

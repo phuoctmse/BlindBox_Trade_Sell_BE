@@ -45,6 +45,12 @@ export const completeOrderController = async (req: Request, res: Response) => {
   res.status(HTTP_STATUS.OK).json(result)
 }
 
+export const getUserPromotionsController = async (req: Request, res: Response) => {
+  const { accountId } = req.decode_authorization as TokenPayload
+  const result = await orderService.getUserPromotions(accountId)
+  res.status(HTTP_STATUS.OK).json(result)
+}
+
 //Seller
 export const getSellerOrdersController = async (req: Request, res: Response) => {
   const { accountId } = req.decode_authorization as TokenPayload

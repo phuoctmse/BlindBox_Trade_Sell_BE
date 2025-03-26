@@ -1,5 +1,5 @@
-import { ObjectId } from "mongodb";
-import { TradeStatus } from "~/constants/enums";
+import { ObjectId } from 'mongodb'
+import { TradeStatus } from '~/constants/enums'
 
 interface TradePostType {
   _id?: ObjectId
