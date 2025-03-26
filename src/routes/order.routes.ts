@@ -6,6 +6,7 @@ import {
   createOrderController,
   getAccountOrdersController,
   getSellerOrdersController,
+  getUserPromotionsController,
   processOrderController,
   sellerCancelOrderController
 } from '~/controllers/order.controllers'
@@ -46,6 +47,8 @@ orderRouter.patch(
   validateCompleteOrder,
   wrapRequestHandler(completeOrderController)
 )
+
+orderRouter.get('/promotions', accessTokenValidation, wrapRequestHandler(getUserPromotionsController))
 
 //Seller
 orderRouter.get(

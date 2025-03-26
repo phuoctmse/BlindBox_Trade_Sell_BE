@@ -78,8 +78,28 @@ productsRouter.post(
 )
 
 productsRouter.get('/promotions', accessTokenValidation, wrapRequestHandler(getAllPromotionsController))
-productsRouter.get('/seller/promotions', accessTokenValidation, validateRegisterSelling, wrapRequestHandler(getPromotionsBySellerIdController))
-productsRouter.post('/seller/promotions', accessTokenValidation, validateRegisterSelling, wrapRequestHandler(createPromotionController))
-productsRouter.put('/seller/promotions/:promotionId', accessTokenValidation, validateRegisterSelling, wrapRequestHandler(editPromotionController))
-productsRouter.delete('/seller/promotions/:promotionId', accessTokenValidation, validateRegisterSelling, wrapRequestHandler(deletePromotionController))
+productsRouter.get(
+  '/seller/promotions',
+  accessTokenValidation,
+  validateRegisterSelling,
+  wrapRequestHandler(getPromotionsBySellerIdController)
+)
+productsRouter.post(
+  '/seller/promotions',
+  accessTokenValidation,
+  validateRegisterSelling,
+  wrapRequestHandler(createPromotionController)
+)
+productsRouter.put(
+  '/seller/promotions/:promotionId',
+  accessTokenValidation,
+  validateRegisterSelling,
+  wrapRequestHandler(editPromotionController)
+)
+productsRouter.delete(
+  '/seller/promotions/:promotionId',
+  accessTokenValidation,
+  validateRegisterSelling,
+  wrapRequestHandler(deletePromotionController)
+)
 export default productsRouter

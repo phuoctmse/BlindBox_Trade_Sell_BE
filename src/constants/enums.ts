@@ -73,5 +73,5 @@ export enum TradeStatus {
   Countered,
   Accepted,
   Rejected,
-  Completed,
+  Completed
 }

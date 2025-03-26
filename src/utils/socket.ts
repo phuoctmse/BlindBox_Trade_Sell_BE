@@ -5,7 +5,6 @@ import {
   socketVerifiedMiddleware,
   socketSellerMiddleware
 } from '../middlewares/socket.middlewares'
-import { TokenPayload } from '~/models/requests/Account.requests'
 import { SOCKET_EVENTS } from '~/constants/sockets'
 
 // Map để lưu trữ kết nối socket cho từng người dùng

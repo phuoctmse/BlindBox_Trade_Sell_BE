@@ -6,7 +6,8 @@ import Orders from '~/models/schemas/Order.schema'
 import OrderDetails from '~/models/schemas/OrderDetail.schema'
 import { ErrorWithStatus } from '~/models/Errors'
 import HTTP_STATUS from '~/constants/httpStatus'
-import { OrderStatus } from '~/constants/enums'
+import { OrderStatus, PaymentMethod } from '~/constants/enums'
+import Promotions from '~/models/schemas/Promotion.schema'
 
 class OrderService {
   async getOrdersByAccountId(accountId: string) {
@@ -48,14 +49,16 @@ class OrderService {
     }
   }
 
-  private async applyPromotion(subTotal: number, promotionId?: string) {
+  private async applyPromotion(subTotal: number, promotionId?: string, accountId?: string) {
     if (!promotionId) return subTotal
+
     const promotion = await databaseServices.promotions.findOne({
       _id: new ObjectId(promotionId)
     })
 
     if (!promotion) return subTotal
 
+    // Check if promotion is valid (date and active status)
     const now = new Date()
     if (now > promotion.endDate || now < promotion.startDate) {
       return subTotal
@@ -64,9 +67,37 @@ class OrderService {
     if (!promotion.isActive) {
       return subTotal
     }
-    const discountAmount = (subTotal * promotion.discountRate) / 100
 
-    return subTotal - discountAmount
+    // Check if this is a single-use promotion assigned to a specific user
+    if (promotion.singleUse && promotion.assignedTo) {
+      // If no account ID provided or promotion is for different user or already used, don't apply it
+      if (!accountId || promotion.assignedTo.toString() !== accountId.toString() || promotion.used) {
+        return subTotal
+      }
+
+      // Mark the promotion as used if it's a single-use promotion
+      await databaseServices.promotions.updateOne({ _id: promotion._id }, { $set: { used: true } })
+    }
+
+    // Calculate discount amount based on promotion type
+    let discountAmount = 0
+
+    // If we have a fixed discount amount (refund/compensation type)
+    if (promotion.discountAmount && promotion.discountAmount > 0) {
+      discountAmount = promotion.discountAmount
+    }
+    // Otherwise, calculate percentage-based discount
+    else if (promotion.discountRate && promotion.discountRate > 0) {
+      discountAmount = (subTotal * promotion.discountRate) / 100
+
+      // If there's a maximum discount amount specified, cap the discount
+      if (promotion.maxDiscountAmount && discountAmount > promotion.maxDiscountAmount) {
+        discountAmount = promotion.maxDiscountAmount
+      }
+    }
+
+    // Calculate final price (don't go below zero)
+    return Math.max(0, subTotal - discountAmount)
   }
 
   private async findCreatedBy(productId: string) {
@@ -107,7 +138,7 @@ class OrderService {
     }
 
     const subTotal = Number(product.price) * payload.item.quantity
-    const finalPrice = await this.applyPromotion(subTotal, payload.promotionId)
+    const finalPrice = await this.applyPromotion(subTotal, payload.promotionId, accountId)
 
     const orderId = new ObjectId()
     const now = new Date()
@@ -244,8 +275,7 @@ class OrderService {
       for (const item of sellerItems) {
         sellerSubTotal += Number(item.price) * item.quantity
       }
-      const finalPrice = await this.applyPromotion(sellerSubTotal, payload.promotionId)
-
+      const finalPrice = await this.applyPromotion(sellerSubTotal, payload.promotionId, accountId)
       const orderId = new ObjectId()
       const order = new Orders({
         _id: orderId,
@@ -601,17 +631,44 @@ class OrderService {
         $set: {
           status: OrderStatus.Cancelled,
           updatedAt: date,
-          statusHistory: [{ status: OrderStatus.Processing, timestamp: date, reason: reason }]
+          statusHistory: [{ status: OrderStatus.Cancelled, timestamp: date, reason: reason }]
         }
       }
     )
+
+    // Create compensation promotion for Banking payments
+    if (order.paymentMethod === PaymentMethod.Banking) {
+      const buyerAccountId = order.buyerInfo.accountId
+
+      // Create a single-use promotion for the buyer
+      const today = new Date()
+      const endDate = new Date()
+      endDate.setMonth(today.getMonth() + 1) // Promotion valid for 1 month
+      const orderValue = Number(order.totalPrice)
+
+      const compensationPromotion = new Promotions({
+        name: `Refund for Order #${order._id}`,
+        discountAmount: orderValue, // Exact amount refund
+        discountRate: 0, // No percentage discount
+        startDate: today,
+        endDate: endDate,
+        sellerId: new ObjectId(createdBy),
+        isActive: true,
+        singleUse: true,
+        assignedTo: buyerAccountId,
+        used: false
+      })
+
+      await databaseServices.promotions.insertOne(compensationPromotion)
+    }
 
     return {
       message: ORDER_MESSAGES.ORDER_CANCELLED_SUCCESS,
       result: {
         _id: order._id,
         status: OrderStatus.Cancelled,
-        updatedAt: new Date()
+        updatedAt: new Date(),
+        compensationAdded: order.paymentMethod === PaymentMethod.Banking
       }
     }
   }
@@ -714,6 +771,65 @@ class OrderService {
         status: OrderStatus.Completed,
         updatedAt: new Date()
       }
+    }
+  }
+
+  async getUserPromotions(accountId: string) {
+    const now = new Date()
+
+    const generalPromotions = await databaseServices.promotions
+      .find({
+        isActive: true,
+        singleUse: { $ne: true },
+        startDate: { $lte: now },
+        endDate: { $gt: now }
+      })
+      .toArray()
+
+    const userPromotions = await databaseServices.promotions
+      .find({
+        isActive: true,
+        singleUse: true,
+        assignedTo: new ObjectId(accountId),
+        used: false,
+        startDate: { $lte: now },
+        endDate: { $gt: now }
+      })
+      .toArray()
+
+    // Transform promotions to include readable information for frontend
+    const transformedPromotions = [...generalPromotions, ...userPromotions].map((promotion) => {
+      let discountInfo = ''
+
+      if (promotion.discountAmount && promotion.discountAmount > 0) {
+        discountInfo = `${promotion.discountAmount.toLocaleString()} VND off`
+      } else if (promotion.discountRate && promotion.discountRate > 0) {
+        discountInfo = `${promotion.discountRate}% off`
+
+        if (promotion.maxDiscountAmount) {
+          discountInfo += ` (up to ${promotion.maxDiscountAmount.toLocaleString()} VND)`
+        }
+      }
+
+      return {
+        _id: promotion._id,
+        name: promotion.name,
+        discountInfo,
+        discountRate: promotion.discountRate,
+        discountAmount: promotion.discountAmount,
+        maxDiscountAmount: promotion.maxDiscountAmount,
+        startDate: promotion.startDate,
+        endDate: promotion.endDate,
+        expiresIn: Math.ceil((promotion.endDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)), // Days until expiration
+        isUserSpecific: promotion.singleUse && promotion.assignedTo ? true : false
+      }
+    })
+
+    transformedPromotions.sort((a, b) => a.expiresIn - b.expiresIn)
+
+    return {
+      message: ORDER_MESSAGES.PROMOTIONS_FETCHED_SUCCESS,
+      result: transformedPromotions
     }
   }
 }

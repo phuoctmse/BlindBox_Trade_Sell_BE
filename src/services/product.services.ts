@@ -440,10 +440,7 @@ class ProductService {
   }
 
   async editPromotion(payload: CreatePromotions, promotionId: string) {
-    const result = await databaseServices.promotions.updateOne(
-      { _id: new ObjectId(promotionId) },
-      { $set: payload }
-    )
+    const result = await databaseServices.promotions.updateOne({ _id: new ObjectId(promotionId) }, { $set: payload })
     return {
       message: PRODUCT_MESSAGES.PROMOTION_UPDATED_SUCCESS,
       result
