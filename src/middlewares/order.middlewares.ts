@@ -3,7 +3,7 @@ import { NextFunction, Request, Response } from 'express'
 import { checkSchema } from 'express-validator'
 import { forEach } from 'lodash'
 import { ObjectId } from 'mongodb'
-import { OrderStatus, OrderType, PaymentMethod } from '~/constants/enums'
+import { Category, OrderStatus, OrderType, PaymentMethod } from '~/constants/enums'
 import HTTP_STATUS from '~/constants/httpStatus'
 import { ORDER_MESSAGES, PRODUCT_MESSAGES } from '~/constants/messages'
 import { ErrorWithStatus } from '~/models/Errors'
@@ -270,34 +270,37 @@ export const createOrderValidation = (req: Request, res: Response, next: NextFun
 }
 
 export const validateCancelOrder = validate(
-  checkSchema(
-    {
-      orderId: {
-        isString: true,
-        notEmpty: {
-          errorMessage: 'Order ID is required'
-        },
-        custom: {
-          options: (value) => {
-            if (!ObjectId.isValid(value)) {
-              throw new Error('Invalid Order ID format')
-            }
-            return true
+  checkSchema({
+    orderId: {
+      in: 'params',
+      isString: true,
+      notEmpty: {
+        errorMessage: 'Order ID is required'
+      },
+      custom: {
+        options: (value) => {
+          if (!ObjectId.isValid(value)) {
+            throw new Error('Invalid Order ID format')
           }
+          return true
         }
       }
     },
-    ['params']
-  )
+    reason: {
+      in: 'body',
+      isString: true,
+      trim: true,
+      isLength: {
+        options: { min: 5, max: 255 }
+      }
+    }
+  })
 )
 
 export const validateSellerNotBuyingOwnProducts = async (req: Request, res: Response, next: NextFunction) => {
   const { orderType } = req.body
-  const { accountId, isSeller } = req.decode_authorization as TokenPayload
+  const { accountId } = req.decode_authorization as TokenPayload
 
-  if (!isSeller) {
-    return next()
-  }
   if (orderType === OrderType.Direct) {
     const { productId } = req.body.item
 
@@ -358,7 +361,7 @@ export const validateSellerNotBuyingOwnProducts = async (req: Request, res: Resp
         continue
       }
 
-      if (product.createdBy.toString() === accountId) {
+      if (product.createdBy.toString() === accountId && product.category !== Category.Accessory) {
         return next(
           new ErrorWithStatus({
             status: HTTP_STATUS.FORBIDDEN,
@@ -367,6 +370,13 @@ export const validateSellerNotBuyingOwnProducts = async (req: Request, res: Resp
         )
       }
     }
+  } else {
+    return next(
+      new ErrorWithStatus({
+        status: HTTP_STATUS.FORBIDDEN,
+        message: ORDER_MESSAGES.INVALID_ORDER_TYPE
+      })
+    )
   }
   next()
 }

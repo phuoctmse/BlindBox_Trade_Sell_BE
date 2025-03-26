@@ -5,6 +5,7 @@ import Transactions from '~/models/schemas/Transaction.schema'
 import { ErrorWithStatus } from '~/models/Errors'
 import HTTP_STATUS from '~/constants/httpStatus'
 import { ORDER_MESSAGES, PAYMENT_MESSAGES, USER_MESSAGES } from '~/constants/messages'
+import { notifyBuyerOrderSuccess } from '~/utils/socket'
 
 class PaymentService {
   async processWebhook(payload: any) {
@@ -81,6 +82,15 @@ class PaymentService {
     }
 
     const { gateway, transactionDate, transferAmount, content } = paymentInfo
+
+    if(!gateway || !transactionDate || !transferAmount || !content) {
+      throw new ErrorWithStatus({
+        status: HTTP_STATUS.NOT_FOUND,
+        message: ORDER_MESSAGES.CANNOT_PROCESS_ORDER
+      })
+    } else {
+      notifyBuyerOrderSuccess(order.buyerInfo.accountId.toString())
+    }
 
     const transaction = new Transactions({
       accountId: order.buyerInfo.accountId,

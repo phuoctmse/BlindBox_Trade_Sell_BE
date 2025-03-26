@@ -69,6 +69,17 @@ class OrderService {
     return subTotal - discountAmount
   }
 
+  private async findCreatedBy(productId: string) {
+    const product = await databaseServices.products.findOne({ _id: new ObjectId(productId) })
+    if (!product) {
+      throw new ErrorWithStatus({
+        status: HTTP_STATUS.BAD_REQUEST,
+        message: PRODUCT_MESSAGES.PRODUCT_NOT_FOUND
+      })
+    }
+    return product.createdBy
+  }
+
   async createDirectOrder(accountId: string, payload: DirectOrderReqBody) {
     const { item } = payload
     const product = await databaseServices.products.findOne({
@@ -171,9 +182,7 @@ class OrderService {
       address: ''
     }
 
-    const orderItems = []
-    let subTotal = 0
-
+    const cartItemsDetails = []
     for (const cartItem of items) {
       const item = await databaseServices.cartItems.findOne({
         _id: new ObjectId(cartItem.itemId),
@@ -205,77 +214,84 @@ class OrderService {
         })
       }
 
-      const itemTotal = Number(product.price) * item.quantity
-      subTotal += itemTotal
-
-      orderItems.push({
+      cartItemsDetails.push({
         cartItemId: item._id,
         productId: product._id,
         productName: product.name,
         quantity: item.quantity,
         price: product.price,
-        image: product.image || ''
+        image: product.image || '',
+        createdBy: product.createdBy
       })
     }
 
-    const finalPrice = await this.applyPromotion(subTotal, payload.promotionId)
+    // Group items by seller
+    const itemsBySeller: Record<string, typeof cartItemsDetails[0][]> = {}
+    for (const item of cartItemsDetails) {
+      const sellerId = item.createdBy ? item.createdBy.toString() : 'unknown'
+      if (!itemsBySeller[sellerId]) {
+        itemsBySeller[sellerId] = []
+      }
+      itemsBySeller[sellerId].push(item)
+    }
 
-    const orderId = new ObjectId()
+    const orders = []
     const now = new Date()
 
-    const order = new Orders({
-      _id: orderId,
-      totalPrice: new Double(finalPrice),
-      promotionId: payload.promotionId ? new ObjectId(payload.promotionId) : undefined,
-      status: OrderStatus.Pending,
-      buyerInfo: {
-        accountId: new ObjectId(accountId)
-      },
-      receiverInfo,
-      paymentMethod: payload.paymentMethod,
-      notes: payload.notes || '',
-      createdAt: now,
-      updatedAt: now
-    })
+    for (const sellerId in itemsBySeller) {
+      const sellerItems = itemsBySeller[sellerId]
 
-    await databaseServices.orders.insertOne(order)
+      let sellerSubTotal = 0
+      for (const item of sellerItems) {
+        sellerSubTotal += Number(item.price) * item.quantity
+      }
+      const finalPrice = await this.applyPromotion(sellerSubTotal, payload.promotionId)
 
-    const orderDetailsForReturn = []
-
-    for (const item of orderItems) {
-      const orderDetail = new OrderDetails({
-        orderId: orderId,
-        productName: item.productName,
-        productId: item.productId,
-        quantity: item.quantity,
-        price: item.price,
-        image: item.image
+      const orderId = new ObjectId()
+      const order = new Orders({
+        _id: orderId,
+        totalPrice: new Double(finalPrice),
+        promotionId: payload.promotionId ? new ObjectId(payload.promotionId) : undefined,
+        status: OrderStatus.Pending,
+        buyerInfo: {
+          accountId: new ObjectId(accountId)
+        },
+        receiverInfo,
+        paymentMethod: payload.paymentMethod,
+        notes: payload.notes || '',
+        createdAt: now,
+        updatedAt: now
       })
 
-      await databaseServices.orderDetails.insertOne(orderDetail)
+      await databaseServices.orders.insertOne(order)
 
-      orderDetailsForReturn.push({
-        productId: item.productId,
-        productName: item.productName,
-        quantity: item.quantity,
-        price: item.price,
-        image: item.image
-      })
+      const orderDetailsForReturn = []
+      for (const item of sellerItems) {
+        const orderDetail = new OrderDetails({
+          orderId: orderId,
+          productName: item.productName,
+          productId: item.productId,
+          quantity: item.quantity,
+          price: item.price,
+          image: item.image
+        })
 
-      await databaseServices.products.updateOne({ _id: item.productId }, { $inc: { quantity: -item.quantity } })
-    }
+        await databaseServices.orderDetails.insertOne(orderDetail)
 
-    for (const item of orderItems) {
-      await databaseServices.cartItems.deleteOne({
-        _id: item.cartItemId
-      })
-    }
+        orderDetailsForReturn.push({
+          productId: item.productId,
+          productName: item.productName,
+          quantity: item.quantity,
+          price: item.price,
+          image: item.image
+        })
 
-    await databaseServices.carts.updateOne({ _id: cart._id }, { $set: { updatedAt: new Date() } })
+        await databaseServices.products.updateOne({ _id: item.productId }, { $inc: { quantity: -item.quantity } })
 
-    return {
-      message: ORDER_MESSAGES.ORDER_CREATED_SUCCESS,
-      result: {
+        await databaseServices.cartItems.deleteOne({ _id: item.cartItemId })
+      }
+
+      orders.push({
         _id: orderId,
         totalPrice: finalPrice,
         status: OrderStatus.Pending,
@@ -285,11 +301,18 @@ class OrderService {
         receiverInfo,
         items: orderDetailsForReturn,
         createdAt: now
-      }
+      })
+    }
+
+    await databaseServices.carts.updateOne({ _id: cart._id }, { $set: { updatedAt: new Date() } })
+
+    return {
+      message: ORDER_MESSAGES.ORDER_CREATED_SUCCESS,
+      result: orders
     }
   }
 
-  async cancelOrder(accountId: string, orderId: string) {
+  async cancelOrder(accountId: string, orderId: string, reason: string) {
     const order = await databaseServices.orders.findOne({
       _id: new ObjectId(orderId),
       'buyerInfo.accountId': new ObjectId(accountId)
@@ -323,12 +346,15 @@ class OrderService {
 
     await Promise.all(productUpdatePromises)
 
+    const date = new Date()
+
     await databaseServices.orders.updateOne(
       { _id: order._id },
       {
         $set: {
           status: OrderStatus.Cancelled,
-          updatedAt: new Date()
+          updatedAt: date,
+          statusHistory: [{ status: OrderStatus.Cancelled, timestamp: date, reason: reason }]
         }
       }
     )
@@ -453,12 +479,15 @@ class OrderService {
 
     await this.validateOrderBelongsToSeller(createdBy, order._id)
 
+    const date = new Date()
+
     await databaseServices.orders.updateOne(
       { _id: order._id },
       {
         $set: {
           status: OrderStatus.Confirmed,
-          updatedAt: new Date()
+          updatedAt: date,
+          statusHistory: [{ status: OrderStatus.Confirmed, timestamp: date }]
         }
       }
     )
@@ -500,12 +529,15 @@ class OrderService {
 
     await this.validateOrderBelongsToSeller(createdBy, order._id)
 
+    const date = new Date()
+
     await databaseServices.orders.updateOne(
       { _id: order._id },
       {
         $set: {
           status: OrderStatus.Processing,
-          updatedAt: new Date()
+          updatedAt: date,
+          statusHistory: [{ status: OrderStatus.Processing, timestamp: date }]
         }
       }
     )
@@ -520,7 +552,7 @@ class OrderService {
     }
   }
 
-  async sellerCancelOrder(createdBy: string, orderId: string) {
+  async sellerCancelOrder(createdBy: string, orderId: string, reason: string) {
     if (!ObjectId.isValid(orderId)) {
       throw new ErrorWithStatus({
         status: HTTP_STATUS.BAD_REQUEST,
@@ -562,12 +594,15 @@ class OrderService {
 
     await Promise.all(productUpdatePromises)
 
+    const date = new Date()
+
     await databaseServices.orders.updateOne(
       { _id: order._id },
       {
         $set: {
           status: OrderStatus.Cancelled,
-          updatedAt: new Date()
+          updatedAt: date,
+          statusHistory: [{ status: OrderStatus.Processing, timestamp: date, reason: reason }]
         }
       }
     )
@@ -609,12 +644,15 @@ class OrderService {
       })
     }
 
+    const date = new Date()
+
     await databaseServices.orders.updateOne(
       { _id: order._id },
       {
         $set: {
           status: OrderStatus.Completed,
-          updatedAt: new Date()
+          statusHistory: [{ status: OrderStatus.Processing, timestamp: date }],
+          updatedAt: date
         }
       }
     )
