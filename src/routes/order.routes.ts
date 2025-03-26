@@ -75,5 +75,12 @@ orderRouter.patch(
   validateCancelOrder,
   wrapRequestHandler(sellerCancelOrderController)
 )
+orderRouter.patch(
+  '/seller/:orderId/complete',
+  accessTokenValidation,
+  validateRegisterSelling,
+  validateCancelOrder,
+  wrapRequestHandler(sellerCancelOrderController)
+)
 
 export default orderRouter

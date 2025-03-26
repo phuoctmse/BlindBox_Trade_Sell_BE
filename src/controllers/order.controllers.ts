@@ -79,3 +79,12 @@ export const sellerCancelOrderController = async (req: Request, res: Response) =
 
   res.status(HTTP_STATUS.OK).json(result)
 }
+
+export const sellerCompleteOrderController = async (req: Request, res: Response) => {
+  const { accountId } = req.decode_authorization as TokenPayload
+  const { orderId } = req.params
+
+  const result = await orderService.sellerCompleteOrder(accountId, orderId)
+
+  res.status(HTTP_STATUS.OK).json(result)
+}
