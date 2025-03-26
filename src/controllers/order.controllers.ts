@@ -29,8 +29,9 @@ export const createOrderController = async (req: Request<ParamsDictionary, any, 
 export const cancelOrderController = async (req: Request, res: Response) => {
   const { accountId } = req.decode_authorization as TokenPayload
   const { orderId } = req.params
+  const { reason } = req.body
 
-  const result = await orderService.cancelOrder(accountId, orderId)
+  const result = await orderService.cancelOrder(accountId, orderId, reason)
 
   res.status(HTTP_STATUS.OK).json(result)
 }
@@ -72,8 +73,9 @@ export const processOrderController = async (req: Request, res: Response) => {
 export const sellerCancelOrderController = async (req: Request, res: Response) => {
   const { accountId } = req.decode_authorization as TokenPayload
   const { orderId } = req.params
+  const { reason } = req.body
 
-  const result = await orderService.sellerCancelOrder(accountId, orderId)
+  const result = await orderService.sellerCancelOrder(accountId, orderId, reason)
 
   res.status(HTTP_STATUS.OK).json(result)
 }

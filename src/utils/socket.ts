@@ -118,3 +118,13 @@ export const notifySellerRegistered = (accountId: string) => {
     })
   }
 }
+
+export const notifyBuyerOrderSuccess = (accountId: string) => {
+  const socket = userSockets.get(accountId)
+  if (socket) {
+    socket.emit(SOCKET_EVENTS.ORDER_SUCCESS, {
+      message: 'You have successfully order',
+      timestamp: new Date()
+    })
+  }
+}
