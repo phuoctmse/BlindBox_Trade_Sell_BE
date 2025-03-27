@@ -87,6 +87,11 @@ adminRouter.delete(
   wrapRequestHandler(deleteFeedbackController)
 )
 
+adminRouter.get('/promotions', accessTokenValidation, adminValidation, wrapRequestHandler(getAllPromotionsController))
+adminRouter.post('/promotions', accessTokenValidation, adminValidation, wrapRequestHandler(createPromotionController))
+adminRouter.put('/promotion/:promotionId', accessTokenValidation, adminValidation, wrapRequestHandler(editPromotionController))
+adminRouter.delete('/promotion/:promotionId', accessTokenValidation, adminValidation, wrapRequestHandler(deletePromotionController))
+
 adminRouter.get('/trade-post', accessTokenValidation, adminValidation, wrapRequestHandler(getAllTradePostsController))
 adminRouter.patch(
   '/trade-post/:id',

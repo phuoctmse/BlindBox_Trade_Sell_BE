@@ -40,7 +40,9 @@ export interface CreateOpenedItem {
 export interface CreatePromotions {
   name: string
   discountRate: number
+  discountAmount: number
+  maxDiscountAmount?: number
   startDate: Date
   endDate: Date
-  isActive?: boolean
+  singleUse: boolean
 }
