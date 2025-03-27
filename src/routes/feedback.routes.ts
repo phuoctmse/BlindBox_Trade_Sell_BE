@@ -1,10 +1,5 @@
 import { Router } from 'express'
-import {
-  createFeedbackController,
-  deleteFeedbackController,
-  getFeedbacksByProductIdController,
-  updateFeedbackController
-} from '../controllers/Feedback.controllers'
+import feedbackController from '~/controllers/Feedback.controllers'
 import { accessTokenValidation } from '~/middlewares/accounts.middlewares'
 import { userOrderedValidation, validateCreateFeedback } from '~/middlewares/products.middleware'
 import { wrapRequestHandler } from '~/utils/handlers'
@@ -12,17 +7,24 @@ import { filterMiddleware } from '~/middlewares/common.middlewares'
 import { CreateFeedbackReqBody } from '~/models/requests/Feedback.requests'
 
 const feedbackRouter = Router()
-//request productId, rate, content
+
+// Create feedback
 feedbackRouter.post(
   '/',
   accessTokenValidation,
   validateCreateFeedback,
   userOrderedValidation,
   filterMiddleware<CreateFeedbackReqBody>(['content', 'accountId', 'productId', 'rate']),
-  wrapRequestHandler(createFeedbackController)
+  wrapRequestHandler(feedbackController.createFeedback)
 )
 
-feedbackRouter.get('/:productId', accessTokenValidation, wrapRequestHandler(getFeedbacksByProductIdController))
-feedbackRouter.put('/:feedbackId', accessTokenValidation, wrapRequestHandler(updateFeedbackController))
-feedbackRouter.delete('/:feedbackId', accessTokenValidation, wrapRequestHandler(deleteFeedbackController))
+// Get feedbacks by product ID
+feedbackRouter.get('/:productId', accessTokenValidation, wrapRequestHandler(feedbackController.getFeedbacksByProductId))
+
+// Update feedback
+feedbackRouter.put('/:feedbackId', accessTokenValidation, wrapRequestHandler(feedbackController.updateFeedback))
+
+// Delete feedback
+feedbackRouter.delete('/:feedbackId', accessTokenValidation, wrapRequestHandler(feedbackController.deleteFeedback))
+
 export default feedbackRouter

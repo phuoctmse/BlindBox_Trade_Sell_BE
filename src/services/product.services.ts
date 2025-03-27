@@ -40,18 +40,27 @@ class ProductService {
   async createBlindBoxes(payload: CreateBlindBoxesReqBody, accountId: string) {
     const newProductId = new ObjectId()
     const slug = slugify(payload.name, { lower: true, strict: true })
+    const account = await databaseServices.accounts.findOne({ _id: new ObjectId(accountId) })
+    if (!account) {
+      throw new ErrorWithStatus({
+      status: HTTP_STATUS.BAD_REQUEST,
+      message: PRODUCT_MESSAGES.ACCOUNT_NOT_FOUND
+      })
+    }
+
     const result = await databaseServices.products.insertOne(
       new Products({
-        ...payload,
-        _id: newProductId,
-        createdBy: new ObjectId(accountId),
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        category: Category.Blindbox,
-        blindBoxes: {
-          size: payload.size
-        },
-        slug
+      ...payload,
+      _id: newProductId,
+      createdBy: new ObjectId(accountId),
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      category: Category.Blindbox,
+      blindBoxes: {
+        size: payload.size
+      },
+      slug,
+      createrName: account.userName
       })
     )
     return {
@@ -60,11 +69,29 @@ class ProductService {
   }
 
   async getBlindBoxesDetails(slug: string, id: string) {
-    const result = await databaseServices.products.findOne({
+    const product = await databaseServices.products.findOne({
       slug,
       _id: new ObjectId(id),
       category: Category.Blindbox
     })
+
+    if (!product) {
+      throw new ErrorWithStatus({
+        status: HTTP_STATUS.NOT_FOUND,
+        message: PRODUCT_MESSAGES.PRODUCT_NOT_FOUND
+      })
+    }
+
+    const account = await databaseServices.accounts.findOne({ _id: product.createdBy })
+
+    const result = {
+      product,
+      seller: {
+        _id: account?._id,
+        userName: account?.userName,
+        fullName: account?.fullName
+      }
+    }
     return {
       message: PRODUCT_MESSAGES.PRODUCTS_FETCHED_SUCCESS,
       result

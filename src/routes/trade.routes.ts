@@ -1,16 +1,5 @@
 import { Router } from 'express'
-import {
-  acceptProposalController,
-  counterOfferController,
-  createTradeController,
-  getAllTradesController,
-  getMyProposalsController,
-  getMyTradesController,
-  getTradeDetailsController,
-  getTradeProposalsController,
-  proposeTradeController,
-  rejectProposalController
-} from '~/controllers/trade.controllers'
+import tradeController from '~/controllers/trade.controllers'
 import { accessTokenValidation } from '~/middlewares/accounts.middlewares'
 import { filterMiddleware } from '~/middlewares/common.middlewares'
 import { validationAuthorInfo, validationProposal, validationTradePost } from '~/middlewares/trade.middlewares'
@@ -20,16 +9,16 @@ import { wrapRequestHandler } from '~/utils/handlers'
 const tradesRouter = Router()
 
 // Trade Posts
-tradesRouter.get('/', accessTokenValidation, wrapRequestHandler(getAllTradesController))
-tradesRouter.get('/my-trades', accessTokenValidation, wrapRequestHandler(getMyTradesController))
-tradesRouter.get('/:id', accessTokenValidation, wrapRequestHandler(getTradeDetailsController))
+tradesRouter.get('/', accessTokenValidation, wrapRequestHandler(tradeController.getAllTrades))
+tradesRouter.get('/my-trades', accessTokenValidation, wrapRequestHandler(tradeController.getMyTrades))
+tradesRouter.get('/:id', accessTokenValidation, wrapRequestHandler(tradeController.getTradeDetails))
 tradesRouter.post(
   '/',
   accessTokenValidation,
   validationAuthorInfo,
   validationTradePost,
   filterMiddleware<TradePostReqBody>(['title', 'item', 'description']),
-  wrapRequestHandler(createTradeController)
+  wrapRequestHandler(tradeController.createTrade)
 )
 
 // Trade Proposals
@@ -38,10 +27,14 @@ tradesRouter.post(
   accessTokenValidation,
   validationProposal,
   filterMiddleware<ProposalReqBody>(['items', 'message']),
-  wrapRequestHandler(proposeTradeController)
+  wrapRequestHandler(tradeController.proposeTrade)
 )
-tradesRouter.get('/posts/:postId/proposals', accessTokenValidation, wrapRequestHandler(getTradeProposalsController))
-tradesRouter.get('/proposals/me', accessTokenValidation, wrapRequestHandler(getMyProposalsController))
+tradesRouter.get(
+  '/posts/:postId/proposals',
+  accessTokenValidation,
+  wrapRequestHandler(tradeController.getTradeProposals)
+)
+tradesRouter.get('/proposals/me', accessTokenValidation, wrapRequestHandler(tradeController.getMyProposals))
 
 // Counter-offers and Proposal Actions
 tradesRouter.post(
@@ -49,9 +42,17 @@ tradesRouter.post(
   accessTokenValidation,
   validationProposal,
   filterMiddleware<ProposalReqBody>(['items', 'message']),
-  wrapRequestHandler(counterOfferController)
+  wrapRequestHandler(tradeController.createCounterOffer)
 )
-tradesRouter.patch('/proposals/:proposalId/accept', accessTokenValidation, wrapRequestHandler(acceptProposalController))
-tradesRouter.patch('/proposals/:proposalId/reject', accessTokenValidation, wrapRequestHandler(rejectProposalController))
+tradesRouter.patch(
+  '/proposals/:proposalId/accept',
+  accessTokenValidation,
+  wrapRequestHandler(tradeController.acceptProposal)
+)
+tradesRouter.patch(
+  '/proposals/:proposalId/reject',
+  accessTokenValidation,
+  wrapRequestHandler(tradeController.rejectProposal)
+)
 
 export default tradesRouter

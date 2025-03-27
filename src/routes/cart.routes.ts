@@ -1,11 +1,5 @@
 import { Router } from 'express'
-import {
-  addToCartController,
-  clearAllCartItemController,
-  deleteCartItemController,
-  getCartController,
-  updateCartController
-} from '~/controllers/cart.controllers'
+import cartController from '~/controllers/cart.controllers'
 import { accessTokenValidation } from '~/middlewares/accounts.middlewares'
 import { addToCartValidation, updateCartValidation } from '~/middlewares/carts.middlewares'
 import { filterMiddleware } from '~/middlewares/common.middlewares'
@@ -14,16 +8,16 @@ import { wrapRequestHandler } from '~/utils/handlers'
 
 const cartRouter = Router()
 
-cartRouter.get('/', accessTokenValidation, getCartController)
+cartRouter.get('/', accessTokenValidation, wrapRequestHandler(cartController.getCart))
 cartRouter.post(
   '/',
   accessTokenValidation,
   addToCartValidation,
   filterMiddleware<AddToCartReqBody>(['productId', 'quantity']),
-  wrapRequestHandler(addToCartController)
+  wrapRequestHandler(cartController.addToCart)
 )
-cartRouter.put('/:itemId', accessTokenValidation, updateCartValidation, wrapRequestHandler(updateCartController))
-cartRouter.delete('/:id', accessTokenValidation, wrapRequestHandler(deleteCartItemController))
-cartRouter.post('/clear-all', accessTokenValidation, wrapRequestHandler(clearAllCartItemController))
+cartRouter.put('/:itemId', accessTokenValidation, updateCartValidation, wrapRequestHandler(cartController.updateCart))
+cartRouter.delete('/:id', accessTokenValidation, wrapRequestHandler(cartController.deleteCartItem))
+cartRouter.post('/clear-all', accessTokenValidation, wrapRequestHandler(cartController.clearAllCartItem))
 
 export default cartRouter

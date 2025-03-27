@@ -20,6 +20,7 @@ interface ProductType {
   category: Category
   image?: string
   createdBy: ObjectId
+  createrName?: string
   status?: ProductStatus
   brand?: string
   feedBack?: ObjectId[]
@@ -40,6 +41,7 @@ export default class Products {
   category: Category
   image: string
   createdBy: ObjectId
+  createrName?: string
   status: ProductStatus
   brand: string
   feedBack: ObjectId[]
@@ -60,6 +62,7 @@ export default class Products {
     this.category = product.category
     this.image = product.image || ''
     this.createdBy = product.createdBy
+    this.createrName = product.createrName || ''
     this.status = product.status || ProductStatus.Inactive
     this.brand = product.brand || ''
     this.feedBack = product.feedBack || []
