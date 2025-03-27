@@ -425,6 +425,7 @@ class OrderService {
 
     const orders = await databaseServices.orders
       .find({ _id: { $in: orderIds } })
+      .project({ totalPrice: 0 })
       .sort({ createdAt: -1 })
       .toArray()
 
@@ -433,6 +434,10 @@ class OrderService {
         const details = orderDetails.filter(
           (detail) => detail.orderId.equals(order._id) && detail.sellerId.equals(new ObjectId(accountId))
         )
+        let totalPrice = 0
+        for (const detail of details) {
+          totalPrice += Number(detail.price) * detail.quantity
+        }
 
         const buyerInfo = await databaseServices.accounts.findOne(
           { _id: order.buyerInfo.accountId },
@@ -442,6 +447,7 @@ class OrderService {
         return {
           ...order,
           items: details,
+          totalPrice,
           buyer: buyerInfo || {}
         }
       })
