@@ -6,6 +6,7 @@ interface FeedbackType {
   content: string
   accountId: ObjectId
   productId: ObjectId
+  accountName: string
   createdAt?: Date
   updatedAt?: Date
 }
@@ -16,6 +17,7 @@ export default class Feedbacks {
   content: string
   accountId: ObjectId
   productId: ObjectId
+  accountName: string
   createdAt: Date
   updatedAt: Date
 
@@ -26,6 +28,7 @@ export default class Feedbacks {
     this.content = feedback.content
     this.accountId = feedback.accountId
     this.productId = feedback.productId
+    this.accountName = feedback.accountName
     this.createdAt = feedback.createdAt || date
     this.updatedAt = feedback.updatedAt || date
   }

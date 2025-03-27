@@ -15,6 +15,11 @@ class FeedbackService {
       throw new Error(FEEDBACK_MESSAGES.ALREADY_LEFT_FEEDBACK)
     }
 
+    const account = await databaseServices.accounts.findOne({ _id: new ObjectId(accountId) })
+    if (!account) {
+      throw new Error(FEEDBACK_MESSAGES.ACCOUNT_NOT_FOUND)
+    }
+
     const newFeedbackId = new ObjectId()
     const feedback = new Feedbacks({
       _id: newFeedbackId,
@@ -22,6 +27,7 @@ class FeedbackService {
       productId: new ObjectId(payload.productId),
       rate: payload.rate,
       content: payload.content,
+      accountName: account.userName,
       createdAt: new Date(),
       updatedAt: new Date()
     })

@@ -110,7 +110,8 @@ const PRODUCT_MESSAGES = {
   PROMOTION_CREATED_SUCCESS: 'Promotion created successfully',
   PROMOTION_UPDATED_SUCCESS: 'Promotion updated successfully',
   PROMOTION_DELETED_SUCCESS: 'Promotion deleted successfully',
-  THIS_PROMOTION_IS_NOT_YOURS: 'This promotion is not yours'
+  THIS_PROMOTION_IS_NOT_YOURS: 'This promotion is not yours',
+  ACCOUNT_NOT_FOUND: 'Account not found',
 } as const
 
 const CART_MESSAGES = {
@@ -155,7 +156,8 @@ export const FEEDBACK_MESSAGES = {
   FEEDBACK_UPDATED_SUCCESS: 'Feedback updated successfully',
   ALREADY_LEFT_FEEDBACK: 'Already left feedback',
   FEEDBACK_DELETED_SUCCESS: 'Feedback deleted successfully',
-  FEEDBACK_NOT_FOUND: 'Feedback not found'
+  FEEDBACK_NOT_FOUND: 'Feedback not found',
+  ACCOUNT_NOT_FOUND: 'Account not found'
 }
 
 const PAYMENT_MESSAGES = {
