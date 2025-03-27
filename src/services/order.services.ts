@@ -173,7 +173,8 @@ class OrderService {
       productId: product._id,
       quantity: payload.item.quantity,
       price: product.price,
-      image: product.image
+      image: product.image,
+      sellerId: product.createdBy
     })
 
     await databaseServices.orderDetails.insertOne(orderDetail)
@@ -223,6 +224,7 @@ class OrderService {
       address: ''
     }
 
+    // Gather all items from cart
     const cartItemsDetails = []
     for (const cartItem of items) {
       const item = await databaseServices.cartItems.findOne({
@@ -266,77 +268,75 @@ class OrderService {
       })
     }
 
-    const itemsBySeller: Record<string, (typeof cartItemsDetails)[0][]> = {}
+    // Calculate total price for all items
+    let totalPrice = 0
     for (const item of cartItemsDetails) {
-      const sellerId = item.createdBy ? item.createdBy.toString() : 'unknown'
-      if (!itemsBySeller[sellerId]) {
-        itemsBySeller[sellerId] = []
-      }
-      itemsBySeller[sellerId].push(item)
+      totalPrice += Number(item.price) * item.quantity
     }
 
-    const orders = []
+    // Apply promotion if any
+    const finalPrice = await this.applyPromotion(totalPrice, payload.promotionId, accountId)
+
+    // Create a single order for the entire cart
     const now = new Date()
-    const orderGroupId = new ObjectId().toString()
+    const orderId = new ObjectId()
+    const order = new Orders({
+      _id: orderId,
+      totalPrice: new Double(finalPrice),
+      promotionId: payload.promotionId ? new ObjectId(payload.promotionId) : undefined,
+      status: OrderStatus.Pending,
+      buyerInfo: {
+        accountId: new ObjectId(accountId)
+      },
+      receiverInfo,
+      paymentMethod: payload.paymentMethod,
+      notes: payload.notes || '',
+      createdAt: now,
+      updatedAt: now
+    })
 
-    for (const sellerId in itemsBySeller) {
-      const sellerItems = itemsBySeller[sellerId]
+    await databaseServices.orders.insertOne(order)
 
-      let subTotal = 0
-      for (const item of sellerItems) {
-        subTotal += Number(item.price) * item.quantity
-      }
+    // Create order details for all items
+    const orderDetailsForReturn = []
 
-      // Apply promotion (if any)
-      const finalPrice = await this.applyPromotion(subTotal, payload.promotionId, accountId)
-
-      // Create order
-      const orderId = new ObjectId()
-      const order = new Orders({
-        _id: orderId,
-        totalPrice: new Double(finalPrice),
-        promotionId: payload.promotionId ? new ObjectId(payload.promotionId) : undefined,
-        status: OrderStatus.Pending,
-        buyerInfo: {
-          accountId: new ObjectId(accountId)
-        },
-        receiverInfo,
-        paymentMethod: payload.paymentMethod,
-        notes: payload.notes || '',
-        createdAt: now,
-        updatedAt: now
+    // Process each item and include seller information for tracking
+    for (const item of cartItemsDetails) {
+      // Create order detail with seller reference
+      const orderDetail = new OrderDetails({
+        orderId: orderId,
+        productName: item.productName,
+        productId: item.productId,
+        quantity: item.quantity,
+        price: item.price,
+        image: item.image,
+        sellerId: item.createdBy // Include the seller ID in the order detail
       })
 
-      await databaseServices.orders.insertOne(order)
+      await databaseServices.orderDetails.insertOne(orderDetail)
 
-      // Create order details for this seller's items
-      const orderDetailsForReturn = []
-      for (const item of sellerItems) {
-        const orderDetail = new OrderDetails({
-          orderId: orderId,
-          productName: item.productName,
-          productId: item.productId,
-          quantity: item.quantity,
-          price: item.price,
-          image: item.image
-        })
+      orderDetailsForReturn.push({
+        productId: item.productId,
+        productName: item.productName,
+        quantity: item.quantity,
+        price: item.price,
+        image: item.image,
+        sellerId: item.createdBy ? item.createdBy.toString() : null
+      })
 
-        await databaseServices.orderDetails.insertOne(orderDetail)
+      // Update product inventory
+      await databaseServices.products.updateOne({ _id: item.productId }, { $inc: { quantity: -item.quantity } })
 
-        orderDetailsForReturn.push({
-          productId: item.productId,
-          productName: item.productName,
-          quantity: item.quantity,
-          price: item.price,
-          image: item.image
-        })
+      // Remove item from cart
+      await databaseServices.cartItems.deleteOne({ _id: item.cartItemId })
+    }
 
-        await databaseServices.products.updateOne({ _id: item.productId }, { $inc: { quantity: -item.quantity } })
+    // Update cart's last modified timestamp
+    await databaseServices.carts.updateOne({ _id: cart._id }, { $set: { updatedAt: new Date() } })
 
-        await databaseServices.cartItems.deleteOne({ _id: item.cartItemId })
-      }
-
-      orders.push({
+    return {
+      message: ORDER_MESSAGES.ORDER_CREATED_SUCCESS,
+      result: {
         _id: orderId,
         totalPrice: finalPrice,
         status: OrderStatus.Pending,
@@ -344,22 +344,8 @@ class OrderService {
           accountId: new ObjectId(accountId)
         },
         receiverInfo,
-        sellerInfo: {
-          sellerId: sellerId !== 'unknown' ? new ObjectId(sellerId) : null
-        },
         items: orderDetailsForReturn,
-        orderGroupId,
         createdAt: now
-      })
-    }
-
-    await databaseServices.carts.updateOne({ _id: cart._id }, { $set: { updatedAt: new Date() } })
-
-    return {
-      message: ORDER_MESSAGES.ORDER_CREATED_SUCCESS,
-      result: {
-        orders: orders,
-        orderGroupId: orderGroupId
       }
     }
   }
@@ -422,18 +408,11 @@ class OrderService {
   }
 
   async getSellerOrders(accountId: string) {
-    const products = await databaseServices.products.find({ createdBy: new ObjectId(accountId) }).toArray()
-
-    if (products.length === 0) {
-      return {
-        message: ORDER_MESSAGES.NO_ORDERS_FOUND,
-        result: []
-      }
-    }
-
-    const productNames = products.map((product) => product.name)
-
-    const orderDetails = await databaseServices.orderDetails.find({ productName: { $in: productNames } }).toArray()
+    const orderDetails = await databaseServices.orderDetails
+      .find({
+        sellerId: new ObjectId(accountId)
+      })
+      .toArray()
 
     if (orderDetails.length === 0) {
       return {
@@ -452,13 +431,11 @@ class OrderService {
     const ordersWithDetails = await Promise.all(
       orders.map(async (order) => {
         const details = orderDetails.filter(
-          (detail) => detail.orderId.equals(order._id) && productNames.includes(detail.productName)
+          (detail) => detail.orderId.equals(order._id) && detail.sellerId.equals(new ObjectId(accountId))
         )
 
         const buyerInfo = await databaseServices.accounts.findOne(
-          {
-            _id: order.buyerInfo.accountId
-          },
+          { _id: order.buyerInfo.accountId },
           { projection: { password: 0, passwordConfirm: 0 } }
         )
 
@@ -476,21 +453,10 @@ class OrderService {
     }
   }
 
-  private async validateOrderBelongsToSeller(createdBy: string, orderId: ObjectId) {
-    const products = await databaseServices.products.find({ createdBy: new ObjectId(createdBy) }).toArray()
-
-    if (products.length === 0) {
-      throw new ErrorWithStatus({
-        status: HTTP_STATUS.NOT_FOUND,
-        message: ORDER_MESSAGES.ORDER_NOT_BELONG_TO_SELLER
-      })
-    }
-
-    const productNames = products.map((product) => product.name)
-
+  private async validateOrderBelongsToSeller(accountId: string, orderId: ObjectId) {
     const orderDetail = await databaseServices.orderDetails.findOne({
       orderId,
-      productName: { $in: productNames }
+      sellerId: new ObjectId(accountId)
     })
 
     if (!orderDetail) {
