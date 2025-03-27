@@ -6,91 +6,95 @@ import { CreateOrderReqBody } from '~/models/requests/Order.requests'
 import HTTP_STATUS from '~/constants/httpStatus'
 import { OrderType } from '~/constants/enums'
 
-//Buyer
-export const getAccountOrdersController = async (req: Request, res: Response) => {
-  const { accountId } = req.decode_authorization as TokenPayload
-  const result = await orderService.getOrdersByAccountId(accountId)
-  res.status(HTTP_STATUS.OK).json(result)
-}
-
-export const createOrderController = async (req: Request<ParamsDictionary, any, CreateOrderReqBody>, res: Response) => {
-  const { accountId } = req.decode_authorization as TokenPayload
-  const payload = req.body
-  let result
-
-  if (payload.orderType === OrderType.Direct) {
-    result = await orderService.createDirectOrder(accountId, payload)
-  } else if (payload.orderType === OrderType.Cart) {
-    result = await orderService.createCartOrder(accountId, payload)
+class OrderController {
+  // Buyer methods
+  async getAccountOrders(req: Request, res: Response) {
+    const { accountId } = req.decode_authorization as TokenPayload
+    const result = await orderService.getOrdersByAccountId(accountId)
+    res.status(HTTP_STATUS.OK).json(result)
   }
-  res.status(HTTP_STATUS.CREATED).json(result)
+
+  async createOrder(req: Request<ParamsDictionary, any, CreateOrderReqBody>, res: Response) {
+    const { accountId } = req.decode_authorization as TokenPayload
+    const payload = req.body
+    let result
+
+    if (payload.orderType === OrderType.Direct) {
+      result = await orderService.createDirectOrder(accountId, payload)
+    } else if (payload.orderType === OrderType.Cart) {
+      result = await orderService.createCartOrder(accountId, payload)
+    }
+    res.status(HTTP_STATUS.CREATED).json(result)
+  }
+
+  async cancelOrder(req: Request, res: Response) {
+    const { accountId } = req.decode_authorization as TokenPayload
+    const { orderId } = req.params
+    const { reason } = req.body
+
+    const result = await orderService.cancelOrder(accountId, orderId, reason)
+
+    res.status(HTTP_STATUS.OK).json(result)
+  }
+
+  async completeOrder(req: Request, res: Response) {
+    const { accountId } = req.decode_authorization as TokenPayload
+    const { orderId } = req.params
+
+    const result = await orderService.completeOrder(accountId, orderId)
+
+    res.status(HTTP_STATUS.OK).json(result)
+  }
+
+  async getUserPromotions(req: Request, res: Response) {
+    const { accountId } = req.decode_authorization as TokenPayload
+    const result = await orderService.getUserPromotions(accountId)
+    res.status(HTTP_STATUS.OK).json(result)
+  }
+
+  // Seller methods
+  async getSellerOrders(req: Request, res: Response) {
+    const { accountId } = req.decode_authorization as TokenPayload
+    const result = await orderService.getSellerOrders(accountId)
+    res.status(HTTP_STATUS.OK).json(result)
+  }
+
+  async confirmOrder(req: Request, res: Response) {
+    const { accountId } = req.decode_authorization as TokenPayload
+    const { orderId } = req.params
+
+    const result = await orderService.confirmOrder(accountId, orderId)
+
+    res.status(HTTP_STATUS.OK).json(result)
+  }
+
+  async processOrder(req: Request, res: Response) {
+    const { accountId } = req.decode_authorization as TokenPayload
+    const { orderId } = req.params
+
+    const result = await orderService.processOrder(accountId, orderId)
+
+    res.status(HTTP_STATUS.OK).json(result)
+  }
+
+  async sellerCancelOrder(req: Request, res: Response) {
+    const { accountId } = req.decode_authorization as TokenPayload
+    const { orderId } = req.params
+    const { reason } = req.body
+
+    const result = await orderService.sellerCancelOrder(accountId, orderId, reason)
+
+    res.status(HTTP_STATUS.OK).json(result)
+  }
+
+  async sellerCompleteOrder(req: Request, res: Response) {
+    const { accountId } = req.decode_authorization as TokenPayload
+    const { orderId } = req.params
+
+    const result = await orderService.sellerCompleteOrder(accountId, orderId)
+
+    res.status(HTTP_STATUS.OK).json(result)
+  }
 }
 
-export const cancelOrderController = async (req: Request, res: Response) => {
-  const { accountId } = req.decode_authorization as TokenPayload
-  const { orderId } = req.params
-  const { reason } = req.body
-
-  const result = await orderService.cancelOrder(accountId, orderId, reason)
-
-  res.status(HTTP_STATUS.OK).json(result)
-}
-
-export const completeOrderController = async (req: Request, res: Response) => {
-  const { accountId } = req.decode_authorization as TokenPayload
-  const { orderId } = req.params
-
-  const result = await orderService.completeOrder(accountId, orderId)
-
-  res.status(HTTP_STATUS.OK).json(result)
-}
-
-export const getUserPromotionsController = async (req: Request, res: Response) => {
-  const { accountId } = req.decode_authorization as TokenPayload
-  const result = await orderService.getUserPromotions(accountId)
-  res.status(HTTP_STATUS.OK).json(result)
-}
-
-//Seller
-export const getSellerOrdersController = async (req: Request, res: Response) => {
-  const { accountId } = req.decode_authorization as TokenPayload
-  const result = await orderService.getSellerOrders(accountId)
-  res.status(HTTP_STATUS.OK).json(result)
-}
-
-export const confirmOrderController = async (req: Request, res: Response) => {
-  const { accountId } = req.decode_authorization as TokenPayload
-  const { orderId } = req.params
-
-  const result = await orderService.confirmOrder(accountId, orderId)
-
-  res.status(HTTP_STATUS.OK).json(result)
-}
-
-export const processOrderController = async (req: Request, res: Response) => {
-  const { accountId } = req.decode_authorization as TokenPayload
-  const { orderId } = req.params
-
-  const result = await orderService.processOrder(accountId, orderId)
-
-  res.status(HTTP_STATUS.OK).json(result)
-}
-
-export const sellerCancelOrderController = async (req: Request, res: Response) => {
-  const { accountId } = req.decode_authorization as TokenPayload
-  const { orderId } = req.params
-  const { reason } = req.body
-
-  const result = await orderService.sellerCancelOrder(accountId, orderId, reason)
-
-  res.status(HTTP_STATUS.OK).json(result)
-}
-
-export const sellerCompleteOrderController = async (req: Request, res: Response) => {
-  const { accountId } = req.decode_authorization as TokenPayload
-  const { orderId } = req.params
-
-  const result = await orderService.sellerCompleteOrder(accountId, orderId)
-
-  res.status(HTTP_STATUS.OK).json(result)
-}
+export default new OrderController()

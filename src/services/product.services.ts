@@ -60,11 +60,29 @@ class ProductService {
   }
 
   async getBlindBoxesDetails(slug: string, id: string) {
-    const result = await databaseServices.products.findOne({
+    const product = await databaseServices.products.findOne({
       slug,
       _id: new ObjectId(id),
       category: Category.Blindbox
     })
+
+    if (!product) {
+      throw new ErrorWithStatus({
+        status: HTTP_STATUS.NOT_FOUND,
+        message: PRODUCT_MESSAGES.PRODUCT_NOT_FOUND
+      })
+    }
+
+    const account = await databaseServices.accounts.findOne({ _id: product.createdBy })
+
+    const result = {
+      product,
+      seller: {
+        _id: account?._id,
+        userName: account?.userName,
+        fullName: account?.fullName
+      }
+    }
     return {
       message: PRODUCT_MESSAGES.PRODUCTS_FETCHED_SUCCESS,
       result

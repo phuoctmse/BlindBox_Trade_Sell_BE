@@ -37,16 +37,44 @@ class FeedbackService {
   async getFeedbacksByProductId(productId: string) {
     const result = await databaseServices.feedbacks.find({ productId: new ObjectId(productId) }).toArray()
 
-    const formattedResult = result.map((feedback) => ({
-      ...feedback,
-      _id: feedback._id.toString(),
-      accountId: feedback.accountId.toString(),
-      productId: feedback.productId.toString()
-    }))
+    const accountIds = [...new Set(result.map((feedback) => feedback.accountId))]
+
+    const accounts = await databaseServices.accounts
+      .find(
+        {
+          _id: { $in: accountIds }
+        },
+        {
+          projection: { _id: 1, userName: 1, fullName: 1 }
+        }
+      )
+      .toArray()
+
+    const accountMap = new Map()
+    accounts.forEach((account) => {
+      accountMap.set(account._id.toString(), account)
+    })
+
+    const formattedResult = result.map((feedback) => {
+      const accountIdString = feedback.accountId.toString()
+      const account = accountMap.get(accountIdString)
+
+      return {
+        ...feedback,
+        _id: feedback._id.toString(),
+        accountId: accountIdString,
+        productId: feedback.productId.toString(),
+        account: {
+          userName: account?.userName || 'Unknown user',
+          fullName: account?.fullName || '',
+          avatar: account?.avatar || ''
+        }
+      }
+    })
 
     return {
       message: FEEDBACK_MESSAGES.FEEDBACKS_FETCHED_SUCCESS,
-      formattedResult
+      result: formattedResult
     }
   }
 

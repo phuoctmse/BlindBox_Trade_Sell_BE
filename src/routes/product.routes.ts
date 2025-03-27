@@ -1,23 +1,5 @@
 import { Router } from 'express'
-import { wrap } from 'lodash'
-import {
-  createAccessoriesController,
-  createBlindBoxesController,
-  deleteProductController,
-  getAllApprovedBlindBoxesController,
-  getBlindBoxesDetailsController,
-  getMyBlindBoxesController,
-  updateProductController,
-  getAllBeadsController,
-  getAccessoryDetailController,
-  getAllOpenedItemsController,
-  createOpenedItemController,
-  getPromotionsBySellerIdController,
-  createPromotionController,
-  editPromotionController,
-  deletePromotionController,
-  getAllPromotionsController
-} from '~/controllers/product.controllers'
+import productController from '~/controllers/product.controllers'
 import { accessTokenValidation, validateRegisterSelling } from '~/middlewares/accounts.middlewares'
 import { filterMiddleware } from '~/middlewares/common.middlewares'
 import {
@@ -35,7 +17,7 @@ productsRouter.get(
   '/seller/blind-boxes',
   accessTokenValidation,
   validateRegisterSelling,
-  wrapRequestHandler(getMyBlindBoxesController)
+  wrapRequestHandler(productController.getMyBlindBoxes)
 )
 productsRouter.post(
   '/seller/blind-boxes',
@@ -43,63 +25,79 @@ productsRouter.post(
   validateRegisterSelling,
   createBlindBoxesValidation,
   filterMiddleware<CreateBlindBoxesReqBody>(['image', 'brand', 'description', 'name', 'price', 'quantity', 'size']),
-  wrapRequestHandler(createBlindBoxesController)
+  wrapRequestHandler(productController.createBlindBoxes)
 )
 productsRouter.put(
   '/seller/blind-boxes/:id',
   accessTokenValidation,
   filterMiddleware<CreateBlindBoxesReqBody>(['brand', 'description', 'name', 'price', 'quantity', 'size']),
-  wrapRequestHandler(updateProductController)
+  wrapRequestHandler(productController.updateProduct)
 )
-productsRouter.delete('/seller/blind-boxes/:id', accessTokenValidation, wrapRequestHandler(deleteProductController))
+productsRouter.delete(
+  '/seller/blind-boxes/:id',
+  accessTokenValidation,
+  wrapRequestHandler(productController.deleteProduct)
+)
 
 //Buyer
-productsRouter.get('/blind-boxes', wrapRequestHandler(getAllApprovedBlindBoxesController))
-productsRouter.get('/blind-boxes/:slug', accessTokenValidation, wrapRequestHandler(getBlindBoxesDetailsController))
+productsRouter.get('/blind-boxes', wrapRequestHandler(productController.getAllApprovedBlindBoxes))
+productsRouter.get(
+  '/blind-boxes/:slug',
+  accessTokenValidation,
+  wrapRequestHandler(productController.getBlindBoxesDetails)
+)
 
 //Customize
-productsRouter.get('/accessories/customization', accessTokenValidation, wrapRequestHandler(getAllBeadsController))
+productsRouter.get(
+  '/accessories/customization',
+  accessTokenValidation,
+  wrapRequestHandler(productController.getAllBeads)
+)
 productsRouter.post(
   '/accessories/customization',
   accessTokenValidation,
   validateCreateCustomization,
-  wrapRequestHandler(createAccessoriesController)
+  wrapRequestHandler(productController.createAccessories)
 )
-productsRouter.get('/accessories/:slug', accessTokenValidation, wrapRequestHandler(getAccessoryDetailController))
+productsRouter.get(
+  '/accessories/:slug',
+  accessTokenValidation,
+  wrapRequestHandler(productController.getAccessoryDetail)
+)
 
-productsRouter.get('/opened-items', accessTokenValidation, wrapRequestHandler(getAllOpenedItemsController))
+productsRouter.get('/opened-items', accessTokenValidation, wrapRequestHandler(productController.getAllOpenedItems))
 
 productsRouter.post(
   '/opened-items',
   accessTokenValidation,
   validationOpenedItem,
   filterMiddleware<CreateOpenedItem>(['image', 'brand', 'description', 'name', 'price', 'quantity', 'condition']),
-  wrapRequestHandler(createOpenedItemController)
+  wrapRequestHandler(productController.createOpenedItem)
 )
 
-productsRouter.get('/promotions', accessTokenValidation, wrapRequestHandler(getAllPromotionsController))
+productsRouter.get('/promotions', accessTokenValidation, wrapRequestHandler(productController.getAllPromotions))
 productsRouter.get(
   '/seller/promotions',
   accessTokenValidation,
   validateRegisterSelling,
-  wrapRequestHandler(getPromotionsBySellerIdController)
+  wrapRequestHandler(productController.getPromotionsBySellerId)
 )
 productsRouter.post(
   '/seller/promotions',
   accessTokenValidation,
   validateRegisterSelling,
-  wrapRequestHandler(createPromotionController)
+  wrapRequestHandler(productController.createPromotion)
 )
 productsRouter.put(
   '/seller/promotions/:promotionId',
   accessTokenValidation,
   validateRegisterSelling,
-  wrapRequestHandler(editPromotionController)
+  wrapRequestHandler(productController.editPromotion)
 )
 productsRouter.delete(
   '/seller/promotions/:promotionId',
   accessTokenValidation,
   validateRegisterSelling,
-  wrapRequestHandler(deletePromotionController)
+  wrapRequestHandler(productController.deletePromotion)
 )
 export default productsRouter
