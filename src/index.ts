@@ -56,25 +56,31 @@ app.use(cookieParser())
 
 app.use('/medias/images/', express.static(UPLOAD_DIR))
 
-// Setup Swagger
-app.use('/api', swaggerUi.serve, swaggerUi.setup(swaggerDocument))
+// Setup Swagger - Keep this outside API version for documentation access
+app.use('/swagger', swaggerUi.serve, swaggerUi.setup(swaggerDocument))
 
-// Routes
-app.use('/accounts', accountsRouter)
-app.use('/products', productsRouter)
-app.use('/medias', mediasRouter)
-app.use('/admins', adminRouter)
-app.use('/cart', cartRouter)
-app.use('/orders', orderRouter)
-app.use('/feedbacks', feedbackRouter)
-app.use('/payment', paymentRouter)
-app.use('/trade', tradesRouter)
+// Create API router for versioning
+const apiRouter = express.Router()
+
+// Mount all routes on the API router with their respective paths
+apiRouter.use('/accounts', accountsRouter)
+apiRouter.use('/products', productsRouter)
+apiRouter.use('/medias', mediasRouter)
+apiRouter.use('/admins', adminRouter)
+apiRouter.use('/cart', cartRouter)
+apiRouter.use('/orders', orderRouter)
+apiRouter.use('/feedbacks', feedbackRouter)
+apiRouter.use('/payment', paymentRouter)
+apiRouter.use('/trade', tradesRouter)
+
+// Mount the API router on the /api/v1 path
+app.use('/api/v1', apiRouter)
 
 // Error handling
 app.use(defaultErrorHandler as any)
 
 // Start server
-app.listen(port, () => {
+httpServer.listen(port, () => {
   console.log(`Server is running on port ${port}`)
 })
 
