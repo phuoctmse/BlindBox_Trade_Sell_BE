@@ -616,7 +616,6 @@ class OrderService {
       })
     }
 
-    // Calculate total price of cancelled items
     let cancelledItemsTotal = 0
     for (const detail of sellerOrderDetails) {
       cancelledItemsTotal += Number(detail.price) * detail.quantity
@@ -634,11 +633,13 @@ class OrderService {
 
     await Promise.all(productUpdatePromises)
 
+    // Get remaining order details to check if order should be fully cancelled
     const remainingOrderDetails = await databaseServices.orderDetails.find({ orderId: order._id }).toArray()
 
     const date = new Date()
 
     if (remainingOrderDetails.length === 0) {
+      // If no items remain, cancel the entire order
       await databaseServices.orders.updateOne(
         { _id: order._id },
         {
@@ -650,6 +651,7 @@ class OrderService {
         }
       )
 
+      // Create compensation promotion for Banking payments
       if (order.paymentMethod === PaymentMethod.Banking) {
         const buyerAccountId = order.buyerInfo.accountId
 
@@ -698,7 +700,7 @@ class OrderService {
                 status: OrderStatus.PartiallyCancelled,
                 timestamp: date,
                 reason: reason,
-                cancelledItems: sellerOrderDetails.map((detail) => ({
+                cancelledItems: sellerOrderDetails.map(detail => ({
                   productName: detail.productName,
                   quantity: detail.quantity,
                   price: detail.price
@@ -719,7 +721,7 @@ class OrderService {
         endDate.setMonth(today.getMonth() + 1) // Promotion valid for 1 month
 
         const compensationPromotion = new Promotions({
-          name: `Partial Refund for Order #${order._id}`,
+          name: `Partial Refund for Order #${order._id} - ${sellerOrderDetails.map(detail => detail.productName).join(', ')}`,
           discountAmount: cancelledItemsTotal, // Refund only the cancelled items amount
           discountRate: 0, // No percentage discount
           startDate: today,
@@ -741,7 +743,7 @@ class OrderService {
           status: OrderStatus.PartiallyCancelled,
           updatedAt: new Date(),
           newTotalPrice,
-          cancelledItems: sellerOrderDetails.map((detail) => ({
+          cancelledItems: sellerOrderDetails.map(detail => ({
             productName: detail.productName,
             quantity: detail.quantity,
             price: detail.price
