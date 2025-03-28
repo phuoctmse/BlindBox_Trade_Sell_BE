@@ -137,6 +137,8 @@ const ORDER_MESSAGES = {
   INVALID_ORDER_TYPE: 'Invalid order type',
   CANNOT_CANCEL_ORDER: 'Cannot cancel order',
   ORDER_CANCELLED_SUCCESS: 'Order cancelled successfully',
+  ORDER_PARTIALLY_CANCELLED_SUCCESS: 'Order partially cancelled successfully',
+  ORDER_DETAILS_COMPLETED_SUCCESS: 'Order details completed successfully',
   NO_ORDERS_FOUND: 'No orders found',
   CANNOT_BUY_OWN_PRODUCT: 'Cannot buy own product',
   SELLER_PRODUCT_IN_CART: 'Seller product in cart',

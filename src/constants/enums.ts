@@ -40,7 +40,8 @@ export enum OrderStatus {
   Confirmed,
   Processing,
   Completed,
-  Cancelled
+  Cancelled,
+  PartiallyCancelled
 }
 
 export enum PaymentMethod {

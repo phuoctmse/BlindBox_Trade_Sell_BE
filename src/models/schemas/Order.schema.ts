@@ -5,6 +5,11 @@ interface StatusHistory {
   status: OrderStatus
   timestamp: Date
   reason?: string
+  cancelledItems?: {
+    productName: string
+    quantity: number
+    price: Double
+  }[]
 }
 interface BuyerInfo {
   accountId: ObjectId

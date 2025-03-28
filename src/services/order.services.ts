@@ -595,18 +595,35 @@ class OrderService {
       })
     }
 
-    if (order.status !== OrderStatus.Pending) {
+    if (order.status !== OrderStatus.Pending && order.status !== OrderStatus.Confirmed) {
       throw new ErrorWithStatus({
         status: HTTP_STATUS.BAD_REQUEST,
         message: ORDER_MESSAGES.CANNOT_CANCEL_ORDER
       })
     }
 
-    await this.validateOrderBelongsToSeller(createdBy, order._id)
+    // Get all order details for this seller
+    const sellerOrderDetails = await databaseServices.orderDetails
+      .find({
+        orderId: order._id,
+        sellerId: new ObjectId(createdBy)
+      })
+      .toArray()
 
-    const orderDetails = await databaseServices.orderDetails.find({ orderId: order._id }).toArray()
+    if (sellerOrderDetails.length === 0) {
+      throw new ErrorWithStatus({
+        status: HTTP_STATUS.FORBIDDEN,
+        message: ORDER_MESSAGES.ORDER_NOT_BELONG_TO_SELLER
+      })
+    }
 
-    const productUpdatePromises = orderDetails.map(async (detail) => {
+    // Calculate total price of cancelled items
+    let cancelledItemsTotal = 0
+    for (const detail of sellerOrderDetails) {
+      cancelledItemsTotal += Number(detail.price) * detail.quantity
+    }
+
+    const productUpdatePromises = sellerOrderDetails.map(async (detail) => {
       const product = await databaseServices.products.findOne({
         name: detail.productName
       })
@@ -618,52 +635,129 @@ class OrderService {
 
     await Promise.all(productUpdatePromises)
 
+    // Remove cancelled items from order details
+    await databaseServices.orderDetails.deleteMany({
+      orderId: order._id,
+      sellerId: new ObjectId(createdBy)
+    })
+
+    // Get remaining order details to check if order should be fully cancelled
+    const remainingOrderDetails = await databaseServices.orderDetails.find({ orderId: order._id }).toArray()
+
     const date = new Date()
 
-    await databaseServices.orders.updateOne(
-      { _id: order._id },
-      {
-        $set: {
+    if (remainingOrderDetails.length === 0) {
+      // If no items remain, cancel the entire order
+      await databaseServices.orders.updateOne(
+        { _id: order._id },
+        {
+          $set: {
+            status: OrderStatus.Cancelled,
+            updatedAt: date,
+            statusHistory: [{ status: OrderStatus.Cancelled, timestamp: date, reason: reason }]
+          }
+        }
+      )
+
+      // Create compensation promotion for Banking payments
+      if (order.paymentMethod === PaymentMethod.Banking) {
+        const buyerAccountId = order.buyerInfo.accountId
+
+        // Create a single-use promotion for the buyer
+        const today = new Date()
+        const endDate = new Date()
+        endDate.setMonth(today.getMonth() + 1) // Promotion valid for 1 month
+
+        const compensationPromotion = new Promotions({
+          name: `Refund for Order #${order._id}`,
+          discountAmount: Number(order.totalPrice), // Exact amount refund
+          discountRate: 0, // No percentage discount
+          startDate: today,
+          endDate: endDate,
+          sellerId: new ObjectId(createdBy),
+          isActive: true,
+          singleUse: true,
+          assignedTo: buyerAccountId,
+          used: false
+        })
+
+        await databaseServices.promotions.insertOne(compensationPromotion)
+      }
+
+      return {
+        message: ORDER_MESSAGES.ORDER_CANCELLED_SUCCESS,
+        result: {
+          _id: order._id,
           status: OrderStatus.Cancelled,
-          updatedAt: date,
-          statusHistory: [{ status: OrderStatus.Cancelled, timestamp: date, reason: reason }]
+          updatedAt: new Date(),
+          compensationAdded: order.paymentMethod === PaymentMethod.Banking
         }
       }
-    )
+    } else {
+      // Update order with new total price and partial cancellation status
+      const newTotalPrice = Number(order.totalPrice) - cancelledItemsTotal
 
-    // Create compensation promotion for Banking payments
-    if (order.paymentMethod === PaymentMethod.Banking) {
-      const buyerAccountId = order.buyerInfo.accountId
+      await databaseServices.orders.updateOne(
+        { _id: order._id },
+        {
+          $set: {
+            totalPrice: new Double(newTotalPrice),
+            updatedAt: date,
+            statusHistory: [
+              {
+                status: OrderStatus.PartiallyCancelled,
+                timestamp: date,
+                reason: reason,
+                cancelledItems: sellerOrderDetails.map(detail => ({
+                  productName: detail.productName,
+                  quantity: detail.quantity,
+                  price: detail.price
+                }))
+              }
+            ]
+          }
+        }
+      )
 
-      // Create a single-use promotion for the buyer
-      const today = new Date()
-      const endDate = new Date()
-      endDate.setMonth(today.getMonth() + 1) // Promotion valid for 1 month
-      const orderValue = Number(order.totalPrice)
+      // Create partial compensation promotion for Banking payments
+      if (order.paymentMethod === PaymentMethod.Banking) {
+        const buyerAccountId = order.buyerInfo.accountId
 
-      const compensationPromotion = new Promotions({
-        name: `Refund for Order #${order._id}`,
-        discountAmount: orderValue, // Exact amount refund
-        discountRate: 0, // No percentage discount
-        startDate: today,
-        endDate: endDate,
-        sellerId: new ObjectId(createdBy),
-        isActive: true,
-        singleUse: true,
-        assignedTo: buyerAccountId,
-        used: false
-      })
+        // Create a single-use promotion for the buyer
+        const today = new Date()
+        const endDate = new Date()
+        endDate.setMonth(today.getMonth() + 1) // Promotion valid for 1 month
 
-      await databaseServices.promotions.insertOne(compensationPromotion)
-    }
+        const compensationPromotion = new Promotions({
+          name: `Partial Refund for Order #${order._id}`,
+          discountAmount: cancelledItemsTotal, // Refund only the cancelled items amount
+          discountRate: 0, // No percentage discount
+          startDate: today,
+          endDate: endDate,
+          sellerId: new ObjectId(createdBy),
+          isActive: true,
+          singleUse: true,
+          assignedTo: buyerAccountId,
+          used: false
+        })
 
-    return {
-      message: ORDER_MESSAGES.ORDER_CANCELLED_SUCCESS,
-      result: {
-        _id: order._id,
-        status: OrderStatus.Cancelled,
-        updatedAt: new Date(),
-        compensationAdded: order.paymentMethod === PaymentMethod.Banking
+        await databaseServices.promotions.insertOne(compensationPromotion)
+      }
+
+      return {
+        message: ORDER_MESSAGES.ORDER_PARTIALLY_CANCELLED_SUCCESS,
+        result: {
+          _id: order._id,
+          status: OrderStatus.PartiallyCancelled,
+          updatedAt: new Date(),
+          newTotalPrice,
+          cancelledItems: sellerOrderDetails.map(detail => ({
+            productName: detail.productName,
+            quantity: detail.quantity,
+            price: detail.price
+          })),
+          compensationAdded: order.paymentMethod === PaymentMethod.Banking
+        }
       }
     }
   }
@@ -694,27 +788,76 @@ class OrderService {
       })
     }
 
-    await this.validateOrderBelongsToSeller(createdBy, order._id)
+    // Get all order details for this seller
+    const sellerOrderDetails = await databaseServices.orderDetails
+      .find({
+        orderId: order._id,
+        sellerId: new ObjectId(createdBy),
+        status: { $ne: OrderStatus.Completed }
+      })
+      .toArray()
+
+    if (sellerOrderDetails.length === 0) {
+      throw new ErrorWithStatus({
+        status: HTTP_STATUS.FORBIDDEN,
+        message: ORDER_MESSAGES.ORDER_NOT_BELONG_TO_SELLER
+      })
+    }
 
     const date = new Date()
 
-    await databaseServices.orders.updateOne(
-      { _id: order._id },
+    // Update all seller's order details to completed
+    await databaseServices.orderDetails.updateMany(
+      {
+        orderId: order._id,
+        sellerId: new ObjectId(createdBy),
+        status: { $ne: OrderStatus.Completed }
+      },
       {
         $set: {
-          status: OrderStatus.Completed,
-          updatedAt: date,
-          statusHistory: [{ status: OrderStatus.Processing, timestamp: date }]
+          status: OrderStatus.Completed
         }
       }
     )
 
-    return {
-      message: ORDER_MESSAGES.ORDER_COMPLETED_SUCCESS,
-      result: {
-        _id: order._id,
-        status: OrderStatus.Completed,
-        updatedAt: new Date()
+    // Check if all order details are completed
+    const allOrderDetails = await databaseServices.orderDetails.find({ orderId: order._id }).toArray()
+    const allCompleted = allOrderDetails.every((detail) => detail.status === OrderStatus.Completed)
+
+    if (allCompleted) {
+      // If all details are completed, update the main order status
+      await databaseServices.orders.updateOne(
+        { _id: order._id },
+        {
+          $set: {
+            status: OrderStatus.Completed,
+            updatedAt: date,
+            statusHistory: [{ status: OrderStatus.Completed, timestamp: date }]
+          }
+        }
+      )
+
+      return {
+        message: ORDER_MESSAGES.ORDER_COMPLETED_SUCCESS,
+        result: {
+          _id: order._id,
+          status: OrderStatus.Completed,
+          updatedAt: new Date()
+        }
+      }
+    } else {
+      // If not all details are completed, just return success for the seller's items
+      return {
+        message: ORDER_MESSAGES.ORDER_DETAILS_COMPLETED_SUCCESS,
+        result: {
+          _id: order._id,
+          status: OrderStatus.Processing,
+          updatedAt: new Date(),
+          completedItems: sellerOrderDetails.map(detail => ({
+            productName: detail.productName,
+            quantity: detail.quantity
+          }))
+        }
       }
     }
   }

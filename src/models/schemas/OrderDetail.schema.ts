@@ -1,4 +1,5 @@
 import { Double, ObjectId } from 'mongodb'
+import { OrderStatus } from '~/constants/enums'
 
 interface OrderDetailsType {
   _id?: ObjectId
@@ -9,6 +10,7 @@ interface OrderDetailsType {
   price: Double
   image: string
   sellerId: ObjectId
+  status?: OrderStatus
 }
 
 export default class OrderDetails {
@@ -20,6 +22,8 @@ export default class OrderDetails {
   price: Double
   image: string
   sellerId: ObjectId
+  status: OrderStatus
+
   constructor(orderDetail: OrderDetailsType) {
     this._id = orderDetail._id || new ObjectId()
     this.orderId = orderDetail.orderId
@@ -29,5 +33,6 @@ export default class OrderDetails {
     this.price = orderDetail.price
     this.image = orderDetail.image
     this.sellerId = orderDetail.sellerId
+    this.status = orderDetail.status || OrderStatus.Pending
   }
 }
