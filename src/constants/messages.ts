@@ -137,6 +137,10 @@ const ORDER_MESSAGES = {
   INVALID_ORDER_TYPE: 'Invalid order type',
   CANNOT_CANCEL_ORDER: 'Cannot cancel order',
   ORDER_CANCELLED_SUCCESS: 'Order cancelled successfully',
+  ORDER_PARTIALLY_CANCELLED_SUCCESS: 'Order partially cancelled successfully',
+  ORDER_DETAILS_COMPLETED_SUCCESS: 'Order details completed successfully',
+  ORDER_DETAILS_CONFIRMED_SUCCESS: 'Order details confirmed successfully',
+  ORDER_DETAILS_PROCESSED_SUCCESS: 'Order details processed successfully',
   NO_ORDERS_FOUND: 'No orders found',
   CANNOT_BUY_OWN_PRODUCT: 'Cannot buy own product',
   SELLER_PRODUCT_IN_CART: 'Seller product in cart',
@@ -147,7 +151,8 @@ const ORDER_MESSAGES = {
   ORDER_PROCESSED_SUCCESS: 'Order processed successfully',
   CANNOT_COMPLETE_ORDER: 'Cannot complete order',
   ORDER_COMPLETED_SUCCESS: 'Order completed successfully',
-  PROMOTIONS_FETCHED_SUCCESS: 'Promotions fetched successfully'
+  PROMOTIONS_FETCHED_SUCCESS: 'Promotions fetched successfully',
+  ORDER_DETAILS_NOT_FOUND: 'Order details not found',
 }
 
 export const FEEDBACK_MESSAGES = {

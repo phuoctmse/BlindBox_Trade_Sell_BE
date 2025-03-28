@@ -23,8 +23,8 @@ config()
 
 class AccountController {
   async register(req: Request<ParamsDictionary, any, RegisterReqBody>, res: Response, next: NextFunction) {
-    const { userName, email, password, phoneNumber } = req.body
-    const result = await accountService.register({ userName, email, password, phoneNumber }, false)
+    const payload = req.body
+    const result = await accountService.register(payload, false)
     res.status(HTTP_STATUS.CREATED).json(result)
   }
 
