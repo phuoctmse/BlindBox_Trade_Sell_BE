@@ -104,7 +104,6 @@ class CartService {
       cartId: cart._id,
       productId: new ObjectId(productId)
     })
-
     if (existingCartItem) {
       const newQuantity = existingCartItem.quantity + quantity
       this.validateProductQuantity(product.quantity, newQuantity)

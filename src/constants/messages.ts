@@ -139,6 +139,8 @@ const ORDER_MESSAGES = {
   ORDER_CANCELLED_SUCCESS: 'Order cancelled successfully',
   ORDER_PARTIALLY_CANCELLED_SUCCESS: 'Order partially cancelled successfully',
   ORDER_DETAILS_COMPLETED_SUCCESS: 'Order details completed successfully',
+  ORDER_DETAILS_CONFIRMED_SUCCESS: 'Order details confirmed successfully',
+  ORDER_DETAILS_PROCESSED_SUCCESS: 'Order details processed successfully',
   NO_ORDERS_FOUND: 'No orders found',
   CANNOT_BUY_OWN_PRODUCT: 'Cannot buy own product',
   SELLER_PRODUCT_IN_CART: 'Seller product in cart',

@@ -970,6 +970,306 @@ class OrderService {
       result: transformedPromotions
     }
   }
+
+  async confirmOrderDetail(createdBy: string, orderId: string) {
+    if (!ObjectId.isValid(orderId)) {
+      throw new ErrorWithStatus({
+        status: HTTP_STATUS.BAD_REQUEST,
+        message: ORDER_MESSAGES.ORDER_NOT_FOUND
+      })
+    }
+
+    const order = await databaseServices.orders.findOne({
+      _id: new ObjectId(orderId)
+    })
+
+    if (!order) {
+      throw new ErrorWithStatus({
+        status: HTTP_STATUS.NOT_FOUND,
+        message: ORDER_MESSAGES.ORDER_NOT_FOUND
+      })
+    }
+
+    if (order.status !== OrderStatus.Pending) {
+      throw new ErrorWithStatus({
+        status: HTTP_STATUS.BAD_REQUEST,
+        message: ORDER_MESSAGES.CANNOT_CONFIRM_ORDER
+      })
+    }
+
+    // Get all order details for this seller
+    const sellerOrderDetails = await databaseServices.orderDetails
+      .find({
+        orderId: order._id,
+        sellerId: new ObjectId(createdBy),
+        status: OrderStatus.Pending
+      })
+      .toArray()
+
+    if (sellerOrderDetails.length === 0) {
+      throw new ErrorWithStatus({
+        status: HTTP_STATUS.FORBIDDEN,
+        message: ORDER_MESSAGES.ORDER_NOT_BELONG_TO_SELLER
+      })
+    }
+
+    const date = new Date()
+
+    // Update all seller's order details to confirmed
+    await databaseServices.orderDetails.updateMany(
+      {
+        orderId: order._id,
+        sellerId: new ObjectId(createdBy),
+        status: OrderStatus.Pending
+      },
+      {
+        $set: {
+          status: OrderStatus.Confirmed
+        }
+      }
+    )
+
+    // Check if all order details are confirmed
+    const allOrderDetails = await databaseServices.orderDetails.find({ orderId: order._id }).toArray()
+    const allConfirmed = allOrderDetails.every((detail) => detail.status === OrderStatus.Confirmed)
+
+    if (allConfirmed) {
+      // If all details are confirmed, update the main order status
+      await databaseServices.orders.updateOne(
+        { _id: order._id },
+        {
+          $set: {
+            status: OrderStatus.Confirmed,
+            updatedAt: date,
+            statusHistory: [{ status: OrderStatus.Confirmed, timestamp: date }]
+          }
+        }
+      )
+
+      return {
+        message: ORDER_MESSAGES.ORDER_CONFIRMED_SUCCESS,
+        result: {
+          _id: order._id,
+          status: OrderStatus.Confirmed,
+          updatedAt: new Date()
+        }
+      }
+    } else {
+      // If not all details are confirmed, just return success for the seller's items
+      return {
+        message: ORDER_MESSAGES.ORDER_DETAILS_CONFIRMED_SUCCESS,
+        result: {
+          _id: order._id,
+          status: OrderStatus.Pending,
+          updatedAt: new Date(),
+          confirmedItems: sellerOrderDetails.map(detail => ({
+            productName: detail.productName,
+            quantity: detail.quantity
+          }))
+        }
+      }
+    }
+  }
+
+  async processOrderDetail(createdBy: string, orderId: string) {
+    if (!ObjectId.isValid(orderId)) {
+      throw new ErrorWithStatus({
+        status: HTTP_STATUS.BAD_REQUEST,
+        message: ORDER_MESSAGES.ORDER_NOT_FOUND
+      })
+    }
+
+    const order = await databaseServices.orders.findOne({
+      _id: new ObjectId(orderId)
+    })
+
+    if (!order) {
+      throw new ErrorWithStatus({
+        status: HTTP_STATUS.NOT_FOUND,
+        message: ORDER_MESSAGES.ORDER_NOT_FOUND
+      })
+    }
+
+    if (order.status !== OrderStatus.Confirmed) {
+      throw new ErrorWithStatus({
+        status: HTTP_STATUS.BAD_REQUEST,
+        message: ORDER_MESSAGES.CANNOT_PROCESS_ORDER
+      })
+    }
+
+    // Get all order details for this seller
+    const sellerOrderDetails = await databaseServices.orderDetails
+      .find({
+        orderId: order._id,
+        sellerId: new ObjectId(createdBy),
+        status: OrderStatus.Confirmed
+      })
+      .toArray()
+
+    if (sellerOrderDetails.length === 0) {
+      throw new ErrorWithStatus({
+        status: HTTP_STATUS.FORBIDDEN,
+        message: ORDER_MESSAGES.ORDER_NOT_BELONG_TO_SELLER
+      })
+    }
+
+    const date = new Date()
+
+    // Update all seller's order details to processing
+    await databaseServices.orderDetails.updateMany(
+      {
+        orderId: order._id,
+        sellerId: new ObjectId(createdBy),
+        status: OrderStatus.Confirmed
+      },
+      {
+        $set: {
+          status: OrderStatus.Processing
+        }
+      }
+    )
+
+    // Check if all order details are processing
+    const allOrderDetails = await databaseServices.orderDetails.find({ orderId: order._id }).toArray()
+    const allProcessing = allOrderDetails.every((detail) => detail.status === OrderStatus.Processing)
+
+    if (allProcessing) {
+      // If all details are processing, update the main order status
+      await databaseServices.orders.updateOne(
+        { _id: order._id },
+        {
+          $set: {
+            status: OrderStatus.Processing,
+            updatedAt: date,
+            statusHistory: [{ status: OrderStatus.Processing, timestamp: date }]
+          }
+        }
+      )
+
+      return {
+        message: ORDER_MESSAGES.ORDER_PROCESSED_SUCCESS,
+        result: {
+          _id: order._id,
+          status: OrderStatus.Processing,
+          updatedAt: new Date()
+        }
+      }
+    } else {
+      // If not all details are processing, just return success for the seller's items
+      return {
+        message: ORDER_MESSAGES.ORDER_DETAILS_PROCESSED_SUCCESS,
+        result: {
+          _id: order._id,
+          status: OrderStatus.Confirmed,
+          updatedAt: new Date(),
+          processedItems: sellerOrderDetails.map(detail => ({
+            productName: detail.productName,
+            quantity: detail.quantity
+          }))
+        }
+      }
+    }
+  }
+
+  async completeOrderDetail(createdBy: string, orderId: string) {
+    if (!ObjectId.isValid(orderId)) {
+      throw new ErrorWithStatus({
+        status: HTTP_STATUS.BAD_REQUEST,
+        message: ORDER_MESSAGES.ORDER_NOT_FOUND
+      })
+    }
+
+    const order = await databaseServices.orders.findOne({
+      _id: new ObjectId(orderId)
+    })
+
+    if (!order) {
+      throw new ErrorWithStatus({
+        status: HTTP_STATUS.NOT_FOUND,
+        message: ORDER_MESSAGES.ORDER_NOT_FOUND
+      })
+    }
+
+    if (order.status !== OrderStatus.Processing) {
+      throw new ErrorWithStatus({
+        status: HTTP_STATUS.BAD_REQUEST,
+        message: ORDER_MESSAGES.CANNOT_COMPLETE_ORDER
+      })
+    }
+
+    // Get all order details for this seller
+    const sellerOrderDetails = await databaseServices.orderDetails
+      .find({
+        orderId: order._id,
+        sellerId: new ObjectId(createdBy),
+        status: OrderStatus.Processing
+      })
+      .toArray()
+
+    if (sellerOrderDetails.length === 0) {
+      throw new ErrorWithStatus({
+        status: HTTP_STATUS.FORBIDDEN,
+        message: ORDER_MESSAGES.ORDER_NOT_BELONG_TO_SELLER
+      })
+    }
+
+    const date = new Date()
+
+    // Update all seller's order details to completed
+    await databaseServices.orderDetails.updateMany(
+      {
+        orderId: order._id,
+        sellerId: new ObjectId(createdBy),
+        status: OrderStatus.Processing
+      },
+      {
+        $set: {
+          status: OrderStatus.Completed
+        }
+      }
+    )
+
+    // Check if all order details are completed
+    const allOrderDetails = await databaseServices.orderDetails.find({ orderId: order._id }).toArray()
+    const allCompleted = allOrderDetails.every((detail) => detail.status === OrderStatus.Completed)
+
+    if (allCompleted) {
+      // If all details are completed, update the main order status
+      await databaseServices.orders.updateOne(
+        { _id: order._id },
+        {
+          $set: {
+            status: OrderStatus.Completed,
+            updatedAt: date,
+            statusHistory: [{ status: OrderStatus.Completed, timestamp: date }]
+          }
+        }
+      )
+
+      return {
+        message: ORDER_MESSAGES.ORDER_COMPLETED_SUCCESS,
+        result: {
+          _id: order._id,
+          status: OrderStatus.Completed,
+          updatedAt: new Date()
+        }
+      }
+    } else {
+      // If not all details are completed, just return success for the seller's items
+      return {
+        message: ORDER_MESSAGES.ORDER_DETAILS_COMPLETED_SUCCESS,
+        result: {
+          _id: order._id,
+          status: OrderStatus.Processing,
+          updatedAt: new Date(),
+          completedItems: sellerOrderDetails.map(detail => ({
+            productName: detail.productName,
+            quantity: detail.quantity
+          }))
+        }
+      }
+    }
+  }
 }
 
 const orderService = new OrderService()
