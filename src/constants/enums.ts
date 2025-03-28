@@ -40,7 +40,11 @@ export enum OrderStatus {
   Confirmed,
   Processing,
   Completed,
-  Cancelled
+  Cancelled,
+  PartiallyCancelled,
+  PartiallyConfirmed,
+  PartiallyProcessing,
+  PartiallyCompleted
 }
 
 export enum PaymentMethod {
@@ -63,4 +67,15 @@ export enum TypeBeads {
   Low,
   Spike,
   Solid
+}
+
+export enum TradeStatus {
+  Processing,
+  Sent, //Sent to Admin
+  Approved, //Admin
+  Cancelled, //Admin
+  Countered,
+  Accepted,
+  Rejected,
+  Completed
 }

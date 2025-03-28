@@ -5,7 +5,6 @@ import {
   socketVerifiedMiddleware,
   socketSellerMiddleware
 } from '../middlewares/socket.middlewares'
-import { TokenPayload } from '~/models/requests/Account.requests'
 import { SOCKET_EVENTS } from '~/constants/sockets'
 
 // Map để lưu trữ kết nối socket cho từng người dùng
@@ -114,6 +113,16 @@ export const notifySellerRegistered = (accountId: string) => {
   if (socket) {
     socket.emit(SOCKET_EVENTS.SELLER_REGISTERED, {
       message: 'You have successfully registered as a seller',
+      timestamp: new Date()
+    })
+  }
+}
+
+export const notifyBuyerOrderSuccess = (accountId: string) => {
+  const socket = userSockets.get(accountId)
+  if (socket) {
+    socket.emit(SOCKET_EVENTS.ORDER_SUCCESS, {
+      message: 'You have successfully order',
       timestamp: new Date()
     })
   }

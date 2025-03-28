@@ -93,14 +93,10 @@ const imageSchema: ParamSchema = {
   }
 }
 
-const colorSchema: ParamSchema = {
-  isString: {
-    errorMessage: PRODUCT_MESSAGES.COLOR_MUST_BE_A_STRING
-  },
-  trim: true,
-  isLength: {
-    options: { min: 1, max: 100 },
-    errorMessage: PRODUCT_MESSAGES.COLOR_LENGTH_MUST_BE_FROM_1_TO_100
+const conditionSchema: ParamSchema = {
+  isInt: {
+    options: { min: 1, max: 10 },
+    errorMessage: PRODUCT_MESSAGES.CONDITION_MUST_BE_A_NUMBER
   }
 }
 
@@ -189,28 +185,42 @@ export const validateCreateFeedback = validate(
   })
 )
 
-//Handle validate if user have ordered the products
 export const userOrderedValidation = validate(
   checkSchema({
     custom: {
       custom: {
         options: async (value, { req }) => {
-          const { accountId } = req.decode_authorization as TokenPayload;
-          const { productId } = req.body;
+          const { accountId } = req.decode_authorization as TokenPayload
+          const { productId } = req.body
 
-          const orders = await orderService.getOrdersByAccountId(accountId);
+          const orders = await orderService.getOrdersByAccountId(accountId)
 
           const productExistsInOrders = orders.result.some((order: { items: WithId<OrderDetails>[] }) =>
-            order.items.some(item => item.productId && item.productId.toString() === productId)
-          );
+            order.items.some((item) => item.productId && item.productId.toString() === productId)
+          )
           if (!productExistsInOrders) {
-            const error = new Error(PRODUCT_MESSAGES.HAVEN_T_ORDERED_THIS_PRODUCT);
-            (error as any).status = HTTP_STATUS.FORBIDDEN;
-            throw error;
+            const error = new Error(PRODUCT_MESSAGES.HAVEN_T_ORDERED_THIS_PRODUCT)
+            ;(error as any).status = HTTP_STATUS.FORBIDDEN
+            throw error
           }
-          return true;
+          return true
         }
       }
     }
   })
-);
+)
+
+export const validationOpenedItem = validate(
+  checkSchema(
+    {
+      image: imageSchema,
+      name: nameSchema,
+      description: descriptionSchema,
+      quantity: quantitySchema,
+      price: priceSchema,
+      brand: brandSchema,
+      condition: conditionSchema
+    },
+    ['body']
+  )
+)

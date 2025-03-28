@@ -2,7 +2,6 @@ import { S3 } from '@aws-sdk/client-s3'
 import { Upload } from '@aws-sdk/lib-storage'
 import { config } from 'dotenv'
 import fs from 'fs'
-import path from 'path'
 config()
 
 const s3 = new S3({

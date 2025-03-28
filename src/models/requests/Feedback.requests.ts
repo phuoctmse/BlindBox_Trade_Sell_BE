@@ -1,8 +1,8 @@
-import { ObjectId } from "mongodb"
+import { ObjectId } from 'mongodb'
 
 export interface CreateFeedbackReqBody {
-    accountId: ObjectId
-    productId: ObjectId
-    rate: number
-    content: string
+  accountId: ObjectId
+  productId: ObjectId
+  rate: number
+  content: string
 }

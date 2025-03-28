@@ -5,8 +5,12 @@ import path from 'path'
 import mediasService from '~/services/medias.services'
 import { handleUploadSingleImage } from '~/utils/file'
 
-export const uploadSingleImageController = async (req: Request, res: Response, next: NextFunction) => {
-  const result = await mediasService.uploadSingleImage(req)
-  res.json({ result })
-  return
+class MediaController {
+  async uploadSingleImage(req: Request, res: Response) {
+    const result = await mediasService.uploadSingleImage(req)
+    res.json(result)
+  }
 }
+
+const mediaController = new MediaController()
+export default mediaController

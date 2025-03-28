@@ -1,15 +1,7 @@
 import { Router } from 'express'
-import {
-  cancelOrderController,
-  completeOrderController,
-  confirmOrderController,
-  createOrderController,
-  getAccountOrdersController,
-  getSellerOrdersController,
-  processOrderController,
-  sellerCancelOrderController
-} from '~/controllers/order.controllers'
+import orderController from '~/controllers/order.controllers'
 import { accessTokenValidation, validateRegisterSelling } from '~/middlewares/accounts.middlewares'
+import { filterMiddleware } from '~/middlewares/common.middlewares'
 import {
   createOrderValidation,
   validateCancelOrder,
@@ -18,60 +10,70 @@ import {
   validateReceiverInfo,
   validateSellerNotBuyingOwnProducts
 } from '~/middlewares/order.middlewares'
+import { CreateOrderReqBody } from '~/models/requests/Order.requests'
 import { wrapRequestHandler } from '~/utils/handlers'
 
 const orderRouter = Router()
 
-//Buyer
-orderRouter.get('/', accessTokenValidation, wrapRequestHandler(getAccountOrdersController))
+// Buyer routes
+orderRouter.get('/', accessTokenValidation, wrapRequestHandler(orderController.getAccountOrders))
 orderRouter.post(
   '/',
   accessTokenValidation,
   validateReceiverInfo,
   validateSellerNotBuyingOwnProducts,
   createOrderValidation,
-  wrapRequestHandler(createOrderController)
+  wrapRequestHandler(orderController.createOrder)
 )
 orderRouter.patch(
   '/:orderId/cancel',
   accessTokenValidation,
   validateCancelOrder,
-  wrapRequestHandler(cancelOrderController)
+  wrapRequestHandler(orderController.cancelOrder)
 )
 orderRouter.patch(
   '/:orderId/complete',
   accessTokenValidation,
   validateCompleteOrder,
-  wrapRequestHandler(completeOrderController)
+  wrapRequestHandler(orderController.completeOrder)
 )
 
-//Seller
+orderRouter.get('/promotions', accessTokenValidation, wrapRequestHandler(orderController.getUserPromotions))
+
+// Seller routes
 orderRouter.get(
   '/seller',
   accessTokenValidation,
   validateRegisterSelling,
-  wrapRequestHandler(getSellerOrdersController)
+  wrapRequestHandler(orderController.getSellerOrders)
 )
 orderRouter.patch(
   '/seller/:orderId/confirm',
   accessTokenValidation,
   validateRegisterSelling,
   validateChangeOrderStatus,
-  wrapRequestHandler(confirmOrderController)
+  wrapRequestHandler(orderController.confirmOrder)
 )
 orderRouter.patch(
   '/seller/:orderId/process',
   accessTokenValidation,
   validateRegisterSelling,
   validateChangeOrderStatus,
-  wrapRequestHandler(processOrderController)
+  wrapRequestHandler(orderController.processOrder)
 )
 orderRouter.patch(
   '/seller/:orderId/cancel',
   accessTokenValidation,
   validateRegisterSelling,
   validateCancelOrder,
-  wrapRequestHandler(sellerCancelOrderController)
+  wrapRequestHandler(orderController.sellerCancelOrder)
+)
+orderRouter.patch(
+  '/seller/:orderId/complete',
+  accessTokenValidation,
+  validateRegisterSelling,
+  validateCancelOrder,
+  wrapRequestHandler(orderController.sellerCompleteOrder)
 )
 
 export default orderRouter

@@ -1,7 +1,13 @@
 import { Double, ObjectId } from 'mongodb'
 import slugify from 'slugify'
 import databaseServices from './database.services'
-import { CreateAccessoriesReqBody, CreateBeadsReqBody, CreateBlindBoxesReqBody } from '~/models/requests/Product.request'
+import {
+  CreateAccessoriesReqBody,
+  CreateBeadsReqBody,
+  CreateBlindBoxesReqBody,
+  CreateOpenedItem,
+  CreatePromotions
+} from '~/models/requests/Product.request'
 import { Category, ProductStatus } from '~/constants/enums'
 import Products from '~/models/schemas/Product.schema'
 import { PRODUCT_MESSAGES } from '~/constants/messages'
@@ -9,6 +15,7 @@ import BeadDetails from '~/models/schemas/BeadDetails.schema'
 import { config } from 'dotenv'
 import { ErrorWithStatus } from '~/models/Errors'
 import HTTP_STATUS from '~/constants/httpStatus'
+import Promotions from '~/models/schemas/Promotion.schema'
 config()
 
 class ProductService {
@@ -33,6 +40,14 @@ class ProductService {
   async createBlindBoxes(payload: CreateBlindBoxesReqBody, accountId: string) {
     const newProductId = new ObjectId()
     const slug = slugify(payload.name, { lower: true, strict: true })
+    const account = await databaseServices.accounts.findOne({ _id: new ObjectId(accountId) })
+    if (!account) {
+      throw new ErrorWithStatus({
+        status: HTTP_STATUS.BAD_REQUEST,
+        message: PRODUCT_MESSAGES.ACCOUNT_NOT_FOUND
+      })
+    }
+
     const result = await databaseServices.products.insertOne(
       new Products({
         ...payload,
@@ -44,7 +59,8 @@ class ProductService {
         blindBoxes: {
           size: payload.size
         },
-        slug
+        slug,
+        createrName: account.userName
       })
     )
     return {
@@ -53,10 +69,29 @@ class ProductService {
   }
 
   async getBlindBoxesDetails(slug: string, id: string) {
-    const result = await databaseServices.products.findOne({
+    const product = await databaseServices.products.findOne({
       slug,
-      _id: new ObjectId(id)
+      _id: new ObjectId(id),
+      category: Category.Blindbox
     })
+
+    if (!product) {
+      throw new ErrorWithStatus({
+        status: HTTP_STATUS.NOT_FOUND,
+        message: PRODUCT_MESSAGES.PRODUCT_NOT_FOUND
+      })
+    }
+
+    const account = await databaseServices.accounts.findOne({ _id: product.createdBy })
+
+    const result = {
+      product,
+      seller: {
+        _id: account?._id,
+        userName: account?.userName,
+        fullName: account?.fullName
+      }
+    }
     return {
       message: PRODUCT_MESSAGES.PRODUCTS_FETCHED_SUCCESS,
       result
@@ -291,6 +326,158 @@ class ProductService {
     return {
       success: true,
       message: PRODUCT_MESSAGES.BEAD_FETCHED_SUCCESS,
+      result
+    }
+  }
+
+  async getAccessoryDetail(slug: string, id: string) {
+    if (!slug || !id || !ObjectId.isValid(id)) {
+      throw new ErrorWithStatus({
+        status: HTTP_STATUS.BAD_REQUEST,
+        message: PRODUCT_MESSAGES.INVALID_PRODUCT_ID
+      })
+    }
+
+    const product = await databaseServices.products.findOne({
+      slug,
+      _id: new ObjectId(id),
+      category: Category.Accessory
+    })
+
+    if (!product) {
+      throw new ErrorWithStatus({
+        status: HTTP_STATUS.NOT_FOUND,
+        message: PRODUCT_MESSAGES.PRODUCT_NOT_FOUND
+      })
+    }
+
+    const beadDetailIds = product.accessories || []
+
+    if (beadDetailIds.length === 0) {
+      return {
+        message: PRODUCT_MESSAGES.PRODUCTS_FETCHED_SUCCESS,
+        result: {
+          product,
+          beadDetails: []
+        }
+      }
+    }
+
+    const objectIdArray = beadDetailIds.map((id) => (id instanceof ObjectId ? id : new ObjectId(id)))
+
+    const beadDetails = await databaseServices.beadDetails.find({ _id: { $in: objectIdArray } }).toArray()
+
+    const beadDetailsWithInfo = await Promise.all(
+      beadDetails.map(async (detail) => {
+        const bead = await databaseServices.beads.findOne({
+          _id: detail.beadId instanceof ObjectId ? detail.beadId : ObjectId.createFromHexString(detail.beadId)
+        })
+
+        return {
+          ...detail,
+          beadInfo: bead
+            ? {
+                _id: bead._id,
+                type: bead.type,
+                price: bead.price
+              }
+            : null
+        }
+      })
+    )
+
+    const totalQuantity = beadDetailsWithInfo.reduce((sum, detail) => sum + detail.quantity, 0)
+    const totalPrice = beadDetailsWithInfo.reduce((sum, detail) => sum + detail.totalPrice, 0)
+
+    return {
+      message: PRODUCT_MESSAGES.PRODUCTS_FETCHED_SUCCESS,
+      result: {
+        product,
+        beadDetails: beadDetailsWithInfo,
+        summary: {
+          totalBeads: beadDetailsWithInfo.length,
+          totalQuantity,
+          totalPrice
+        }
+      }
+    }
+  }
+
+  async getAllOpenedItems() {
+    const result = await databaseServices.products
+      .find({
+        category: Category.OpenedItems
+      })
+      .toArray()
+    return {
+      message: PRODUCT_MESSAGES.PRODUCTS_FETCHED_SUCCESS,
+      result
+    }
+  }
+  async createOpenedItem(payload: CreateOpenedItem, accountId: string) {
+    const newProductId = new ObjectId()
+    const slug = slugify(payload.name, { lower: true, strict: true })
+    const result = await databaseServices.products.insertOne(
+      new Products({
+        ...payload,
+        _id: newProductId,
+        createdBy: new ObjectId(accountId),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        category: Category.OpenedItems,
+        slug
+      })
+    )
+    return {
+      message: PRODUCT_MESSAGES.PRODUCT_CREATED_SUCCESS,
+      result
+    }
+  }
+
+  async getPromotionBySellerId(sellerId: string) {
+    const result = await databaseServices.promotions.find({ sellerId: new ObjectId(sellerId) }).toArray()
+    return {
+      message: PRODUCT_MESSAGES.PROMOTION_FETCHED_SUCCESS,
+      result
+    }
+  }
+
+  async getAllPromotions() {
+    const result = await databaseServices.promotions.find().toArray()
+    return {
+      message: PRODUCT_MESSAGES.PROMOTION_FETCHED_SUCCESS,
+      result
+    }
+  }
+
+  async createPromotion(payload: CreatePromotions, accountId: string) {
+    const newPromotionId = new ObjectId()
+    const result = await databaseServices.promotions.insertOne(
+      new Promotions({
+        ...payload,
+        _id: newPromotionId,
+        isActive: true,
+        sellerId: new ObjectId(accountId)
+      })
+    )
+    return {
+      message: PRODUCT_MESSAGES.PROMOTION_CREATED_SUCCESS,
+      result
+    }
+  }
+
+  async editPromotion(payload: CreatePromotions, promotionId: string) {
+    const result = await databaseServices.promotions.updateOne({ _id: new ObjectId(promotionId) }, { $set: payload })
+    return {
+      message: PRODUCT_MESSAGES.PROMOTION_UPDATED_SUCCESS,
+      result
+    }
+  }
+
+  async deletePromotion(promotionId: string) {
+    const result = await databaseServices.promotions.deleteOne({ _id: new ObjectId(promotionId) })
+    return {
+      message: PRODUCT_MESSAGES.PROMOTION_DELETED_SUCCESS,
       result
     }
   }

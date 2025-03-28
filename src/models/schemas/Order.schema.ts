@@ -1,7 +1,31 @@
 import { Double, ObjectId } from 'mongodb'
 import { OrderStatus, PaymentMethod } from '~/constants/enums'
 import { ReceiverInfo } from '../requests/Order.requests'
-
+interface StatusHistory {
+  status: OrderStatus
+  timestamp: Date
+  reason?: string
+  cancelledItems?: {
+    productName: string
+    quantity: number
+    price: Double
+  }[]
+  confirmedItems?: {
+    productName: string
+    quantity: number
+    sellerId: ObjectId
+  }[]
+  processedItems?: {
+    productName: string
+    quantity: number
+    sellerId: ObjectId
+  }[]
+  completedItems?: {
+    productName: string
+    quantity: number
+    sellerId: ObjectId
+  }[]
+}
 interface BuyerInfo {
   accountId: ObjectId
 }
@@ -11,6 +35,7 @@ interface OrdersType {
   totalPrice: Double
   promotionId?: ObjectId
   status?: OrderStatus
+  statusHistory?: StatusHistory[]
   buyerInfo: BuyerInfo
   receiverInfo: ReceiverInfo
   paymentMethod?: PaymentMethod
@@ -24,6 +49,7 @@ export default class Orders {
   totalPrice: Double
   promotionId?: ObjectId
   status: OrderStatus
+  statusHistory: StatusHistory[]
   buyerInfo: BuyerInfo
   receiverInfo: ReceiverInfo
   paymentMethod: PaymentMethod
@@ -40,6 +66,13 @@ export default class Orders {
     this.buyerInfo = order.buyerInfo
     this.receiverInfo = order.receiverInfo
     this.status = order.status || OrderStatus.Pending
+    this.statusHistory = order.statusHistory || [
+      {
+        status: this.status,
+        timestamp: date
+      }
+    ]
+
     this.createdAt = order.createdAt || date
     this.updatedAt = order.updatedAt || date
     this.notes = order.notes || ''

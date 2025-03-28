@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from 'express'
 import { pick } from 'lodash'
 import HTTP_STATUS from '~/constants/httpStatus'
-import {USER_MESSAGES} from '~/constants/messages'
+import { USER_MESSAGES } from '~/constants/messages'
 import { ErrorWithStatus } from '~/models/Errors'
 
 type FilterKeys<T> = Array<keyof T>

@@ -6,6 +6,7 @@ export const SOCKET_EVENTS = {
 
   EMAIL_VERIFIED: 'email_verified',
   SELLER_REGISTERED: 'seller_registered',
+  ORDER_SUCCESS: 'order success'
 }
 
 export const SOCKET_NAMESPACES = {
