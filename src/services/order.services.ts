@@ -475,7 +475,7 @@ class OrderService {
     return true
   }
 
-  async confirmOrder(createdBy: string, orderId: string) {
+  async sellerConfirmOrder(createdBy: string, orderId: string) {
     if (!ObjectId.isValid(orderId)) {
       throw new ErrorWithStatus({
         status: HTTP_STATUS.BAD_REQUEST,
@@ -612,7 +612,7 @@ class OrderService {
     }
   }
 
-  async processOrder(createdBy: string, orderId: string) {
+  async sellerProcessOrder(createdBy: string, orderId: string) {
     if (!ObjectId.isValid(orderId)) {
       throw new ErrorWithStatus({
         status: HTTP_STATUS.BAD_REQUEST,
@@ -998,7 +998,7 @@ class OrderService {
     const allOrderDetails = await databaseServices.orderDetails
       .find({
         orderId: order._id,
-        status: { $ne: OrderStatus.Cancelled } // Exclude cancelled items
+        status: { $ne: OrderStatus.Cancelled }
       })
       .toArray()
 
@@ -1006,7 +1006,6 @@ class OrderService {
       allOrderDetails.length > 0 && allOrderDetails.every((detail) => detail.status === OrderStatus.Completed)
 
     if (allCompleted) {
-      // If all active details are completed, update the main order status
       await databaseServices.orders.updateOne(
         { _id: order._id },
         {
@@ -1029,7 +1028,6 @@ class OrderService {
         }
       }
     } else {
-      // Otherwise mark as partially completed
       await databaseServices.orders.updateOne(
         { _id: order._id },
         {

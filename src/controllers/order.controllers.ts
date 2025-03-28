@@ -63,7 +63,7 @@ class OrderController {
     const { accountId } = req.decode_authorization as TokenPayload
     const { orderId } = req.params
 
-    const result = await orderService.confirmOrder(accountId, orderId)
+    const result = await orderService.sellerConfirmOrder(accountId, orderId)
 
     res.status(HTTP_STATUS.OK).json(result)
   }
@@ -72,7 +72,7 @@ class OrderController {
     const { accountId } = req.decode_authorization as TokenPayload
     const { orderId } = req.params
 
-    const result = await orderService.processOrder(accountId, orderId)
+    const result = await orderService.sellerProcessOrder(accountId, orderId)
 
     res.status(HTTP_STATUS.OK).json(result)
   }
