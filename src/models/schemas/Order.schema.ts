@@ -10,6 +10,21 @@ interface StatusHistory {
     quantity: number
     price: Double
   }[]
+  confirmedItems?: {
+    productName: string
+    quantity: number
+    sellerId: ObjectId
+  }[]
+  processedItems?: {
+    productName: string
+    quantity: number
+    sellerId: ObjectId
+  }[]
+  completedItems?: {
+    productName: string
+    quantity: number
+    sellerId: ObjectId
+  }[]
 }
 interface BuyerInfo {
   accountId: ObjectId
