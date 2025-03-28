@@ -43,24 +43,24 @@ class ProductService {
     const account = await databaseServices.accounts.findOne({ _id: new ObjectId(accountId) })
     if (!account) {
       throw new ErrorWithStatus({
-      status: HTTP_STATUS.BAD_REQUEST,
-      message: PRODUCT_MESSAGES.ACCOUNT_NOT_FOUND
+        status: HTTP_STATUS.BAD_REQUEST,
+        message: PRODUCT_MESSAGES.ACCOUNT_NOT_FOUND
       })
     }
 
     const result = await databaseServices.products.insertOne(
       new Products({
-      ...payload,
-      _id: newProductId,
-      createdBy: new ObjectId(accountId),
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      category: Category.Blindbox,
-      blindBoxes: {
-        size: payload.size
-      },
-      slug,
-      createrName: account.userName
+        ...payload,
+        _id: newProductId,
+        createdBy: new ObjectId(accountId),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        category: Category.Blindbox,
+        blindBoxes: {
+          size: payload.size
+        },
+        slug,
+        createrName: account.userName
       })
     )
     return {
