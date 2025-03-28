@@ -36,15 +36,15 @@ export enum RarityLevel {
 }
 
 export enum OrderStatus {
-  Pending = 'Pending',
-  Confirmed = 'Confirmed',
-  Processing = 'Processing',
-  Completed = 'Completed',
-  Cancelled = 'Cancelled',
-  PartiallyCancelled = 'PartiallyCancelled',
-  PartiallyConfirmed = 'PartiallyConfirmed',
-  PartiallyProcessing = 'PartiallyProcessing',
-  PartiallyCompleted = 'PartiallyCompleted'
+  Pending,
+  Confirmed,
+  Processing,
+  Completed,
+  Cancelled,
+  PartiallyCancelled,
+  PartiallyConfirmed,
+  PartiallyProcessing,
+  PartiallyCompleted
 }
 
 export enum PaymentMethod {
