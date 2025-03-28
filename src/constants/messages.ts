@@ -151,7 +151,8 @@ const ORDER_MESSAGES = {
   ORDER_PROCESSED_SUCCESS: 'Order processed successfully',
   CANNOT_COMPLETE_ORDER: 'Cannot complete order',
   ORDER_COMPLETED_SUCCESS: 'Order completed successfully',
-  PROMOTIONS_FETCHED_SUCCESS: 'Promotions fetched successfully'
+  PROMOTIONS_FETCHED_SUCCESS: 'Promotions fetched successfully',
+  ORDER_DETAILS_NOT_FOUND: 'Order details not found',
 }
 
 export const FEEDBACK_MESSAGES = {
